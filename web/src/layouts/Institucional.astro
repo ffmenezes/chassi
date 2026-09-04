@@ -1,0 +1,89 @@
+---
+/**
+ * O layout das quatro páginas jurídicas (Task 11) e da confirmação de
+ * contato: título, data de última atualização, o corpo por `<slot />`, e —
+ * no topo de toda página jurídica, RENDERIZADO e não em comentário — o aviso
+ * de que o texto é ponto de partida e não parecer jurídico.
+ *
+ * Cai sobre `Base.astro` e usa a mesma casca de token que `Artigo.astro`
+ * ([data-estilo][data-modo][data-site]) porque o corpo fala a mesma
+ * linguagem de átomos (`.b-h1`, `.b-p`...) do resto do site. Não importa
+ * `Artigo.astro` diretamente porque estas páginas não são artigo: não têm
+ * bloco de catálogo, sumário nem `<article>` — só prosa institucional.
+ */
+import Base from "./Base.astro";
+import { cssDoSite } from "../sites";
+import type { Site } from "../sites/tipos";
+import { dataBR } from "../data";
+
+interface Props {
+  site: Site;
+  titulo: string;
+  /** ISO `YYYY-MM-DD`. Dia de calendário, nunca instante — mesma regra do resto do site. */
+  atualizado: string;
+}
+const { site, titulo, atualizado } = Astro.props;
+const desvio = cssDoSite(site);
+---
+
+<Base titulo={`${titulo} — ${site.nome}`} descricao={titulo} site={site}>
+  {desvio && <style set:html={desvio} />}
+  <div class="pagina" data-estilo={site.estilo} data-modo={site.modoPadrao} data-site={site.slug}>
+    <main class="institucional">
+      {/* Renderizado, não comentado: é o aviso que impede que este texto
+          circule como se fosse parecer jurídico de verdade. */}
+      <p class="aviso">
+        <strong>Este texto é um ponto de partida, não é parecer jurídico.</strong> O
+        controlador dos dados deste site é quem o publica. Revise com quem entende
+        antes de operar com dados de terceiros.
+      </p>
+      <header class="cab">
+        <h1 class="b-h1">{titulo}</h1>
+        <p class="atualizado">
+          Atualizado em <time datetime={atualizado}>{dataBR(atualizado)}</time>
+        </p>
+      </header>
+      <div class="corpo">
+        <slot />
+      </div>
+    </main>
+  </div>
+</Base>
+
+<style>
+  .pagina { min-height: 100vh; }
+
+  .institucional {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 48px 20px 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .aviso {
+    margin: 0;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--b-corpo);
+    background: var(--b-acento-fraco);
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+  }
+  .aviso strong { color: var(--b-tinta); }
+
+  .cab { display: flex; flex-direction: column; gap: 6px; }
+
+  .atualizado {
+    margin: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+    color: var(--b-tinta-2);
+  }
+
+  .corpo :global(h2) { margin-top: 10px; }
+  .corpo :global(p),
+  .corpo :global(li) { max-width: none; }
+</style>

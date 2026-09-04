@@ -1,0 +1,69 @@
+---
+/**
+ * Termos de uso. NENHUM dado literal aqui: nome, domínio e e-mail saem todos
+ * de `siteInstitucional()`. Ver o cabeçalho de `privacidade.astro` para o
+ * porquê disso importar.
+ */
+import Institucional from "../layouts/Institucional.astro";
+import { siteInstitucional } from "../institucional/dados";
+
+const site = siteInstitucional();
+---
+
+<Institucional site={site} titulo="Termos de Uso" atualizado="2026-09-04">
+  <h2 class="b-h2">1. Objeto</h2>
+  <p class="b-p">
+    Estes termos regulam o uso do site <strong>{site.nome}</strong>, publicado em{" "}
+    <strong>{site.dominio}</strong>. Ao acessar e usar este site, você concorda com o
+    que está descrito aqui.
+  </p>
+
+  <h2 class="b-h2">2. Uso permitido</h2>
+  <p class="b-p">
+    O conteúdo é disponibilizado para leitura pessoal e não comercial. É permitido
+    citar trechos com atribuição, na forma descrita na{" "}
+    <a href="/direitos-autorais/">página de direitos autorais</a>. Não é permitido
+    republicar o conteúdo na íntegra, nem usá-lo para treinar modelo de linguagem ou
+    qualquer outro sistema automatizado, sem autorização prévia.
+  </p>
+
+  <h2 class="b-h2">3. Conteúdo de terceiros</h2>
+  <p class="b-p">
+    Este site pode conter links para sites de terceiros e, quando declarado, ligação
+    de afiliado. Não temos controle sobre o conteúdo ou as políticas de sites externos,
+    e a presença de um link não é endosso de tudo o que existe no destino.
+  </p>
+
+  <h2 class="b-h2">4. Isenção de garantia</h2>
+  <p class="b-p">
+    O conteúdo é publicado com o cuidado editorial que a apuração de cada artigo
+    permite, mas é fornecido <strong>"como está"</strong>, sem garantia de que está
+    livre de erro, completo ou atualizado no momento em que você lê. Preço, prazo e
+    dado numérico mudam depois da publicação: confirme antes de decidir com base neles.
+  </p>
+
+  <h2 class="b-h2">5. Limitação de responsabilidade</h2>
+  <p class="b-p">
+    Na máxima medida permitida por lei, {site.nome} não se responsabiliza por dano
+    direto ou indireto decorrente do uso deste site ou da informação nele contida.
+    Decisão tomada com base no conteúdo é de responsabilidade de quem decide.
+  </p>
+
+  <h2 class="b-h2">6. Alteração destes termos</h2>
+  <p class="b-p">
+    Estes termos podem mudar a qualquer momento, e a versão em vigor é sempre a que
+    está publicada nesta página, com a data de atualização no topo.
+  </p>
+
+  <h2 class="b-h2">7. Foro</h2>
+  <p class="b-p">
+    Fica eleito o foro do Brasil para resolver qualquer controvérsia decorrente destes
+    termos, com renúncia a qualquer outro, por mais privilegiado que seja.
+  </p>
+
+  <h2 class="b-h2">8. Contato</h2>
+  <p class="b-p">
+    Dúvida sobre estes termos vai para{" "}
+    <a href={`mailto:${site.emailContato}`}>{site.emailContato}</a>.
+  </p>
+</Institucional>

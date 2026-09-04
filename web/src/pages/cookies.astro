@@ -1,0 +1,75 @@
+---
+/**
+ * Política de cookies. A bifurcação inteira desta página vem de
+ * `cookiesDoSite(site)`, que lê o adaptador de analytics ativo
+ * (`analyticsDoSite`, Task 8): lista vazia afirma que o site não usa cookie
+ * de medição; lista com itens renderiza a tabela. Trocar `site.analytics` em
+ * `src/sites/<slug>.ts` — ligar o PostHog na aula 5, por exemplo — atualiza
+ * esta página sozinho, sem o participante precisar lembrar de vir aqui.
+ */
+import Institucional from "../layouts/Institucional.astro";
+import { siteInstitucional, cookiesDoSite } from "../institucional/dados";
+
+const site = siteInstitucional();
+const clausulas = cookiesDoSite(site);
+---
+
+<Institucional site={site} titulo="Política de Cookies" atualizado="2026-09-04">
+  <h2 class="b-h2">O que é um cookie</h2>
+  <p class="b-p">
+    Cookie é um pequeno arquivo que um site pode guardar no seu navegador, usado para
+    lembrar informação entre visitas — como preferência de tema, ou, no caso abaixo,
+    para medir quantas pessoas visitam cada página.
+  </p>
+
+  {clausulas.length === 0 ? (
+    <>
+      <h2 class="b-h2">Este site não usa cookie de medição</h2>
+      <p class="b-p">
+        Hoje este site não grava cookie nenhum para medir audiência. Se isso mudar —
+        ao ligar uma ferramenta de analytics, por exemplo —, esta página se atualiza
+        sozinha, porque ela lê a mesma configuração que liga a ferramenta.
+      </p>
+    </>
+  ) : (
+    <>
+      <h2 class="b-h2">Os cookies que este site usa</h2>
+      <p class="b-p">
+        Este site usa os cookies abaixo para medir audiência — quantas pessoas visitam
+        cada página, de onde vêm e o que leem.
+      </p>
+      <div class="b-tabela-wrap">
+        <table class="b-tabela">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Finalidade</th>
+              <th>Duração</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clausulas.map((c) => (
+              <tr>
+                <td><code>{c.nome}</code></td>
+                <td>{c.finalidade}</td>
+                <td>{c.duracao}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+
+  <h2 class="b-h2">Como recusar ou apagar</h2>
+  <p class="b-p">
+    Todo navegador permite bloquear ou apagar cookie nas próprias configurações de
+    privacidade. Bloquear os cookies de medição acima não impede o uso do site: eles
+    servem só para medir audiência, nunca para o funcionamento das páginas.
+  </p>
+
+  <h2 class="b-h2">Dúvida</h2>
+  <p class="b-p">
+    Escreva para <a href={`mailto:${site.emailContato}`}>{site.emailContato}</a>.
+  </p>
+</Institucional>

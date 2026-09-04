@@ -1,0 +1,54 @@
+---
+/**
+ * Direitos autorais. NENHUM dado literal aqui: nome, domínio e e-mail saem
+ * todos de `siteInstitucional()`. Ver o cabeçalho de `privacidade.astro` para
+ * o porquê disso importar.
+ */
+import Institucional from "../layouts/Institucional.astro";
+import { siteInstitucional } from "../institucional/dados";
+
+const site = siteInstitucional();
+---
+
+<Institucional site={site} titulo="Direitos Autorais" atualizado="2026-09-04">
+  <h2 class="b-h2">1. Titularidade</h2>
+  <p class="b-p">
+    Texto, imagem e demais conteúdos produzidos por <strong>{site.nome}</strong> e
+    publicados em <strong>{site.dominio}</strong> são protegidos pela Lei de Direitos
+    Autorais (Lei 9.610/1998). Conteúdo de terceiro citado no site — imagem, gráfico,
+    trecho de fonte — permanece de titularidade de quem o produziu, e é usado aqui com
+    atribuição.
+  </p>
+
+  <h2 class="b-h2">2. Citação e uso de trechos</h2>
+  <p class="b-p">
+    É permitido citar trecho do conteúdo deste site, desde que:
+  </p>
+  <ul class="b-lista">
+    <li>o trecho seja curto, proporcional ao que o texto original justifica;</li>
+    <li>venha com atribuição visível ao autor e a este site;</li>
+    <li>
+      inclua um link de volta para a página de origem, quando o uso for em outro site
+      ou publicação online.
+    </li>
+  </ul>
+  <p class="b-p">
+    Reprodução do conteúdo na íntegra, sem autorização, não é uso de trecho: é cópia, e
+    não é permitida por estes termos.
+  </p>
+
+  <h2 class="b-h2">3. Uso indevido — como notificar</h2>
+  <p class="b-p">
+    Se você encontrou conteúdo deste site republicado sem autorização em outro lugar,
+    ou acredita que algo publicado aqui infringe direito autoral seu, escreva para{" "}
+    <a href={`mailto:${site.emailContato}`}>{site.emailContato}</a> com:
+  </p>
+  <ul class="b-lista">
+    <li>o link da página deste site e o link de onde está a cópia (ou o material que você contesta);</li>
+    <li>a descrição do direito que você entende violado;</li>
+    <li>um contato seu para retorno.</li>
+  </ul>
+  <p class="b-p">
+    Toda notificação recebida é analisada, e a resposta chega pelo mesmo canal.
+  </p>
+</Institucional>

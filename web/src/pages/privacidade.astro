@@ -1,0 +1,104 @@
+---
+/**
+ * Política de privacidade. NENHUM dado literal aqui: nome, domínio, e-mail e
+ * responsável saem todos de `siteInstitucional()`. O participante nunca abre
+ * este arquivo — ele edita a configuração do site, e esta página se atualiza
+ * sozinha, inclusive quando o upstream corrige o texto.
+ */
+import Institucional from "../layouts/Institucional.astro";
+import { siteInstitucional, renderizarResponsavel } from "../institucional/dados";
+import { analyticsDoSite } from "../analytics/porta";
+
+const site = siteInstitucional();
+const controlador = renderizarResponsavel(site.responsavel);
+const adaptador = analyticsDoSite(site);
+const usaCookieDeMedicao = adaptador.usaCookie;
+
+const NOME_DO_PROVEDOR: Record<string, string> = {
+  ga4: "Google Analytics",
+  cloudflare: "Cloudflare Web Analytics",
+  posthog: "PostHog",
+};
+const provedorDeMedicao = NOME_DO_PROVEDOR[adaptador.id];
+---
+
+<Institucional site={site} titulo="Política de Privacidade" atualizado="2026-09-04">
+  <h2 class="b-h2">1. Quem é o controlador</h2>
+  <p class="b-p">
+    O controlador dos dados coletados por este site é <strong>{controlador}</strong>,
+    responsável pela publicação e pelo conteúdo. Dúvida ou pedido sobre dados pessoais
+    vai para <a href={`mailto:${site.emailContato}`}>{site.emailContato}</a>.
+  </p>
+
+  <h2 class="b-h2">2. Quais dados são coletados</h2>
+  <p class="b-p">
+    Quando você usa o formulário de contato, coletamos <strong>nome</strong>,
+    <strong> e-mail</strong> e o texto da <strong>mensagem</strong> que você escreve, só
+    para responder o que você perguntou.
+  </p>
+  {usaCookieDeMedicao ? (
+    <p class="b-p">
+      Este site também usa {provedorDeMedicao ?? "uma ferramenta de medição de audiência"} para
+      entender quantas pessoas visitam cada página, por meio de cookies. A seção completa,
+      com nome, finalidade e duração de cada um, está na{" "}
+      <a href="/cookies/">política de cookies</a>.
+    </p>
+  ) : (
+    <p class="b-p">
+      Este site <strong>não usa cookie de medição de audiência</strong>. Se isso mudar, esta
+      página e a <a href="/cookies/">política de cookies</a> se atualizam junto, porque as duas
+      leem a mesma configuração.
+    </p>
+  )}
+
+  <h2 class="b-h2">3. Base legal e finalidade</h2>
+  <p class="b-p">
+    O tratamento do formulário de contato se apoia no <strong>legítimo interesse</strong> em
+    responder quem procura o site, e no <strong>consentimento</strong>, dado no ato do envio.
+    Nenhum dado é usado para finalidade diferente da que está descrita aqui.
+  </p>
+
+  <h2 class="b-h2">4. Com quem os dados são compartilhados</h2>
+  <ul class="b-lista">
+    <li>
+      <strong>Cloudflare</strong>, que hospeda o site e processa as requisições — sem ela a
+      página não existe no ar.
+    </li>
+    <li>
+      Quando o formulário de contato está habilitado, a mensagem passa por um serviço de
+      envio de e-mail transacional (Resend, ou o serviço de e-mail nativo da Cloudflare,
+      conforme o que estiver configurado no servidor) só para chegar à caixa de entrada do
+      responsável — o conteúdo não é usado para nenhum outro fim.
+    </li>
+    {usaCookieDeMedicao && (
+      <li>
+        <strong>{provedorDeMedicao}</strong>, que processa os dados de audiência descritos na{" "}
+        <a href="/cookies/">política de cookies</a>.
+      </li>
+    )}
+  </ul>
+
+  <h2 class="b-h2">5. Retenção</h2>
+  <p class="b-p">
+    A mensagem enviada pelo formulário de contato é guardada só pelo tempo necessário para
+    responder e resolver o que foi pedido. Dado de medição de audiência segue a duração
+    declarada na <a href="/cookies/">política de cookies</a>, quando este site usa cookie.
+  </p>
+
+  <h2 class="b-h2">6. Seus direitos</h2>
+  <p class="b-p">
+    A Lei Geral de Proteção de Dados (Lei 13.709/2018) garante a você, entre outros, o
+    direito de:
+  </p>
+  <ul class="b-lista">
+    <li>confirmar se este site trata algum dado seu, e acessá-lo;</li>
+    <li>corrigir dado incompleto, inexato ou desatualizado;</li>
+    <li>pedir a eliminação do dado tratado com base no seu consentimento;</li>
+    <li>pedir a portabilidade dos seus dados a outro fornecedor;</li>
+    <li>revogar o consentimento a qualquer momento, sem efeito retroativo.</li>
+  </ul>
+  <p class="b-p">
+    Para exercer qualquer um destes direitos, escreva para{" "}
+    <a href={`mailto:${site.emailContato}`}>{site.emailContato}</a>.
+  </p>
+</Institucional>
