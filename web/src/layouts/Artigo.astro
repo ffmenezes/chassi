@@ -16,13 +16,23 @@ import Base from "./Base.astro";
 import { cssDoSite } from "../sites";
 import type { Site, Modo } from "../sites";
 
-interface Props { site: Site; titulo: string; descricao?: string; modo?: Modo }
-const { site, titulo, descricao, modo } = Astro.props;
+interface Props {
+  site: Site;
+  titulo: string;
+  descricao?: string;
+  modo?: Modo;
+  /** Página de serviço, que existe para quem já está no site e não para busca. */
+  noindex?: boolean;
+}
+const { site, titulo, descricao, modo, noindex } = Astro.props;
 const modoAtual = modo ?? site.modoPadrao;
 const desvio = cssDoSite(site);
 ---
 
-<Base titulo={titulo} descricao={descricao}>
+{/* `site` chega até o `Base` para o <Analytics> montar o script do adaptador
+    ativo — sem isto nenhuma página que usa este layout mede nada, mesmo
+    quando o site declara `analytics`. */}
+<Base titulo={titulo} descricao={descricao} noindex={noindex} site={site}>
   {desvio && <style set:html={desvio} />}
   <div class="pagina" data-estilo={site.estilo} data-modo={modoAtual} data-site={site.slug}>
     <slot />

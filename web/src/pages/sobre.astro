@@ -1,0 +1,111 @@
+---
+/**
+ * ESTA É A PÁGINA QUE MAIS PESA EM AUTORIDADE NA ANÁLISE DO ADSENSE.
+ * Texto genérico aqui derruba o pedido inteiro — é a página onde o revisor
+ * humano decide se existe alguém de verdade por trás do site, ou se é mais
+ * um blog fantasma. "Nossa equipe de especialistas" não é resposta: nasce
+ * em branco de propósito, com o roteiro abaixo, para o participante escrever
+ * com nome, rosto e caso próprio — o oposto do texto com cara de IA que a
+ * aula seguinte do workshop ensina a evitar.
+ *
+ * Igual à página inicial: o roteiro é comentário HTML (sempre no
+ * código-fonte) e também texto visível só em `npm run dev`
+ * (`import.meta.env.DEV`) — no build de produção este bloco não existe no
+ * HTML.
+ */
+import Artigo from "../layouts/Artigo.astro";
+import { siteInstitucional } from "../institucional/dados";
+
+const site = siteInstitucional();
+---
+
+<!--
+  ESCREVA AQUI — a página "quem somos" responde a estas perguntas:
+  1. Quem escreve? (nome e rosto, não "nossa equipe")
+  2. Por que essa pessoa tem o que dizer sobre este assunto?
+  3. Como o conteúdo é apurado?
+  4. Como o site se sustenta? (declaração de monetização — anúncio, afiliado, etc.)
+  5. Como falar com você?
+-->
+<Artigo site={site} titulo={`Sobre — ${site.nome}`} descricao={`Quem escreve o ${site.nome}, e como.`}>
+  <div class="pagina-sobre">
+    <header class="hero">
+      <h1 class="b-h1">Sobre {site.nome}</h1>
+    </header>
+
+    {import.meta.env.DEV && (
+      <div class="roteiro">
+        <p class="roteiro-tag">
+          ESCREVA AQUI — some no build de produção — página de maior peso no AdSense
+        </p>
+        <ul class="b-lista">
+          <li>Quem escreve? Nome e rosto — não "nossa equipe" nem "nossos especialistas".</li>
+          <li>Por que essa pessoa tem o que dizer sobre este assunto?</li>
+          <li>Como o conteúdo deste site é apurado, na prática?</li>
+          <li>Como o site se sustenta? Diga a fonte de receita (anúncio, afiliado, etc.).</li>
+          <li>Como o leitor fala com você?</li>
+        </ul>
+        <p class="exemplo">
+          <strong>Exemplo</strong> (apague depois de escrever o seu): "Eu sou [nome],
+          trabalhei N anos com [ofício relacionado ao nicho]. Este site nasceu de
+          [motivo concreto]. Todo preço e prazo aqui vem de [como você apura]. Este site
+          se sustenta com anúncio e, quando declarado no rodapé do artigo, link de
+          afiliado — nunca com conteúdo pago disfarçado de recomendação."
+        </p>
+      </div>
+    )}
+
+    <section class="corpo">
+      <h2 class="b-h2">Quem escreve</h2>
+      <p class="b-p">Escreva aqui: seu nome, sua foto (ou a foto de quem assina) e uma frase sobre você.</p>
+
+      <h2 class="b-h2">Por que este site existe</h2>
+      <p class="b-p">Escreva aqui por que você tem o que dizer sobre este assunto.</p>
+
+      <h2 class="b-h2">Como o conteúdo é apurado</h2>
+      <p class="b-p">Escreva aqui como você confirma preço, prazo e afirmação antes de publicar.</p>
+
+      <h2 class="b-h2">Como o site se sustenta</h2>
+      <p class="b-p">Escreva aqui a declaração de monetização: anúncio, afiliado, ou os dois.</p>
+
+      <h2 class="b-h2">Como falar com você</h2>
+      <p class="b-p">
+        Pelo <a href="/contato/">formulário de contato</a>, ou direto em{" "}
+        <a href={`mailto:${site.emailContato}`}>{site.emailContato}</a>.
+      </p>
+    </section>
+  </div>
+</Artigo>
+
+<style>
+  .pagina-sobre {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 56px 20px 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .hero { display: flex; flex-direction: column; gap: 10px; }
+
+  .roteiro {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    border: 1px dashed var(--b-linha-forte);
+    border-radius: var(--b-radius);
+    background: var(--b-superficie);
+  }
+  .roteiro-tag {
+    margin: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-acento-tinta);
+  }
+  .exemplo { margin: 0; font-size: 14px; color: var(--b-tinta-2); font-style: italic; }
+
+  .corpo { display: flex; flex-direction: column; gap: 6px; }
+</style>

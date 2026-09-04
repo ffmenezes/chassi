@@ -1,0 +1,111 @@
+---
+/**
+ * O formulário de contato: `method="post"` comum, sem fetch, na mesma porta
+ * que `web/functions/api/contato.ts` atende — `urlDaApi(CAMINHOS.contato)`,
+ * nunca `/api/contato` escrito na mão, porque quem atende pode virar Worker
+ * amanhã sem que este componente mude.
+ *
+ * O widget do Turnstile só entra na página quando existe chave pública. Sem
+ * ela o formulário continua funcionando — `manejarContato` recusa com 403
+ * quando a verificação falhar, então um formulário sem Turnstile ainda
+ * envia, só que sem anti-spam. Widget que tenta montar sem chave é tela
+ * quebrada para o leitor, o que é pior que ficar sem anti-spam por um tempo.
+ * Mesmo padrão que `Comentarios.astro` já usa.
+ */
+import { CAMINHOS, urlDaApi } from "../api/contrato";
+import type { Site } from "../sites/tipos";
+
+interface Props { site: Site }
+const { site } = Astro.props;
+
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
+---
+
+<form class="formulario-contato" method="post" action={urlDaApi(CAMINHOS.contato)}>
+  <input type="hidden" name="site" value={site.slug} />
+
+  <div class="campo-bloco">
+    <label class="rotulo" for="fc-nome">Seu nome</label>
+    <input class="campo" id="fc-nome" name="nome" type="text" maxlength="120" required />
+  </div>
+
+  <div class="campo-bloco">
+    <label class="rotulo" for="fc-email">Seu e-mail</label>
+    <input class="campo" id="fc-email" name="email" type="email" maxlength="254" required />
+  </div>
+
+  <div class="campo-bloco">
+    <label class="rotulo" for="fc-mensagem">Sua mensagem</label>
+    <textarea class="campo" id="fc-mensagem" name="mensagem" rows="5" maxlength="5000" required></textarea>
+  </div>
+
+  {sitekey ? (
+    <div class="cf-turnstile" data-sitekey={sitekey}></div>
+  ) : (
+    /* Só em build de desenvolvimento: em produção sem chave, o formulário
+       fica sem esta faixa, mudo sobre o motivo, porque avisar o leitor final
+       que "isto não tem anti-spam" não é informação dele. */
+    import.meta.env.DEV && (
+      <p class="aviso-dev">
+        PUBLIC_TURNSTILE_SITEKEY não está definida: este formulário envia sem
+        verificação humana.
+      </p>
+    )
+  )}
+
+  <button class="botao" type="submit">Enviar mensagem</button>
+</form>
+
+{sitekey && (
+  <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+)}
+
+<style>
+  .formulario-contato {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: var(--b-medida);
+  }
+  .campo-bloco { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .rotulo {
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-tinta-2);
+  }
+  .campo {
+    width: 100%;
+    padding: 11px 13px;
+    font-size: 15px;
+    line-height: 1.55;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    background: var(--b-fundo);
+    color: var(--b-tinta);
+    resize: vertical;
+    font-family: inherit;
+  }
+  .aviso-dev {
+    margin: 0;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--b-tinta-2);
+    background: var(--b-superficie);
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+  }
+  .botao {
+    align-self: flex-start;
+    padding: 11px 22px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--b-sobre-acento);
+    background: var(--b-acento);
+    border: 0;
+    border-radius: var(--b-radius);
+    cursor: pointer;
+  }
+  .botao:hover { background: var(--b-acento-forte); }
+</style>

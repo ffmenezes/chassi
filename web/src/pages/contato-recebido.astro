@@ -1,0 +1,33 @@
+---
+/**
+ * Página de confirmação para onde `manejarContato` redireciona no sucesso
+ * (`web/functions/_lib/contato.ts`). `noindex`: é página de serviço para
+ * quem acabou de enviar, não para busca — mesma regra do `Base.astro`.
+ */
+import Artigo from "../layouts/Artigo.astro";
+import { siteInstitucional } from "../institucional/dados";
+
+const site = siteInstitucional();
+---
+
+<Artigo site={site} titulo={`Mensagem recebida — ${site.nome}`} noindex>
+  <div class="pagina-recebido">
+    <h1 class="b-h1">Mensagem recebida</h1>
+    <p class="b-p">
+      Sua mensagem chegou. Costumo responder pelo e-mail que você deixou no formulário.
+    </p>
+    <a class="b-btn b-btn--forte" href="/">Voltar para o início</a>
+  </div>
+</Artigo>
+
+<style>
+  .pagina-recebido {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 90px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+</style>

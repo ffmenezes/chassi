@@ -1,0 +1,39 @@
+---
+/**
+ * Página de contato: o formulário, mais o e-mail visível como alternativa —
+ * o formulário pode estar inerte (sem `PUBLIC_TURNSTILE_SITEKEY` em dev, ou
+ * sem `EMAIL_CONTATO`/chave de e-mail configurada no servidor em produção),
+ * e quem precisa falar não pode ficar sem saída.
+ */
+import Artigo from "../layouts/Artigo.astro";
+import FormularioContato from "../components/FormularioContato.astro";
+import { siteInstitucional } from "../institucional/dados";
+
+const site = siteInstitucional();
+---
+
+<Artigo site={site} titulo={`Contato — ${site.nome}`} descricao={`Fale com ${site.nome}.`}>
+  <div class="pagina-contato">
+    <header class="hero">
+      <h1 class="b-h1">Contato</h1>
+      <p class="b-p">
+        Escreva pelo formulário abaixo, ou direto para{" "}
+        <a href={`mailto:${site.emailContato}`}>{site.emailContato}</a>.
+      </p>
+    </header>
+
+    <FormularioContato site={site} />
+  </div>
+</Artigo>
+
+<style>
+  .pagina-contato {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 56px 20px 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .hero { display: flex; flex-direction: column; gap: 10px; }
+</style>

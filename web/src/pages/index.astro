@@ -1,132 +1,122 @@
 ---
-import Base from "../layouts/Base.astro";
-import { ESTILOS, SITES } from "../sites";
-import type { Estilo } from "../sites";
-import { CATALOGO } from "../catalogo";
-import "../styles/chrome.css";
+/**
+ * A página inicial. Nasce EM BRANCO, com roteiro — ao contrário das quatro
+ * jurídicas (Task 11), que nascem escritas: esta é identidade, e identidade
+ * copiada de outro site é o padrão que o revisor humano do AdSense reconhece
+ * na hora. Ver o comentário de `sobre.astro` para o porquê disso pesar mais
+ * ainda naquela página.
+ *
+ * O roteiro mora em comentário HTML — sempre no código-fonte, para quem olhar
+ * "ver código-fonte" encontrar — e também como texto visível, mas só em
+ * `npm run dev` (`import.meta.env.DEV`): no build de produção este bloco
+ * não existe no HTML, então não tem como o esqueleto ir ao ar sem que
+ * alguém tenha escrito o texto de verdade por cima dele.
+ */
+import Artigo from "../layouts/Artigo.astro";
+import { siteInstitucional } from "../institucional/dados";
 
-const temas = Object.keys(ESTILOS) as Estilo[];
-const sitesDoTema = (e: Estilo) => Object.values(SITES).filter((s) => s.estilo === e);
+const site = siteInstitucional();
 ---
 
-<Base
-  titulo="Blocos — holding de sites de nicho"
-  descricao="Catálogo de blocos, temas e o artigo de exemplo em cada um."
->
-  <header class="topo">
-    <div class="wrap topo-in">
-      <p class="sobrancelha">holding de sites de nicho</p>
-      <h1 class="titulo">Blocos</h1>
-      <p class="lede">
-        {CATALOGO.length} blocos no catálogo, {temas.length} temas, dois modos. O markup é o
-        mesmo em todo tema: muda só o token.
+<!--
+  ESCREVA AQUI — a página inicial responde a estas perguntas:
+  1. Que pergunta este site responde?
+  2. Para quem? (quem é o leitor que chega aqui)
+  3. O que ele encontra aqui que não encontra no primeiro resultado do Google?
+  4. Três links para as peças principais do site.
+-->
+<Artigo site={site} titulo={site.nome} descricao={`O que ${site.nome} responde, e para quem.`}>
+  <div class="pagina-inicial">
+    <header class="hero">
+      <p class="selo">{site.nome}</p>
+      <h1 class="b-h1">Escreva aqui o que este site resolve, numa frase.</h1>
+      <p class="b-p">
+        Escreva aqui, num parágrafo curto, para quem é este site e o que ele promete
+        que o leitor não vai achar pronto no primeiro resultado do Google.
       </p>
-    </div>
-  </header>
+    </header>
 
-  <div class="wrap conteudo">
-    <section>
-      <h2 class="secao">Bancada</h2>
-      <p class="ajuda">
-        Todo bloco do catálogo com dados fictícios, e troca de tema e modo ao vivo.
-      </p>
-      <a href="/bancada/" class="cartao cartao--largo">
-        <b>Abrir a bancada &rarr;</b>
-        <span>{CATALOGO.length} blocos, cada um com a regra que ele implementa</span>
-      </a>
-    </section>
-
-    <section>
-      <h2 class="secao">Artigo de exemplo, por tema</h2>
-      <p class="ajuda">
-        O <b>mesmo</b> artigo nos cinco temas. Só o tema muda, então dá para julgar a
-        diferença sem que o conteúdo mude junto.
-      </p>
-      <div class="grade">
-        {temas.map((e) => {
-          const usam = sitesDoTema(e);
-          return (
-            <a href={`/exemplo/${e}/`} class="cartao">
-              <span class="cab">
-                <span class="ponto" style={`background:${ESTILOS[e].acento}`}></span>
-                <b>{ESTILOS[e].nome}</b>
-              </span>
-              <span class="origem">{ESTILOS[e].origem}</span>
-              <span class="usa">
-                {usam.length ? usam.map((s) => s.nome).join(", ") : "sem site ainda"}
-              </span>
-            </a>
-          );
-        })}
+    {import.meta.env.DEV && (
+      <div class="roteiro">
+        <p class="roteiro-tag">ESCREVA AQUI — some no build de produção</p>
+        <ul class="b-lista">
+          <li>Que pergunta este site responde?</li>
+          <li>Para quem? (quem é o leitor que chega aqui)</li>
+          <li>O que ele encontra aqui que não encontra no primeiro resultado do Google?</li>
+          <li>Três links para as peças principais do site (abaixo).</li>
+        </ul>
+        <p class="exemplo">
+          <strong>Exemplo</strong> (apague depois de escrever o seu): "Aqui você descobre
+          quanto custa mesmo trocar de operadora de internet no seu bairro — sem letra
+          miúda, com os valores que as próprias operadoras cobraram de mim este mês."
+        </p>
       </div>
-    </section>
+    )}
 
-    <section>
-      <h2 class="secao">Sites</h2>
-      <p class="ajuda">
-        Cada site escolhe um tema e declara quais blocos monta, em
-        <code>src/sites/index.ts</code>. Bloco que o site não declara não existe na página.
-      </p>
-      <div class="tabela-wrap">
-        <table class="tabela">
-          <thead>
-            <tr><th>Site</th><th>Domínio</th><th>Tema</th><th>Blocos</th><th>Muro de e-mail</th></tr>
-          </thead>
-          <tbody>
-            {Object.values(SITES).map((s) => (
-              <tr>
-                <td>{s.nome}</td>
-                <td>{s.dominio}</td>
-                <td><a href={`/exemplo/${s.estilo}/`}>{ESTILOS[s.estilo].nome}</a></td>
-                <td>{s.blocos.length} de {CATALOGO.length}</td>
-                <td>{s.muroDeEmail ? "sim, nos derivados" : "não"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <section class="pecas">
+      <h2 class="b-h2">Comece por aqui</h2>
+      <p class="b-p">Troque os três links abaixo pelas suas três peças principais.</p>
+      <div class="grade">
+        <a class="b-card cartao" href="#">
+          <b>Peça principal 1</b>
+          <span>Troque por título e link do primeiro artigo</span>
+        </a>
+        <a class="b-card cartao" href="#">
+          <b>Peça principal 2</b>
+          <span>Troque por título e link do segundo artigo</span>
+        </a>
+        <a class="b-card cartao" href="#">
+          <b>Peça principal 3</b>
+          <span>Troque por título e link do terceiro artigo</span>
+        </a>
       </div>
     </section>
   </div>
-</Base>
+</Artigo>
 
 <style>
-  .conteudo { padding: 32px 0 90px; display: flex; flex-direction: column; gap: 34px; }
-  .secao { font-size: 15px; margin: 0 0 8px; letter-spacing: -.01em; }
-  .ajuda { margin: 0 0 14px; color: var(--c-ink-2); font-size: 14.5px; max-width: 68ch; }
-  .ajuda code {
-    font-family: var(--c-mono); font-size: .88em;
-    background: var(--c-bench); padding: 1px 5px; border-radius: 4px;
+  .pagina-inicial {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 56px 20px 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
   }
-  .grade { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .hero { display: flex; flex-direction: column; gap: 10px; }
+  .selo {
+    margin: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-tinta-2);
+  }
+
+  .roteiro {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    border: 1px dashed var(--b-linha-forte);
+    border-radius: var(--b-radius);
+    background: var(--b-superficie);
+  }
+  .roteiro-tag {
+    margin: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-acento-tinta);
+  }
+  .exemplo { margin: 0; font-size: 14px; color: var(--b-tinta-2); font-style: italic; }
+
+  .pecas { display: flex; flex-direction: column; gap: 12px; }
+  .grade { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
   .cartao {
-    display: flex; flex-direction: column; gap: 6px;
-    background: var(--c-paper); border: 1px solid var(--c-rule);
-    border-radius: 10px; padding: 15px 18px; text-decoration: none;
-    color: var(--c-ink); font-size: 13.5px;
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 15px 17px; text-decoration: none; color: var(--b-tinta); font-size: 14px;
   }
-  .cartao:hover { border-color: var(--c-mark); }
-  .cartao--largo { display: inline-flex; min-width: 280px; }
-  .cab { display: flex; align-items: center; gap: 8px; }
-  .ponto { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); }
-  .origem { color: var(--c-ink-2); font-size: 12.5px; line-height: 1.45; }
-  .usa {
-    color: var(--c-dim); font-size: 11px; font-family: var(--c-mono);
-    margin-top: 2px;
-  }
-  .cartao--largo span { color: var(--c-dim); font-size: 12.5px; }
-
-  .tabela-wrap { overflow-x: auto; }
-  .tabela {
-    width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 560px;
-    background: var(--c-paper); border: 1px solid var(--c-rule); border-radius: 10px;
-  }
-  .tabela th, .tabela td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--c-rule); }
-  .tabela thead th {
-    font-family: var(--c-mono); font-size: 10.5px; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--c-dim); font-weight: 600;
-  }
-  .tabela tbody tr:last-child td { border-bottom: 0; }
-  .tabela a { color: var(--c-mark); }
+  .cartao span { color: var(--b-tinta-2); font-size: 12.5px; }
 </style>
-
-<script>document.body.classList.add("bancada");</script>
