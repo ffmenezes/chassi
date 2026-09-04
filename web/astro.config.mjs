@@ -8,6 +8,15 @@ export default defineConfig({
   build: { format: "directory" },
   devToolbar: { enabled: false },
 
+  // PT-BR sem prefixo: `/sobre` continua `/sobre`. A porta do multi-idioma
+  // fica aberta (`/en/sobre` nasce depois) sem custo e sem prefixo hoje —
+  // ver web/src/idioma.ts.
+  i18n: {
+    defaultLocale: "pt-br",
+    locales: ["pt-br"],
+    routing: { prefixDefaultLocale: false },
+  },
+
   // `host: true` escuta em 0.0.0.0, que é o que um túnel precisa alcançar.
   server: { host: true, port: 4321 },
 

@@ -5,6 +5,7 @@ import "../styles/estilos/index";
 import "../styles/atomos.css";
 import Analytics from "../components/Analytics.astro";
 import type { Site } from "../sites/tipos";
+import { LANG_HTML } from "../idioma";
 
 interface Props {
   titulo: string;
@@ -15,7 +16,7 @@ interface Props {
   /** Ausente na bancada, de propósito: espécime não é site, e não mede nada. */
   site?: Site;
 }
-const { titulo, descricao, lang = "pt-BR", noindex = false, site } = Astro.props;
+const { titulo, descricao, lang = LANG_HTML, noindex = false, site } = Astro.props;
 ---
 <!doctype html>
 <html lang={lang}>
