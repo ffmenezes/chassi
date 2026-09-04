@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# O que mudou no upstream  x  o que VOCÊ tocou aqui.
+#
+# Não faz merge. Merge conflitaria e você desistiria de atualizar na terceira
+# vez. Aqui a atualização é `git checkout upstream/main -- <arquivo>`, que não
+# exige ancestral comum e não produz conflito — em troca, SOBRESCREVE EM
+# SILÊNCIO. Por isso este script existe: para você nunca puxar às cegas.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+git remote get-url upstream >/dev/null 2>&1 || {
+  echo "Sem remote 'upstream'. Rode:  git remote add upstream https://github.com/ffmenezes/chassi.git"
+  exit 1
+}
+
+echo "buscando upstream..."
+git fetch --quiet upstream
+
+BASE=$(git merge-base HEAD upstream/main 2>/dev/null || true)
+if [ -z "$BASE" ]; then
+  echo "Sem ancestral comum com o upstream."
+  echo "Isso acontece se o repo foi criado com 'Use this template' em vez de clone."
+  echo "Ainda dá para puxar arquivo a arquivo, mas sem a lista automática:"
+  echo "  git checkout upstream/main -- <caminho>"
+  exit 1
+fi
+
+# Caminhos que são SEUS. O upstream promete nunca escrever neles, e este script
+# nunca os oferece para puxar.
+#
+# A lista de infraestrutura abaixo (index.ts, tipos.ts, validacao.ts,
+# validacao.test.ts) tem que bater exatamente com o padrão negativo do
+# `import.meta.glob` em web/src/sites/index.ts. Mudou um lado, muda o outro.
+#
+# web/src/pages/{index,sobre,contato}.astro nascem em branco, com um roteiro
+# de perguntas embutido, para o participante preencher com a identidade do
+# site dele — "quem somos" é a página que mais pesa na análise do AdSense
+# justamente por ser pessoal. Identidade não se copia: o upstream entrega uma
+# vez (igual a exemplo.ts) e a partir dali o arquivo é do participante, para
+# sempre — senão essas três apareceriam em CONFLITO em toda atualização, para
+# todo mundo, e isso é ruído permanente, não risco de perda (a lista CONFLITO
+# já protege contra sobrescrita silenciosa).
+#
+# As outras quatro páginas de web/src/pages/ (privacidade, cookies, termos,
+# direitos-autorais) são o caso oposto e CONTINUAM do upstream: são
+# alimentadas por configuração, o texto jurídico é igual para todos os
+# participantes, o participante nunca as abre, e por isso seguem recebendo
+# correção nossa para sempre.
+e_seu() {
+  case "$1" in
+    sites/*|web/src/meu/*) return 0 ;;
+    web/src/pages/index.astro|web/src/pages/sobre.astro|web/src/pages/contato.astro) return 0 ;;
+    web/src/sites/exemplo.ts) return 1 ;;   # o modelo é do upstream
+    web/src/sites/index.ts|web/src/sites/tipos.ts|web/src/sites/validacao.ts|web/src/sites/validacao.test.ts) return 1 ;;
+    web/src/sites/*.ts) return 0 ;;         # o SEU site
+    *) return 1 ;;
+  esac
+}
+
+mudou_la=$(git diff --name-only "$BASE" upstream/main)
+tocou_aqui=$(git diff --name-only "$BASE" HEAD)
+
+novos=(); seguros=(); conflito=()
+for arq in $mudou_la; do
+  e_seu "$arq" && continue
+  if [ ! -e "$arq" ]; then
+    novos+=("$arq")
+  elif echo "$tocou_aqui" | grep -qx -- "$arq"; then
+    conflito+=("$arq")
+  else
+    seguros+=("$arq")
+  fi
+done
+
+echo
+echo "commits novos no upstream:"
+git log --oneline "$BASE"..upstream/main | sed 's/^/  /'
+
+echo
+echo "NOVOS (${#novos[@]}) — arquivos que ainda não existem aqui. Puxar é sempre seguro."
+printf '  %s\n' "${novos[@]:-(nenhum)}"
+
+echo
+echo "SEGUROS (${#seguros[@]}) — mudaram lá, você nunca tocou. Puxar não perde nada."
+printf '  %s\n' "${seguros[@]:-(nenhum)}"
+
+echo
+echo "CONFLITO (${#conflito[@]}) — mudaram lá E você mexeu aqui. NÃO puxe sem olhar."
+printf '  %s\n' "${conflito[@]:-(nenhum)}"
+
+echo
+echo "Para puxar tudo o que é seguro:"
+echo "  ./scripts/atualizar --aplicar-seguros"
+echo "Para ver os dois lados de um arquivo em conflito:"
+echo "  git diff $BASE HEAD -- <arquivo>            # o que VOCÊ fez"
+echo "  git diff $BASE upstream/main -- <arquivo>   # o que o UPSTREAM fez"
+
+if [ "${1:-}" = "--aplicar-seguros" ]; then
+  todos=("${novos[@]:-}" "${seguros[@]:-}")
+  for arq in "${todos[@]}"; do
+    [ -n "$arq" ] || continue
+    git checkout upstream/main -- "$arq"
+    echo "  puxado: $arq"
+  done
+  echo "Feito. Rode 'cd web && npm test && npm run build' antes de commitar."
+fi
