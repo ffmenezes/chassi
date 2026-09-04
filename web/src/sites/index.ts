@@ -8,7 +8,16 @@
  */
 import type { BlocoId } from "../catalogo";
 
-export type Estilo = "linho" | "concreto" | "vidro" | "circuito" | "ceu";
+export { ESTILOS, nomesDeEstilo } from "../styles/estilos";
+export type { MetaEstilo } from "../styles/estilos";
+
+/**
+ * Antes era união de literais. A varredura de pasta (`styles/estilos/index.ts`)
+ * descobre o conjunto só em tempo de build, então a união deixou de ser
+ * sustentável aqui. A perda de type check é consciente: a validação equivalente
+ * (estilo inexistente quebra a build) entra como checagem em tempo de build.
+ */
+export type Estilo = string;
 export type Modo = "claro" | "escuro";
 
 /**
@@ -91,34 +100,6 @@ export const SITE_DEMO: Site = {
     "N1", "N2", "N3", "N4", "N5", "A1", "A2",
   ],
   muroDeEmail: true,
-};
-
-export const ESTILOS: Record<Estilo, { nome: string; acento: string; origem: string }> = {
-  linho: {
-    nome: "Linho",
-    acento: "#cc785c",
-    origem: "Tokens do sistema do Claude. Serifa é a voz de display; o corpo é sans humanista.",
-  },
-  concreto: {
-    nome: "Concreto",
-    acento: "#7c4dee",
-    origem: "Tokens da certfique.com.br. Borda 2px, sombra dura 4px 4px 0, hover que desloca.",
-  },
-  vidro: {
-    nome: "Vidro",
-    acento: "#00e5cc",
-    origem: "Tokens da ibe.ia.br. Superfície translúcida sobre aurora, blur com saturação.",
-  },
-  circuito: {
-    nome: "Circuito",
-    acento: "#bbf451",
-    origem: "Tokens da cofounder.co. Tinta por opacidade, e o lime só preenche, nunca vira texto.",
-  },
-  ceu: {
-    nome: "Céu",
-    acento: "#006aff",
-    origem: "Tokens do Bluesky. Zero sombra, hairline de 1px, e o rótulo é peso — nunca caixa alta.",
-  },
 };
 
 /**

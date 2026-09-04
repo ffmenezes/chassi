@@ -96,10 +96,10 @@ export const paragrafos = [
 export const panorama = {
   colunas: ["Lorem", "Ipsum", "Dolor", "Sit amet", "Consectetur"],
   linhas: [
-    ["Lorem ipsum", "150 un", "8,0", "1,20 kWh", { sim: "sim" }],
-    ["Dolor sit amet", "750 un", "0,5", "0,38 kWh", { sim: "sim" }],
-    ["Consectetur elit", "2.500 un", "0,3", "0,75 kWh", "não"],
-    ["Sed do eiusmod", "60 un", "5,0", "0,30 kWh", "não"],
+    ["Lorem ipsum", "150 un", "8,0", "1,20 kg", { sim: "sim" }],
+    ["Dolor sit amet", "750 un", "0,5", "0,38 kg", { sim: "sim" }],
+    ["Consectetur elit", "2.500 un", "0,3", "0,75 kg", "não"],
+    ["Sed do eiusmod", "60 un", "5,0", "0,30 kg", "não"],
     // a lacuna declarada é slot, e o estilo precisa conseguir mostrá-la
     ["Tempor incididunt", "120 un", "—", { vazio: "[sem dado confiável]" }, "não"],
   ] as Celula[][],
