@@ -1,0 +1,45 @@
+---
+/**
+ * A2 — espécime das três listas, para a bancada.
+ *
+ * Ordenada onde a ordem existe, não ordenada para conjunto, e `<dl>` para
+ * glossário. Não é bloco: o artigo escreve lista em Markdown e o estilo só
+ * precisa entregá-las legíveis, inclusive o segundo nível — que é o teto.
+ */
+export interface Glossario { termo: string; definicao: string }
+interface Props { passos: string[]; conjunto: string[]; glossario: Glossario[] }
+const { passos, conjunto, glossario } = Astro.props;
+---
+
+<div class="demo">
+  <p class="b-rotulo">Ordenada — a ordem existe</p>
+  <ol class="b-lista-num">{passos.map((p) => <li>{p}</li>)}</ol>
+
+  <p class="b-rotulo">Não ordenada — conjunto de irmãos</p>
+  <ul class="b-lista">
+    {conjunto.map((c) => <li>{c}</li>)}
+    <li>
+      As duas que quase sempre coincidem:
+      <ul>
+        <li>geladeira, que liga por termostato</li>
+        <li>bomba d'água, que liga por boia</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p class="b-rotulo">Glossário — o termo que o leitor procura</p>
+  <dl class="b-glossario">
+    {glossario.map((g) => (
+      <>
+        <dt>{g.termo}</dt>
+        <dd>{g.definicao}</dd>
+      </>
+    ))}
+  </dl>
+</div>
+
+<style>
+  .demo { max-width: var(--b-medida); display: flex; flex-direction: column; gap: 4px; }
+  .demo .b-rotulo { margin-top: 14px; }
+  .demo .b-rotulo:first-child { margin-top: 0; }
+</style>

@@ -1,0 +1,104 @@
+---
+/**
+ * O diagrama de exemplo do bloco 19. Não é bloco: é o CONTEÚDO de uma figura,
+ * usado na bancada e na página de exemplo para que o contrato de SVG de
+ * `referencias/imagens.md` apareça montado em vez de descrito.
+ *
+ * Os números chegam por prop, de `mock/artigo.ts`, porque número não mora em
+ * componente. E o que o contrato exige está tudo aqui:
+ *
+ *   - `role="img"` com `aria-labelledby` apontando para o <title> e o <desc>
+ *   - o <desc> descreve OS NÚMEROS, não a forma: quem ouve sai com o dado
+ *   - `viewBox` com `width="100%"`, nunca pixel fixo
+ *   - fonte mínima de 18 unidades num viewBox de 600 de largura
+ *   - nada distinguido só por cor: cada barra tem rótulo e valor ancorados,
+ *     e a de cima leva hachura
+ *   - fonte e data DENTRO do desenho, porque ele é recortado e postado sem a
+ *     <figcaption> junto
+ *   - sem chão pintado: o texto é `currentColor` e acompanha o modo inteiro
+ *
+ * Cor entra por CSS, nunca por atributo de apresentação: `fill="var(--b-acento)"`
+ * não resolve a variável, e o defeito aparece como preto chapado no tema escuro.
+ */
+export interface Props {
+  /** O <title> do SVG. Todo texto do desenho vem de fora: o mesmo componente
+   *  serve a bancada, que é verossímil, e o exemplo, que é lorem ipsum. */
+  titulo: string;
+  serieA: { rotulo: string; valor: number };
+  serieB: { rotulo: string; valor: number };
+  limite: { rotulo: string; valor: number };
+  unidade: string;
+  fonte: string;
+  id?: string;
+}
+const { titulo, serieA, serieB, limite, unidade, fonte, id = "diag" } = Astro.props;
+
+const fmt = (v: number) => `${v.toLocaleString("pt-BR")} ${unidade}`;
+
+const X0 = 168;
+/* a barra para antes da borda: o valor é escrito na ponta dela, e ele precisa
+   caber dentro do viewBox mesmo na maior das séries */
+const LARG = 370;
+const maior = Math.max(serieA.valor, serieB.valor, limite.valor);
+const teto = Math.ceil((maior * 1.1) / 500) * 500;
+const px = (v: number) => (v / teto) * LARG;
+const xLimite = X0 + px(limite.valor);
+const diferenca = Math.abs(serieA.valor - serieB.valor);
+---
+
+<svg
+  class="diagrama"
+  viewBox="0 0 600 268"
+  width="100%"
+  role="img"
+  aria-labelledby={`${id}-t ${id}-d`}
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title id={`${id}-t`}>{titulo}</title>
+  {/* o <desc> descreve OS NÚMEROS, não a forma: quem ouve sai com o dado, e não
+      com "gráfico de barras" */}
+  <desc id={`${id}-d`}>
+    {serieA.rotulo}: {fmt(serieA.valor)}. {serieB.rotulo}: {fmt(serieB.valor)}.
+    {" "}{limite.rotulo}: {fmt(limite.valor)}. Diferença entre as duas séries:
+    {" "}{fmt(diferenca)}.
+  </desc>
+
+  <defs>
+    <pattern
+      id={`${id}-hachura`}
+      width="8" height="8"
+      patternTransform="rotate(45)"
+      patternUnits="userSpaceOnUse"
+    >
+      <rect class="hachura-fundo" width="8" height="8"></rect>
+      <line class="hachura-traco" x1="0" y1="0" x2="0" y2="8"></line>
+    </pattern>
+  </defs>
+
+  <text class="rot" x="0" y="60">{serieA.rotulo}</text>
+  <rect x={X0} y="40" width={px(serieA.valor)} height="34" fill={`url(#${id}-hachura)`}></rect>
+  <text class="rot val" x={X0 + px(serieA.valor) + 10} y="60">{fmt(serieA.valor)}</text>
+
+  <text class="rot" x="0" y="132">{serieB.rotulo}</text>
+  <rect class="barra" x={X0} y="112" width={px(serieB.valor)} height="34"></rect>
+  <text class="rot val" x={X0 + px(serieB.valor) + 10} y="132">{fmt(serieB.valor)}</text>
+
+  <line class="limite" x1={xLimite} y1="24" x2={xLimite} y2="164"></line>
+  <text class="rot" x={xLimite - 8} y="196" text-anchor="end">
+    {limite.rotulo}: {fmt(limite.valor)}
+  </text>
+
+  <text class="assinatura" x="0" y="246">{fonte}</text>
+</svg>
+
+<style>
+  .diagrama { display: block; font-family: var(--b-fonte-meta); }
+  /* currentColor: sem chão pintado, o desenho acompanha o modo inteiro */
+  .rot { font-size: 18px; fill: currentColor; }
+  .val { font-weight: 700; }
+  .barra { fill: var(--b-acento); }
+  .hachura-fundo { fill: var(--b-acento); opacity: .28; }
+  .hachura-traco { stroke: var(--b-acento-tinta); stroke-width: 4; }
+  .limite { stroke: currentColor; stroke-width: 2; stroke-dasharray: 5 4; }
+  .assinatura { font-size: 16px; fill: currentColor; opacity: .7; }
+</style>

@@ -1,0 +1,410 @@
+/* ============================================================
+   ÁTOMOS
+   ------------------------------------------------------------
+   As poucas peças que vários blocos compartilham. Tudo aqui fala
+   só `--b-*`. Nenhum valor literal de cor, fonte ou raio.
+
+   O que é específico de um bloco mora no <style> do componente
+   dele, e não aqui.
+   ============================================================ */
+
+.b-p {
+  margin: 0 0 14px;
+  max-width: var(--b-medida);
+  color: var(--b-corpo);
+  line-height: 1.68;
+  font-size: 16px;
+}
+.b-p:last-child { margin-bottom: 0; }
+.b-p--dim { color: var(--b-tinta-2); }
+
+/* Só existe um por página, mas é átomo e não peça de página: quem o emite é o
+   `CabecalhoArtigo`, e regra com escopo de página não alcança componente. */
+.b-h1 {
+  font-family: var(--b-fonte-titulo);
+  font-weight: var(--b-peso-titulo);
+  font-size: clamp(28px, 5vw, 42px);
+  letter-spacing: var(--b-titulo-track);
+  line-height: 1.1;
+  margin: 0;
+  color: var(--b-tinta);
+  text-wrap: balance;
+}
+
+.b-h2 {
+  font-family: var(--b-fonte-titulo);
+  font-weight: var(--b-peso-titulo);
+  font-size: clamp(20px, 2.6vw, 26px);
+  letter-spacing: var(--b-titulo-track);
+  line-height: 1.2;
+  margin: 10px 0 12px;
+  color: var(--b-tinta);
+  text-wrap: balance;
+}
+
+.b-h3 {
+  font-family: var(--b-fonte-titulo);
+  font-weight: var(--b-peso-titulo);
+  font-size: clamp(17px, 2vw, 20px);
+  letter-spacing: var(--b-titulo-track);
+  line-height: 1.25;
+  margin: 4px 0 -8px;
+  color: var(--b-tinta);
+}
+
+/* A âncora precisa entregar o heading ABAIXO da barra de progresso, que é fixa.
+   Sem isto o título chega escondido atrás dela, e o defeito só aparece no
+   celular. Mora aqui, e não na página, porque quem emite o heading agora é o
+   componente: regra com escopo de página não alcança o que o componente
+   renderiza. */
+.b-h2[id],
+.b-h3[id] { scroll-margin-top: 76px; }
+
+/* ---------- O elo de cada seção ----------
+   Sarjeta à esquerda do heading, com o elo dentro dela: o ícone não empurra o
+   texto e a primeira letra dos H2 continua alinhada com a dos parágrafos.
+
+   Ele nasce no HTML como `<a href="#id">`, e não injetado por JS: sem script o
+   elo ainda leva à seção, que é a metade que importa. Copiar é o upgrade. */
+.b-h2:has(.b-ancora),
+.b-h3:has(.b-ancora) {
+  position: relative;
+  padding-left: var(--b-sarjeta-elo, 26px);
+}
+
+.b-ancora {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 1em;
+  color: var(--b-tinta-2);
+  text-decoration: none;
+  transition: color .15s;
+}
+.b-h2 .b-ancora { top: .1em; }
+.b-h3 .b-ancora { top: .12em; }
+
+.b-ancora:hover,
+.b-ancora:focus-visible,
+.b-ancora[data-copiado] { color: var(--b-acento-tinta); }
+
+.b-ancora svg { width: 15px; height: 15px; }
+
+/* A dica é reforço visual do que o `aria-label` já diz; por isso `aria-hidden`,
+   senão o leitor de tela ouve o mesmo rótulo duas vezes. */
+.b-ancora-dica {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--b-tinta);
+  color: var(--b-fundo);
+  font-family: var(--b-fonte-meta);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .1s;
+}
+.b-ancora:hover .b-ancora-dica,
+.b-ancora:focus-visible .b-ancora-dica,
+.b-ancora[data-copiado] .b-ancora-dica { opacity: 1; }
+
+/* ---------- A RÉGUA ----------
+   Ver o comentário do token em `base.css`. Aqui só o desenho.
+
+   Horizontal ocupa o `background` do próprio elemento; vertical ocupa os
+   pseudo-elementos. É essa divisão que deixa as duas conviverem no mesmo
+   elemento — e é também por que `.b-regua-lados` e `.b-esquinas-*` NÃO
+   convivem: as duas disputam `::before`/`::after`. */
+.b-regua-topo,
+.b-regua-base,
+.b-regua-lados,
+.b-regua-esq,
+.b-regua-dir {
+  --b-regua-h: repeating-linear-gradient(
+    to right,
+    var(--b-regua-cor) 0 var(--b-regua-traco),
+    transparent var(--b-regua-traco) calc(var(--b-regua-traco) + var(--b-regua-vao))
+  );
+  --b-regua-v: repeating-linear-gradient(
+    to bottom,
+    var(--b-regua-cor) 0 var(--b-regua-traco),
+    transparent var(--b-regua-traco) calc(var(--b-regua-traco) + var(--b-regua-vao))
+  );
+}
+
+.b-regua-topo,
+.b-regua-base {
+  background-image: var(--b-regua-h);
+  background-repeat: repeat-x;
+  background-size: 100% var(--b-regua-peso);
+}
+.b-regua-topo { background-position: 0 0; }
+.b-regua-base { background-position: 0 100%; }
+
+/* As duas juntas viram duas camadas; sem esta regra a segunda classe apagaria
+   a primeira, porque `background-image` substitui, não soma. */
+.b-regua-topo.b-regua-base {
+  background-image: var(--b-regua-h), var(--b-regua-h);
+  background-position: 0 0, 0 100%;
+  background-size: 100% var(--b-regua-peso), 100% var(--b-regua-peso);
+}
+
+/* A sangria: faz uma faixa interna alcançar as verticais do container.
+   Sem ela a horizontal morre antes da moldura, e o conjunto lê como três linhas
+   soltas em vez de uma grade — que é o defeito que a planta baixa não pode ter.
+   O container declara `--b-sangria` igual ao próprio `padding-inline`. */
+.b-sangra { margin-inline: calc(var(--b-sangria, 0px) * -1); }
+
+.b-regua-lados,
+.b-regua-esq,
+.b-regua-dir { position: relative; }
+
+.b-regua-lados::before,
+.b-regua-lados::after,
+.b-regua-esq::before,
+.b-regua-dir::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--b-regua-peso);
+  background-image: var(--b-regua-v);
+  background-repeat: repeat-y;
+  pointer-events: none;
+}
+.b-regua-lados::before,
+.b-regua-esq::before { left: 0; }
+.b-regua-lados::after,
+.b-regua-dir::after { right: 0; }
+
+/* A cruzinha de onde duas réguas se encontram: dois filetes cruzados, do mesmo
+   peso da régua. É ela que faz o conjunto ler como planta baixa em vez de
+   moldura — e é por isso que cada tema decide se quer. */
+.b-esquinas-topo,
+.b-esquinas-base { position: relative; }
+
+.b-esquinas-topo::before,
+.b-esquinas-topo::after,
+.b-esquinas-base::before,
+.b-esquinas-base::after {
+  content: "";
+  position: absolute;
+  width: var(--b-esquina);
+  height: var(--b-esquina);
+  /* filete SÓLIDO, e não a régua: sete pixels de tracejado sairiam como um
+     traço e meio, que lê como sujeira de renderização e não como cruz. */
+  background-image:
+    linear-gradient(var(--b-regua-cor) 0 0),
+    linear-gradient(var(--b-regua-cor) 0 0);
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: 100% var(--b-regua-peso), var(--b-regua-peso) 100%;
+  pointer-events: none;
+}
+.b-esquinas-topo::before { top: 0; left: 0; translate: -50% -50%; }
+.b-esquinas-topo::after { top: 0; right: 0; translate: 50% -50%; }
+.b-esquinas-base::before { bottom: 0; left: 0; translate: -50% 50%; }
+.b-esquinas-base::after { bottom: 0; right: 0; translate: 50% 50%; }
+
+/* Só para o leitor de tela. Sai do fluxo sem sair da árvore de acessibilidade:
+   `display: none` some para os dois, e `aria-live` num nó escondido não fala. */
+.b-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.b-rotulo {
+  font-family: var(--b-fonte-meta);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--b-track-rotulo);
+  text-transform: var(--b-caixa-rotulo);
+  color: var(--b-tinta-2);
+  margin: 0 0 10px;
+}
+
+.b-card {
+  background: var(--b-superficie);
+  border: var(--b-borda);
+  border-radius: var(--b-radius);
+  box-shadow: var(--b-sombra);
+  backdrop-filter: var(--b-blur);
+  -webkit-backdrop-filter: var(--b-blur);
+}
+
+/* A ressalva não é enfeite tipográfico: é slot obrigatório.
+   Piso, premissa, faixa com data, caso único apurado, conflito. */
+.b-ressalva {
+  font-family: var(--b-fonte-meta);
+  font-size: 12px;
+  color: var(--b-tinta-2);
+}
+
+.b-fonte {
+  font-family: var(--b-fonte-meta);
+  font-size: 11.5px;
+  color: var(--b-tinta-2);
+  margin-top: 10px;
+}
+.b-fonte a { color: var(--b-acento-tinta); text-underline-offset: 2px; }
+
+.b-btn {
+  font-family: var(--b-fonte-meta);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: var(--b-radius);
+  cursor: pointer;
+  border: var(--b-borda);
+  background: var(--b-superficie);
+  color: var(--b-tinta);
+  box-shadow: var(--b-sombra);
+  backdrop-filter: var(--b-blur);
+  -webkit-backdrop-filter: var(--b-blur);
+  transition: transform .15s, box-shadow .15s, background .15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.b-btn:hover { box-shadow: var(--b-sombra-hover); transform: var(--b-lift); }
+
+.b-btn--forte {
+  background: var(--b-acento);
+  color: var(--b-sobre-acento);
+  border-color: var(--b-linha-forte);
+}
+.b-btn--forte:hover { background: var(--b-acento-forte); }
+
+/* ---------- A1: os átomos da prosa ----------
+   Não são blocos: a arquitetura não os escolhe, a prosa usa. A regra de
+   cada um está no bloco A1 de `arquitetura-pagina.md`. */
+
+/* Código inline é para o LITERAL — o que se digita, se procura ou se
+   reconhece numa tela. Não é grifo com outra fonte. */
+.b-code {
+  font-family: var(--b-fonte-codigo);
+  font-size: .88em;
+  padding: .12em .38em;
+  border-radius: 4px;
+  background: var(--b-acento-fraco);
+  color: var(--b-acento-tinta);
+  /* caminho longo cabe sem estourar a coluna; longo demais era bloco 20 */
+  overflow-wrap: anywhere;
+}
+
+/* Tecla é outra coisa: `Esc` se aperta, `--flag` se digita. */
+.b-kbd {
+  font-family: var(--b-fonte-codigo);
+  font-size: .82em;
+  padding: .12em .45em;
+  border-radius: 4px;
+  border: 1px solid var(--b-linha-forte);
+  border-bottom-width: 2px;
+  background: var(--b-superficie);
+  color: var(--b-tinta);
+  white-space: nowrap;
+}
+
+/* O title é reforço, nunca a expansão: ela vai escrita no texto. */
+.b-abbr {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+/* Número e unidade não se separam: quebrado, o número perde a unidade
+   justamente na tela estreita. */
+.b-num {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- A2: listas ---------- */
+.b-lista,
+.b-lista-num {
+  margin: 0 0 14px;
+  padding-left: 1.35em;
+  max-width: var(--b-medida);
+  color: var(--b-corpo);
+  line-height: 1.68;
+  font-size: 16px;
+}
+.b-lista { list-style: disc; }
+.b-lista-num { list-style: decimal; }
+.b-lista li,
+.b-lista-num li { margin-bottom: 7px; }
+.b-lista li:last-child,
+.b-lista-num li:last-child { margin-bottom: 0; }
+.b-lista li::marker,
+.b-lista-num li::marker { color: var(--b-acento-tinta); }
+/* dois níveis é o teto: o terceiro é seção mal dividida */
+.b-lista :is(ul, ol),
+.b-lista-num :is(ul, ol) { margin: 7px 0 0; padding-left: 1.2em; }
+
+/* Glossário é <dl>, com o termo que o leitor procura no <dt>. */
+.b-glossario {
+  margin: 0 0 14px;
+  max-width: var(--b-medida);
+  color: var(--b-corpo);
+  font-size: 16px;
+  line-height: 1.68;
+}
+.b-glossario dt {
+  font-weight: 700;
+  color: var(--b-tinta);
+  margin-top: 12px;
+}
+.b-glossario dt:first-child { margin-top: 0; }
+.b-glossario dd { margin: 2px 0 0; padding-left: 14px; border-left: 2px solid var(--b-linha); }
+
+/* Toda tabela rola dentro do próprio container. O corpo da página
+   nunca rola de lado. */
+.b-tabela-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.b-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+  min-width: 520px;
+  font-variant-numeric: tabular-nums;
+}
+.b-tabela th,
+.b-tabela td {
+  text-align: left;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--b-linha);
+  vertical-align: top;
+  color: var(--b-corpo);
+}
+.b-tabela thead th {
+  font-family: var(--b-fonte-meta);
+  font-size: 11px;
+  letter-spacing: var(--b-track-rotulo);
+  text-transform: var(--b-caixa-rotulo);
+  color: var(--b-tinta-2);
+  font-weight: 600;
+  border-bottom: 2px solid var(--b-linha-forte);
+}
+.b-tabela tbody tr:last-child td { border-bottom: 0; }
+/* lacuna declarada é honesta e fica; estimativa não rotulada é o defeito */
+.b-tabela .vazio { color: var(--b-tinta-2); font-family: var(--b-fonte-meta); font-size: 12px; }
+.b-tabela .sim { color: var(--b-acento-tinta); font-weight: 600; }

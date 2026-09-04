@@ -1,0 +1,123 @@
+---
+/**
+ * O cabeçalho do artigo: selo, título e a linha de meta.
+ *
+ * A linha de meta não é enfeite. `arquitetura-pagina.md` já exige data visível,
+ * e exige que ela seja a de `dateModified` — é por ela que o leitor decide se o
+ * que está lendo ainda vale. Até aqui a página não mostrava nenhuma; o botão de
+ * copiar link foi a ocasião de resolver as duas coisas no mesmo lugar, porque
+ * botão solto embaixo do título não tem onde morar.
+ *
+ * O ícone é do Phosphor Icons (MIT).
+ */
+import { dataBR } from "../data";
+import Autor from "./blocos/Autor.astro";
+import type { Autor as DadosDoAutor } from "../autor";
+
+interface Props {
+  /** A linha de origem, acima do título. Opcional: nem todo site usa selo. */
+  selo?: string;
+  titulo: string;
+  /** `dateModified`, em ISO `YYYY-MM-DD`. Dia de calendário, nunca instante. */
+  atualizado: string;
+  /** Minutos de leitura. Vem de fora: quem conta palavra é quem tem o texto. */
+  minutos: number;
+  /**
+   * Quem assina, na variante `circle` do bloco 22. Entra como primeiro item da
+   * faixa porque autoria e data são o par que o leitor usa para decidir se
+   * confia — separá-los é obrigar a percorrer a página para juntar de novo.
+   *
+   * Ausente, ou com campo pendente no `AUTOR.md`, a faixa fica exatamente como
+   * era antes de existir byline. Quem decide isso é `autor.ts`, não este arquivo.
+   */
+  autor?: DadosDoAutor | null;
+}
+const { selo, titulo, atualizado, minutos, autor } = Astro.props;
+---
+
+<header class="cabecalho">
+  {selo && <p class="selo">{selo}</p>}
+  <h1 class="b-h1">{titulo}</h1>
+
+  {/* Duas caixas do mesmo tamanho porque a cruz das esquinas mora em
+      ::before/::after: quatro cruzes não cabem num elemento só. A externa
+      carrega as réguas e as duas de cima; a interna, as duas de baixo. */}
+  <div class="meta-faixa b-sangra b-regua-topo b-regua-base b-esquinas-topo">
+    <div class="meta b-esquinas-base">
+      <Autor autor={autor} variante="circle" />
+      <span class="meta-item">
+        Atualizado em <time datetime={atualizado}>{dataBR(atualizado)}</time>
+      </span>
+      <span class="meta-item">{minutos} min de leitura</span>
+      <button
+        type="button"
+        class="meta-item copia"
+        data-copia
+        data-copia-antes="Copiar link"
+        data-copia-depois="Copiado"
+      >
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+          <path d="M240,88.23a54.43,54.43,0,0,1-16,37L189.25,160a54.27,54.27,0,0,1-38.63,16h-.05A54.63,54.63,0,0,1,96,119.84a8,8,0,0,1,16,.45A38.62,38.62,0,0,0,150.58,160h0a38.39,38.39,0,0,0,27.31-11.31l34.75-34.75a38.63,38.63,0,0,0-54.63-54.63l-11,11A8,8,0,0,1,135.7,59l11-11A54.65,54.65,0,0,1,224,48,54.86,54.86,0,0,1,240,88.23ZM109,185.66l-11,11A38.41,38.41,0,0,1,70.6,208h0a38.63,38.63,0,0,1-27.29-65.94L78,107.31A38.63,38.63,0,0,1,144,135.71a8,8,0,0,0,16,.45A54.86,54.86,0,0,0,144,96a54.65,54.65,0,0,0-77.27,0L32,130.75A54.62,54.62,0,0,0,70.56,224h0a54.28,54.28,0,0,0,38.64-16l11-11A8,8,0,0,0,109,185.66Z"></path>
+        </svg>
+        <span data-copia-rotulo>Copiar link</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .cabecalho { display: flex; flex-direction: column; gap: 14px; }
+
+  .selo {
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--b-tinta-2);
+    margin: 0;
+    max-width: 62ch;
+  }
+
+  .meta-faixa { margin-top: 4px; }
+
+  /* a faixa sangra até a moldura, mas o TEXTO dela volta para a coluna: o
+     padding aqui desfaz a sangria só para o conteúdo, e é o que mantém a data
+     alinhada com o primeiro parágrafo. */
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 22px;
+    padding: 11px var(--b-sangria, 0px);
+  }
+
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-tinta-2);
+  }
+
+  /* O botão não se disfarça de texto: ele é o único item com cursor e com
+     mudança de cor, e é assim que o leitor descobre que a linha faz algo. */
+  .copia {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .copia:hover,
+  .copia[data-copiado] { color: var(--b-acento-tinta); }
+
+  .copia svg { width: 14px; height: 14px; }
+</style>
+
+<script>
+  import { ligarCopia } from "../copiarLink";
+  ligarCopia();
+</script>

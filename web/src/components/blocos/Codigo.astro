@@ -1,0 +1,87 @@
+---
+/** Bloco 20 — Bloco de código.
+ *
+ * O trecho literal que o leitor copia ou digita. O custo do erro aqui é dele:
+ * comando errado colado num terminal não devolve o estado anterior. Daí as duas
+ * travas que quebram a build em vez de virarem revisão manual.
+ *
+ * Sem realce de sintaxe: crawler de IA não executa JS (`infra.md`), e realce no
+ * cliente entrega bloco cru para quem indexa e ainda paga em peso. Havendo
+ * realce um dia, ele é gerado na build.
+ */
+export interface Props {
+  /** Onde isso é colado: `bash`, `.env`, "fórmula da planilha", "display do inversor". */
+  rotulo: string;
+  /** Literal e reproduzível. Trecho "arrumado" é paráfrase em monoespaçada. */
+  codigo: string;
+  /** Obrigatório quando o trecho altera estado: o que ele faz e o que não desfaz. */
+  aviso?: string;
+}
+const { rotulo, codigo, aviso } = Astro.props;
+
+const erro = (m: string) => {
+  throw new Error(`[bloco 20] ${m}`);
+};
+
+if (!rotulo.trim()) {
+  erro(`bloco de código sem rótulo. O leitor precisa saber onde aquilo é colado antes de colar.`);
+}
+
+const linhas = codigo.trim().split("\n");
+const comCifrao = linhas.find((l) => /^\s*[$#>]\s/.test(l));
+if (comCifrao) {
+  erro(
+    `linha começando com prompt (${comCifrao.trim().slice(0, 24)}…). O cifrão viaja ` +
+      `junto na cópia e quebra o comando. Precisando separar comando de saída, ` +
+      `são dois blocos, cada um com o seu rótulo.`
+  );
+}
+
+const texto = linhas.join("\n");
+---
+
+<div class="codigo">
+  <p class="b-rotulo rot">{rotulo}</p>
+  {aviso && <p class="alerta">{aviso}</p>}
+  <div class="rolagem"><pre><code>{texto}</code></pre></div>
+</div>
+
+<style>
+  .codigo { max-width: var(--b-medida); }
+  .rot { margin-bottom: 7px; }
+
+  /* o que o comando faz e o que ele não desfaz vem ANTES, em texto: é a
+     ressalva do número, na camada em que o leitor executa */
+  .alerta {
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--b-tinta-2);
+    margin: 0 0 8px;
+    padding-left: 10px;
+    border-left: 2px solid var(--b-acento);
+  }
+
+  /* rola dentro do próprio container: o corpo da página nunca rola de lado */
+  .rolagem {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--b-superficie);
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    box-shadow: var(--b-sombra);
+  }
+  pre {
+    margin: 0;
+    padding: 14px 16px;
+    /* comando não quebra linha sozinho: quebra invisível é comando errado colado */
+    white-space: pre;
+  }
+  code {
+    font-family: var(--b-fonte-codigo);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--b-corpo);
+    tab-size: 2;
+  }
+</style>

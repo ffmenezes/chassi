@@ -1,0 +1,10 @@
+---
+/** Bloco 5 — Tabela de contraste.
+ * As duas colunas precisam ser apuradas na mesma base. Comparar um lado
+ * medido com um lado imaginado é o item 10 de integridade em forma de tabela. */
+import Tabela from "./_Tabela.astro";
+import type { Celula } from "./_Tabela.astro";
+interface Props { colunas: string[]; linhas: Celula[][]; fonte?: string }
+const { colunas, linhas, fonte } = Astro.props;
+---
+<Tabela colunas={colunas} linhas={linhas} fonte={fonte} />

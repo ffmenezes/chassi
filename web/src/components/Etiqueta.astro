@@ -1,0 +1,112 @@
+---
+/**
+ * A etiqueta de um elemento no artigo de exemplo.
+ *
+ * É andaime, não bloco: fala em `--c-*` (chrome) para nunca ser confundida com
+ * o espécime que ela nomeia, e nenhum site a monta. Ela existe porque o artigo
+ * de exemplo é lorem ipsum: sem o nome ao lado, "aquele retângulo com borda" não
+ * se liga a nenhum arquivo nem a nenhuma linha da doutrina.
+ *
+ * Ela **envolve** o elemento e só aparece no hover, fora do fluxo, na folga que
+ * já existe entre os blocos. Trinta e quatro rótulos permanentes viravam a
+ * página inteira em legenda, e aí não se julgava mais nem o tema nem o ritmo —
+ * que é a única coisa que esta rota existe para julgar.
+ *
+ * Diz as três coisas de uma vez: o número no catálogo, o nome em português, e o
+ * componente que renderiza.
+ */
+interface Props {
+  /** Id do catálogo: 2, "N4", "A1". Ausente no que não é bloco. */
+  bloco?: string | number;
+  nome: string;
+  /** O arquivo, ou a tag quando o elemento é HTML puro: `<dl>`. */
+  codigo: string;
+  /**
+   * Para o que não se pode passar o mouse: a barra de progresso, que é fixa, e
+   * o overlay, que é `<dialog>` fechado. Como não há hover para revelar, o
+   * rótulo só existe no modo fixo — na página limpa ele some inteiro, em vez de
+   * ficar sozinho poluindo o topo.
+   */
+  ancorado?: boolean;
+}
+const { bloco, nome, codigo, ancorado = false } = Astro.props;
+---
+
+<div class:list={["marcado", { ancorado }]}>
+  <p class="etiqueta">
+    {bloco !== undefined && <span class="n">{bloco}</span>}
+    <span class="nome">{nome}</span>
+    <code>{codigo}</code>
+  </p>
+  <slot />
+</div>
+
+<style>
+  .marcado { position: relative; }
+
+  /* fora do fluxo: aparecer e sumir não pode empurrar o texto */
+  .etiqueta {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin: 0 0 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    font-family: var(--c-ui);
+    color: var(--c-dim);
+    background: var(--c-paper);
+    opacity: 0;
+    transition: opacity .12s ease;
+    pointer-events: none;
+  }
+  .marcado:hover > .etiqueta,
+  .marcado:focus-within > .etiqueta { opacity: 1; }
+  /* o teclado também chega: focar qualquer coisa dentro revela o nome */
+
+  /* a chave da barra de prévia fixa todas de uma vez, para varrer a página */
+  :global(.etiquetas-fixas) .etiqueta { opacity: 1; }
+
+  .marcado:hover {
+    outline: 1px dashed var(--c-rule);
+    outline-offset: 7px;
+    border-radius: 3px;
+  }
+
+  /* Invisível não recebe hover, então não tem como revelar: some de vez e volta
+     só no modo fixo, aí no fluxo, porque não há elemento acima do qual flutuar. */
+  .ancorado > .etiqueta { display: none; }
+  :global(.etiquetas-fixas) .ancorado > .etiqueta {
+    display: flex;
+    position: static;
+    opacity: 1;
+    margin: 0 0 6px;
+  }
+  .ancorado:hover { outline: 0; }
+
+  .n {
+    font-family: var(--c-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--c-ink);
+    color: var(--c-paper);
+    font-variant-numeric: tabular-nums;
+  }
+  .nome {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    color: var(--c-ink-2);
+  }
+  .etiqueta code {
+    font-family: var(--c-mono);
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--c-rule);
+    color: var(--c-dim);
+  }
+</style>

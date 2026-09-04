@@ -1,0 +1,31 @@
+---
+/** Blocos 16 e 17 — mapa mental e PDF (derivados).
+ *
+ * Os dois são o mesmo artigo em outro recipiente, então valem as quatro travas
+ * dos derivados: gerados do publicado, regeneram na fase 9 ou saem do ar, nada
+ * que a página não tenha, e origem mais data dentro do arquivo.
+ *
+ * `muro` só pode ser true aqui, nunca no artigo e nunca no áudio: o muro fica
+ * no que sai daqui como arquivo. É a trava C que mantém isAccessibleForFree
+ * honesto no schema.json. */
+interface Props { titulo: string; texto: string; ancora: string; muro?: boolean }
+const { titulo, texto, ancora, muro = false } = Astro.props;
+---
+<div class="b-card download">
+  <div class="txt">
+    <b>{titulo}</b>
+    <span>{texto}</span>
+  </div>
+  <button class="b-btn b-btn--forte" type="button" data-muro={muro ? "" : undefined}>
+    {ancora}
+  </button>
+</div>
+<style>
+  .download {
+    padding: 18px 20px; display: flex; flex-wrap: wrap; gap: 14px;
+    align-items: center; justify-content: space-between;
+  }
+  .txt { max-width: 46ch; }
+  .txt b { display: block; margin-bottom: 3px; color: var(--b-tinta); }
+  .txt span { color: var(--b-tinta-2); font-size: 13.5px; line-height: 1.55; }
+</style>

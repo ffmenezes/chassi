@@ -1,0 +1,30 @@
+---
+/** Bloco 7 — Citação de fonte nomeada.
+ * O `conflito` é slot obrigatório e não opcional por acaso: a neutralidade
+ * não se presume. E citação não é origem de número: quem tem número na frase
+ * precisa da própria origem no dossiê. */
+interface Props { texto: string; nome: string; papel: string; conflito: string }
+const { texto, nome, papel, conflito } = Astro.props;
+---
+<figure class="b-card citacao">
+  <blockquote>{texto}</blockquote>
+  <figcaption>
+    <span class="quem">
+      <span class="nome">{nome}</span>
+      <span class="papel">{papel}</span>
+    </span>
+    <span class="conflito">{conflito}</span>
+  </figcaption>
+</figure>
+<style>
+  .citacao { padding: 20px 22px; margin: 0; }
+  blockquote { margin: 0 0 14px; font-size: 16.5px; line-height: 1.6; color: var(--b-corpo); }
+  .quem { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  .nome { font-weight: 700; color: var(--b-tinta); }
+  .papel { color: var(--b-tinta-2); font-size: 13.5px; }
+  .conflito {
+    display: block; margin-top: 10px;
+    font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2);
+    border-top: 1px solid var(--b-linha); padding-top: 9px;
+  }
+</style>

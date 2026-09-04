@@ -1,0 +1,43 @@
+---
+/** N1 — Paginação. Chrome de site: nunca entra no campo ARQUITETURA.
+ *
+ * Cada página é URL própria e indexável, a canônica aponta para ela mesma, e
+ * não existe noindex nas seguintes: os três erros podam o caminho até o artigo
+ * antigo, que é de onde vem a cauda longa. Link é <a href>, porque crawler
+ * segue href e não escuta clique. */
+interface Props { total: number; atual: number; href: (p: number) => string; janela?: number }
+const { total, atual, href, janela = 2 } = Astro.props;
+
+const paginas: (number | "gap")[] = [];
+for (let p = 1; p <= total; p++) {
+  const perto = Math.abs(p - atual) <= janela;
+  if (p === 1 || p === total || perto) paginas.push(p);
+  else if (paginas[paginas.length - 1] !== "gap") paginas.push("gap");
+}
+---
+<nav class="pag" aria-label="Paginação da listagem">
+  {atual > 1 && <a href={href(atual - 1)} rel="prev">Anterior</a>}
+  {paginas.map((p) =>
+    p === "gap" ? (
+      <span class="gap" aria-hidden="true">…</span>
+    ) : (
+      <a href={href(p)} aria-current={p === atual ? "page" : undefined}>{p}</a>
+    )
+  )}
+  {atual < total && <a href={href(atual + 1)} rel="next">Próxima</a>}
+</nav>
+<style>
+  .pag { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+  a, .gap {
+    min-width: 38px; height: 38px; padding: 0 12px; border-radius: var(--b-radius);
+    display: inline-flex; align-items: center; justify-content: center;
+    border: var(--b-borda); color: var(--b-tinta); text-decoration: none;
+    font-family: var(--b-fonte-meta); font-size: 13.5px;
+    background: var(--b-superficie); font-variant-numeric: tabular-nums;
+  }
+  a[aria-current="page"] {
+    background: var(--b-acento); color: var(--b-sobre-acento);
+    border-color: var(--b-linha-forte); font-weight: 700;
+  }
+  .gap { border: 0; background: transparent; color: var(--b-tinta-2); min-width: 20px; padding: 0; }
+</style>

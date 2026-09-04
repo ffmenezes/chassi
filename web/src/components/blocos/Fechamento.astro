@@ -1,0 +1,23 @@
+---
+/** Bloco 10 — Fechamento.
+ * Retoma o problema da abertura e devolve o leitor ao caminho dele com um
+ * critério a mais. Não é onde o disclosure mora: ele já apareceu na primeira
+ * menção, no corpo. */
+interface Props { paragrafos: string[] }
+const { paragrafos } = Astro.props;
+---
+<div class="fechamento b-sangra">
+  {paragrafos.map((p, i) => (
+    <p class={i === 0 ? "b-p" : "b-p b-p--dim"}>{p}</p>
+  ))}
+</div>
+<style>
+  /* Linha SÓLIDA, e é de propósito: o fechamento ainda é o artigo, e o
+     tracejado ficou reservado para a fronteira de região. Sangra como todo
+     separador de grande bloco, para alcançar as verticais em vez de morrer no
+     meio do quadro. Regra em `referencias/arquitetura-pagina.md`. */
+  .fechamento {
+    border-top: 2px solid var(--b-linha-forte);
+    padding: 18px var(--b-sangria, 0px) 0;
+  }
+</style>

@@ -1,0 +1,62 @@
+/* ============================================================
+   CIRCUITO — papel morno, tinta em alpha, lime
+   ------------------------------------------------------------
+   Tokens da cofounder.co. Duas marcas do sistema deles:
+   a tinta é definida por OPACIDADE sobre #262323, não por uma
+   escada de cinzas sólidos; e o lime é a única cor alta, sempre
+   preenchendo e nunca virando texto. Daí o --b-acento-tinta.
+   ============================================================ */
+@layer estilo {
+[data-estilo="circuito"] {
+  --b-fonte-titulo: Neoris, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --b-fonte-corpo: Neoris, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --b-fonte-meta: departureMono, "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --b-peso-titulo: 500;
+  --b-titulo-track: -.022em;
+  --b-radius: 12px;
+  --b-medida: 68ch;
+  --b-track-rotulo: .14em;
+  /* a planta baixa é deste tema: tracejado curto e a cruz nas esquinas */
+  --b-regua-traco: 4px;
+  --b-regua-vao: 4px;
+  --b-esquina: 7px;
+}
+}
+
+@layer modo {
+[data-estilo="circuito"][data-modo="claro"] {
+  --b-fundo: #f5f5f2;
+  --b-superficie: #fbfbf8;
+  --b-tinta: #262323;
+  --b-corpo: rgba(38, 35, 35, .80);
+  --b-tinta-2: rgba(38, 35, 35, .55);
+  --b-linha: #dee2de;
+  --b-linha-forte: #c7cdc7;
+  --b-acento: #bbf451;
+  --b-acento-tinta: #4c6b0c;
+  --b-acento-forte: #d8f999;
+  --b-acento-fraco: #eef7dc;
+  --b-sobre-acento: #202020;
+  --b-erro: #a83a2c;
+}
+}
+
+@layer modo {
+[data-estilo="circuito"][data-modo="escuro"] {
+  /* fundo morno de propósito: preto neutro com lime é o lugar-comum
+     que esta paleta atrai, e o sistema de origem é todo de neutros quentes */
+  --b-fundo: #1a1a17;
+  --b-superficie: #232320;
+  --b-tinta: #f3f3ef;
+  --b-corpo: rgba(243, 243, 239, .82);
+  --b-tinta-2: rgba(243, 243, 239, .55);
+  --b-linha: #34342e;
+  --b-linha-forte: #46463d;
+  --b-acento: #bbf451;
+  --b-acento-tinta: #cdf87a;
+  --b-acento-forte: #d8f999;
+  --b-acento-fraco: #26301a;
+  --b-sobre-acento: #1a1a17;
+  --b-erro: #f08b7d;
+}
+}

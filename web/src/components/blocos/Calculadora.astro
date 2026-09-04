@@ -1,0 +1,210 @@
+---
+/** Bloco 23 — Calculadora.
+ *
+ * A conta que o artigo já fez por extenso, com as variáveis abertas para troca.
+ * Regra integral em `.claude/skills/artigo/referencias/arquitetura-pagina.md`.
+ *
+ * Três coisas que este arquivo faz de propósito e que parecem detalhe:
+ *
+ * 1. **O resultado é calculado na build.** O mesmo `calcular` roda aqui e no
+ *    cliente, então o HTML inicial já sai com número certo. Crawler de IA não
+ *    executa JS (`infra.md`), e uma calculadora que só existe depois do script
+ *    entrega uma caixa vazia para quem indexa.
+ * 2. **A fórmula é dado, não código.** `expr` vem do esqueleto congelado. Ninguém
+ *    reescreve a conta em JavaScript, que é como o formulário passa a afirmar uma
+ *    coisa e o parágrafo ao lado outra.
+ * 3. **Cada campo mostra de onde veio o valor de partida.** É a trava central do
+ *    bloco, e ela quebra a build em `validarCalculadora`.
+ *
+ * O que ela NÃO faz: pedir e-mail, esconder resultado, projetar faturamento, ou
+ * mandar os números do leitor para qualquer lugar. Os três primeiros são regra do
+ * catálogo; o quarto é que aquilo é o custo do negócio dele.
+ */
+import { calcular, validarCalculadora, type CampoCalculo, type SaidaCalculo } from "../../calculo";
+
+export interface Props {
+  /** Identificador único na página. Uma calculadora por artigo, então ele é fixo. */
+  id: string;
+  titulo: string;
+  /** Uma frase dizendo o que a conta responde. Não é metadiscurso do artigo. */
+  descricao: string;
+  campos: CampoCalculo[];
+  saidas: SaidaCalculo[];
+  /** Onde a mesma conta está escrita por extenso. Âncora dentro do artigo. */
+  ancoraDaConta: string;
+}
+const { id, titulo, descricao, campos, saidas, ancoraDaConta } = Astro.props;
+
+validarCalculadora(campos, saidas);
+
+const iniciais = Object.fromEntries(campos.map((c) => [c.id, c.inicial]));
+const partida = calcular(campos, saidas, iniciais);
+const visiveis = saidas.filter((s) => !s.oculta);
+const dados = JSON.stringify({ campos, saidas });
+---
+
+<section class="b-card calc" id={id} data-calc>
+  <p class="b-rotulo">Calculadora</p>
+  <h3 class="titulo">{titulo}</h3>
+  <p class="desc">{descricao}</p>
+
+  <form class="grade" novalidate>
+    {campos.map((c) => (
+      <div class="campo">
+        <label for={`${id}-${c.id}`}>
+          {c.rotulo}
+          {c.unidade && <span class="un">{c.unidade}</span>}
+        </label>
+        <input
+          id={`${id}-${c.id}`}
+          name={c.id}
+          type="number"
+          inputmode="decimal"
+          value={String(c.inicial)}
+          step={c.passo ?? "any"}
+          min={c.min}
+          max={c.max}
+        />
+        {/* a origem do valor de partida, na tela, ao lado do campo */}
+        <small class="origem">{c.origem}</small>
+      </div>
+    ))}
+  </form>
+
+  <div class="saidas">
+    {visiveis.map((s) => {
+      const p = partida.find((x) => x.id === s.id)!;
+      return (
+        <div class="saida">
+          <span class="rot">{s.rotulo}</span>
+          <output for={campos.map((c) => `${id}-${c.id}`).join(" ")} name={s.id} aria-live="polite">
+            {p.texto}
+          </output>
+          {s.ressalva && <small class="b-ressalva">{s.ressalva}</small>}
+        </div>
+      );
+    })}
+  </div>
+
+  <p class="rodape">
+    Os números de partida são premissa, não catálogo, e cada campo diz de onde saiu
+    o dele. A mesma conta está escrita por extenso em <a href={ancoraDaConta}>{titulo}</a>,
+    e nada aqui é enviado para lugar nenhum: a conta roda no seu navegador.
+  </p>
+
+  {/* dado, não código: `is:inline` é explícito para o Astro não tentar processar
+      isto como script, e para o JSON chegar ao HTML inicial intacto */}
+  <script is:inline type="application/json" data-calc-dados set:html={dados} />
+</section>
+
+<script>
+  import { calcular } from "../../calculo";
+
+  document.querySelectorAll<HTMLElement>("[data-calc]").forEach((raiz) => {
+    const cru = raiz.querySelector<HTMLScriptElement>("[data-calc-dados]")?.textContent;
+    if (!cru) return;
+    const { campos, saidas } = JSON.parse(cru);
+    const form = raiz.querySelector("form");
+    if (!form) return;
+
+    const refresca = () => {
+      const valores: Record<string, number> = {};
+      for (const c of campos) {
+        const el = form.elements.namedItem(c.id) as HTMLInputElement | null;
+        // campo vazio cai para o valor de partida, e não para zero: zero é um
+        // número, e número errado na tela é pior que a ausência dele
+        valores[c.id] = el && el.value !== "" ? Number(el.value) : NaN;
+      }
+      for (const s of calcular(campos, saidas, valores)) {
+        const saida = raiz.querySelector<HTMLOutputElement>(`output[name="${s.id}"]`);
+        if (saida && saida.textContent !== s.texto) saida.textContent = s.texto;
+      }
+    };
+
+    form.addEventListener("input", refresca);
+    refresca();
+  });
+</script>
+
+<style>
+  .calc {
+    padding: 20px 22px;
+    max-width: var(--b-medida);
+    /* altura reservada: ela recalcula depois do primeiro paint, e sem isso cada
+       recálculo é um empurrão de layout no meio da leitura */
+    min-height: 320px;
+  }
+  .titulo {
+    font-family: var(--b-fonte-titulo);
+    font-weight: var(--b-peso-titulo);
+    letter-spacing: var(--b-titulo-track);
+    font-size: 19px;
+    color: var(--b-tinta);
+    margin: 0 0 4px;
+  }
+  .desc { color: var(--b-tinta-2); font-size: 14px; line-height: 1.55; margin: 0 0 16px; }
+
+  .grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px 16px;
+  }
+  .campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  label {
+    font-size: 13.5px;
+    color: var(--b-corpo);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .un { font-family: var(--b-fonte-meta); font-size: 11px; color: var(--b-tinta-2); }
+  input {
+    padding: 9px 11px;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    background: var(--b-fundo);
+    color: var(--b-tinta);
+    font-family: var(--b-fonte-meta);
+    font-variant-numeric: tabular-nums;
+    width: 100%;
+    min-width: 0;
+  }
+  input:hover { border-color: var(--b-acento); }
+  .origem {
+    font-family: var(--b-fonte-meta);
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: var(--b-tinta-2);
+  }
+
+  .saidas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px 16px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: var(--b-borda);
+  }
+  .saida { display: flex; flex-direction: column; gap: 2px; }
+  .rot { font-size: 13px; color: var(--b-tinta-2); }
+  output {
+    font-family: var(--b-fonte-meta);
+    font-variant-numeric: tabular-nums;
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--b-acento-tinta);
+    /* número e unidade não se separam, e a saída já vem com espaço não separável */
+    white-space: nowrap;
+  }
+  .saida .b-ressalva { font-size: 11px; line-height: 1.45; }
+
+  .rodape {
+    margin: 18px 0 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--b-tinta-2);
+  }
+  .rodape a { color: var(--b-acento-tinta); text-underline-offset: 2px; }
+</style>

@@ -1,0 +1,10 @@
+---
+/** Bloco 4 — Tabela de panorama.
+ * A coluna existe se TODAS as células dela saírem do esqueleto congelado.
+ * Uma célula faltando derruba a coluna, não a célula. */
+import Tabela from "./_Tabela.astro";
+import type { Celula } from "./_Tabela.astro";
+interface Props { colunas: string[]; linhas: Celula[][]; fonte?: string }
+const { colunas, linhas, fonte } = Astro.props;
+---
+<Tabela colunas={colunas} linhas={linhas} fonte={fonte} />

@@ -1,0 +1,58 @@
+/* ============================================================
+   LINHO — canvas creme, display em serifa, coral
+   ------------------------------------------------------------
+   Tokens do sistema do Claude (VoltAgent/awesome-design-md).
+   A serifa é a voz de DISPLAY; o corpo é sans humanista. Trocar
+   isso vira pastiche de jornal.
+   ============================================================ */
+@layer estilo {
+[data-estilo="linho"] {
+  --b-fonte-titulo: Copernicus, "Tiempos Headline", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --b-fonte-corpo: StyreneB, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --b-fonte-meta: StyreneB, Inter, ui-sans-serif, system-ui, sans-serif;
+  --b-peso-titulo: 500;
+  --b-titulo-track: -.02em;
+  --b-radius: 12px;
+  --b-medida: 66ch;
+  --b-track-rotulo: .12em;
+  /* linha sólida de um pixel, e nenhuma cruz: este tema é a voz do Não Pague
+     Luz, e planta baixa ali transformaria o artigo em documentação técnica. */
+  --b-regua-vao: 0px;
+}
+}
+
+@layer modo {
+[data-estilo="linho"][data-modo="claro"] {
+  --b-fundo: #faf9f5;
+  --b-superficie: #efe9de;
+  --b-tinta: #141413;
+  --b-corpo: #3d3d3a;
+  --b-tinta-2: #6c6a64;
+  --b-linha: #e6dfd8;
+  --b-linha-forte: #d8cfc0;
+  --b-acento: #cc785c;
+  --b-acento-tinta: #a9583e;
+  --b-acento-forte: #a9583e;
+  --b-acento-fraco: #f2e5dd;
+  --b-sobre-acento: #ffffff;
+  --b-erro: #c64545;
+}
+}
+
+@layer modo {
+[data-estilo="linho"][data-modo="escuro"] {
+  --b-fundo: #181715;
+  --b-superficie: #252320;
+  --b-tinta: #faf9f5;
+  --b-corpo: #ddd9d0;
+  --b-tinta-2: #a09d96;
+  --b-linha: #332f2a;
+  --b-linha-forte: #46403a;
+  --b-acento: #e0906f;
+  --b-acento-tinta: #e0906f;
+  --b-acento-forte: #f0a887;
+  --b-acento-fraco: #2f2620;
+  --b-sobre-acento: #181715;
+  --b-erro: #e07a7a;
+}
+}

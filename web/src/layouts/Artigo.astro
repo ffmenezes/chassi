@@ -1,0 +1,49 @@
+---
+/**
+ * O layout de artigo de um site.
+ *
+ * Ele é a contraparte em código do campo ARQUITETURA do esqueleto: o site diz
+ * quais blocos monta, o artigo diz em que ordem, e este layout instancia.
+ *
+ * Três camadas de token chegam aqui, e a ordem de vitória está declarada em
+ * `styles/base.css` com @layer, não em contagem de seletor:
+ *
+ *   [data-estilo]                        forma e tipografia
+ *   [data-estilo][data-modo]             cor
+ *   [data-site][data-modo]  (camada site)  desvio declarado
+ */
+import Base from "./Base.astro";
+import { cssDoSite } from "../sites";
+import type { Site, Modo } from "../sites";
+
+interface Props { site: Site; titulo: string; descricao?: string; modo?: Modo }
+const { site, titulo, descricao, modo } = Astro.props;
+const modoAtual = modo ?? site.modoPadrao;
+const desvio = cssDoSite(site);
+---
+
+<Base titulo={titulo} descricao={descricao}>
+  {desvio && <style set:html={desvio} />}
+  <div class="pagina" data-estilo={site.estilo} data-modo={modoAtual} data-site={site.slug}>
+    <slot />
+  </div>
+</Base>
+
+<style>
+  .pagina { min-height: 100vh; }
+</style>
+
+<script>
+  /* O <dialog> vive na top layer do navegador, fora do wrapper, então os três
+     atributos precisam ser copiados na mão. Sem `data-site`, o overlay sairia
+     com a cor do estilo padrão enquanto o resto da página usa o desvio. */
+  const pagina = document.querySelector<HTMLElement>(".pagina");
+  if (pagina) {
+    for (const d of document.querySelectorAll("dialog")) {
+      for (const attr of ["data-estilo", "data-modo", "data-site"]) {
+        const v = pagina.getAttribute(attr);
+        if (v) d.setAttribute(attr, v);
+      }
+    }
+  }
+</script>

@@ -1,0 +1,38 @@
+---
+/** N3 — Toast. Chrome de site.
+ *
+ * Definição fechada: resposta a uma ação que o leitor acabou de tomar, nada
+ * mais. Daí decorre tudo — não carrega conteúdo, NÃO TRAZ NÚMERO (número que
+ * some antes de alguém conferir é o item 1 de integridade em forma de
+ * interface), não pede nada, e não é onde se coleta consentimento.
+ *
+ * Sucesso some sozinho; erro fica até ser dispensado, porque quem precisa
+ * agir precisa continuar lendo. */
+interface Props { tipo?: "ok" | "erro"; titulo: string; texto: string }
+const { tipo = "ok", titulo, texto } = Astro.props;
+const erro = tipo === "erro";
+---
+<div
+  class:list={["b-card toast", { erro }]}
+  role={erro ? "alert" : "status"}
+  aria-live={erro ? "assertive" : "polite"}
+>
+  <span class="ico" aria-hidden="true">{erro ? "!" : "✓"}</span>
+  <span class="msg">
+    <b>{titulo}</b>
+    <span>{texto}</span>
+  </span>
+</div>
+<style>
+  .toast { padding: 13px 15px; display: flex; gap: 11px; align-items: flex-start; max-width: 420px; }
+  .ico {
+    width: 18px; height: 18px; border-radius: 50%; flex: none; margin-top: 2px;
+    display: grid; place-items: center; font-size: 11px; font-weight: 700;
+    background: var(--b-acento); color: var(--b-sobre-acento);
+  }
+  .erro { border-color: var(--b-erro); }
+  .erro .ico { background: var(--b-erro); color: #fff; }
+  .msg { font-size: 13.5px; line-height: 1.5; }
+  .msg b { display: block; margin-bottom: 2px; color: var(--b-tinta); }
+  .msg span { color: var(--b-tinta-2); }
+</style>

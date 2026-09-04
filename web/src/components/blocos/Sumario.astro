@@ -1,0 +1,100 @@
+---
+/** Bloco 3 — Sumário.
+ * Gerado dos headings, nunca escrito à mão. Sai inline no celular e como
+ * trilho fixo no desktop: nunca só no desktop, que é quem menos precisa. */
+export interface ItemSumario { texto: string; href: string; nivel?: 2 | 3 }
+interface Props { rotulo?: string; itens: ItemSumario[]; minimoH2?: number }
+const { rotulo = "Neste artigo", itens, minimoH2 = 4 } = Astro.props;
+/* regra do slot: menos de quatro H2 e o sumário não nasce */
+const h2 = itens.filter((i) => (i.nivel ?? 2) === 2).length;
+const nasce = h2 >= minimoH2;
+---
+{nasce && (
+  <nav class="b-card sumario" data-sumario aria-label={rotulo}>
+    <p class="b-rotulo">{rotulo}</p>
+    <ol>
+      {itens.map((i) => (
+        <li class={i.nivel === 3 ? "sub" : undefined}>
+          <a href={i.href}>{i.texto}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+<style>
+  .sumario { padding: 18px 20px; }
+  ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  a { color: var(--b-tinta); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover { border-bottom-color: var(--b-acento); color: var(--b-acento-tinta); }
+
+  /* O item da seção em que o leitor está. `aria-current="location"` é o valor
+     certo: o destino não é a página atual, é um ponto dentro dela. */
+  a[aria-current="location"] {
+    color: var(--b-acento-tinta);
+    font-weight: 700;
+  }
+  li { position: relative; }
+  li:has(a[aria-current="location"])::before {
+    content: ""; position: absolute; left: -12px; top: 3px; bottom: 3px;
+    width: 2px; border-radius: 2px; background: var(--b-acento);
+  }
+  li.sub:has(a[aria-current="location"])::before { left: 6px; }
+  li.sub a[aria-current="location"] { color: var(--b-acento-tinta); }
+  li.sub { padding-left: 18px; }
+  li.sub a { color: var(--b-tinta-2); font-size: 14px; }
+</style>
+
+<script>
+  /* Destaca a seção em que o leitor está. Melhoria progressiva: sem JS o
+     sumário continua sendo uma lista de âncoras que funciona. */
+  const listas = [...document.querySelectorAll<HTMLElement>("nav.sumario")];
+  if (listas.length) {
+    /* Uma âncora só existe se o heading existir. Sumário digitado ao lado do
+       corpo diverge na primeira edição, e o sintoma é clique que não faz nada —
+       então isto avisa alto em vez de falhar em silêncio. */
+    const alvos = new Map<string, HTMLElement>();
+    for (const nav of listas) {
+      for (const a of nav.querySelectorAll<HTMLAnchorElement>("a[href^='#']")) {
+        const id = decodeURIComponent(a.hash.slice(1));
+        const el = document.getElementById(id);
+        if (el) alvos.set(id, el);
+        else {
+          a.dataset.quebrada = "";
+          console.warn(`[sumario] âncora #${id} não tem heading correspondente.`);
+        }
+      }
+    }
+
+    const marcar = (id: string | null) => {
+      for (const nav of listas) {
+        for (const a of nav.querySelectorAll<HTMLAnchorElement>("a[href^='#']")) {
+          const ativo = id !== null && decodeURIComponent(a.hash.slice(1)) === id;
+          if (ativo) a.setAttribute("aria-current", "location");
+          else a.removeAttribute("aria-current");
+        }
+      }
+    };
+
+    /* Ativo = o último heading que já passou pelo topo. Mais estável que marcar
+       "o que está visível": com dois headings na tela o segundo não rouba o
+       destaque, e no fim da página o último item não pisca. */
+    const ordenados = [...alvos.entries()];
+    let pedido = 0;
+
+    const medir = () => {
+      pedido = 0;
+      const linha = window.innerHeight * 0.28;
+      let atual: string | null = null;
+      for (const [id, el] of ordenados) {
+        if (el.getBoundingClientRect().top <= linha) atual = id;
+      }
+      /* antes do primeiro heading não há seção corrente, e mentir aqui é pior */
+      marcar(atual);
+    };
+
+    const agendar = () => { if (!pedido) pedido = requestAnimationFrame(medir); };
+    addEventListener("scroll", agendar, { passive: true });
+    addEventListener("resize", agendar);
+    medir();
+  }
+</script>

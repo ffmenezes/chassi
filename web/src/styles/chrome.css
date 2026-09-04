@@ -1,0 +1,214 @@
+/* ============================================================
+   CHROME DA BANCADA
+   ------------------------------------------------------------
+   Só a moldura: índice, rótulos, controles. Neutro de propósito,
+   porque os estilos são os espécimes e a moldura não pode
+   competir com eles. O acento é índigo por não colidir com os
+   acentos dos espécimes — com uma ressalva desde o tema `ceu`:
+   o azul dele (#006aff) é vizinho deste índigo. O que separa os
+   dois é o palco, não o matiz; se algum dia confundir, quem muda
+   é a moldura, nunca o espécime.
+
+   Nada aqui usa `--b-*`. Nada nos blocos usa `--c-*`.
+   ============================================================ */
+:root {
+  --c-paper: #ffffff;
+  --c-bench: #f1f3f5;
+  --c-ink: #14161a;
+  --c-ink-2: #4a5158;
+  --c-dim: #767f88;
+  --c-rule: #d9dde2;
+  --c-mark: #3b5bdb;
+  --c-mark-soft: #eef1fd;
+
+  --c-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --c-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --c-sp: 8px;
+  --c-shell: 1240px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-paper: #0d0f12;
+    --c-bench: #15181c;
+    --c-ink: #e7eaee;
+    --c-ink-2: #a6aeb7;
+    --c-dim: #79828c;
+    --c-rule: #262b31;
+    --c-mark: #93a8ff;
+    --c-mark-soft: #191f33;
+  }
+}
+
+:root[data-theme="dark"] {
+  --c-paper: #0d0f12;
+  --c-bench: #15181c;
+  --c-ink: #e7eaee;
+  --c-ink-2: #a6aeb7;
+  --c-dim: #79828c;
+  --c-rule: #262b31;
+  --c-mark: #93a8ff;
+  --c-mark-soft: #191f33;
+}
+
+body.bancada {
+  background: var(--c-bench);
+  color: var(--c-ink);
+  font-family: var(--c-ui);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+body.bancada a { color: var(--c-mark); }
+body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 2px; }
+
+.wrap { max-width: var(--c-shell); margin: 0 auto; padding: 0 calc(var(--c-sp) * 3); }
+
+/* ---------- cabeçalho ---------- */
+.topo { background: var(--c-paper); border-bottom: 1px solid var(--c-rule); }
+.topo-in { padding: calc(var(--c-sp) * 5) 0 calc(var(--c-sp) * 3); }
+.sobrancelha {
+  font-size: 11px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--c-dim); font-family: var(--c-mono);
+  margin: 0;
+}
+.titulo {
+  margin: calc(var(--c-sp) * 1.5) 0 0;
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: -.02em; line-height: 1.08; font-weight: 700; text-wrap: balance;
+}
+.lede {
+  margin: calc(var(--c-sp) * 1.5) 0 0; max-width: 64ch;
+  color: var(--c-ink-2); font-size: 15.5px;
+}
+.lede code, .aviso code, .estender code {
+  font-family: var(--c-mono); font-size: .88em;
+  background: var(--c-bench); padding: 1px 5px; border-radius: 4px;
+}
+.aviso {
+  margin-top: calc(var(--c-sp) * 3);
+  display: flex; gap: calc(var(--c-sp) * 1.5); align-items: flex-start;
+  border: 1px solid var(--c-rule); border-left: 3px solid var(--c-mark);
+  background: var(--c-mark-soft);
+  padding: calc(var(--c-sp) * 1.5) calc(var(--c-sp) * 2);
+  border-radius: 6px; font-size: 13.5px; color: var(--c-ink-2); max-width: 76ch;
+}
+.aviso b { color: var(--c-ink); }
+
+/* ---------- barra ---------- */
+.barra {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, var(--c-paper) 86%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--c-rule);
+}
+.barra-in {
+  display: flex; flex-wrap: wrap; gap: calc(var(--c-sp) * 2);
+  align-items: center; justify-content: space-between;
+  padding: calc(var(--c-sp) * 1.5) 0;
+}
+.seg { display: flex; border: 1px solid var(--c-rule); border-radius: 8px; overflow: hidden; background: var(--c-paper); }
+.seg button {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 600; color: var(--c-ink-2);
+  padding: calc(var(--c-sp) * 1.1) calc(var(--c-sp) * 2);
+  border-right: 1px solid var(--c-rule);
+  display: flex; align-items: center; gap: 7px;
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--c-ink); color: var(--c-paper); }
+.ponto { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.18); }
+.controles { display: flex; align-items: center; gap: calc(var(--c-sp) * 2); flex-wrap: wrap; }
+.chave { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--c-ink-2); cursor: pointer; }
+.chave input { accent-color: var(--c-mark); width: 15px; height: 15px; }
+.conta { font-family: var(--c-mono); font-size: 12px; color: var(--c-dim); font-variant-numeric: tabular-nums; }
+
+/* ---------- corpo ---------- */
+.colunas {
+  display: grid; grid-template-columns: 1fr; gap: calc(var(--c-sp) * 4);
+  padding: calc(var(--c-sp) * 5) 0 calc(var(--c-sp) * 10);
+}
+@media (min-width: 1060px) { .colunas { grid-template-columns: 216px 1fr; } }
+
+/* índice inline no celular, trilho fixo no desktop:
+   a bancada obedece à regra do bloco 3 que ela documenta */
+.indice-inline { display: block; margin-bottom: calc(var(--c-sp) * 3); }
+.indice-trilho { display: none; }
+@media (min-width: 1060px) {
+  .indice-inline { display: none; }
+  .indice-trilho {
+    display: block; position: sticky; top: 66px; align-self: start;
+    max-height: calc(100vh - 90px); overflow-y: auto;
+  }
+}
+.indice-caixa { background: var(--c-paper); border: 1px solid var(--c-rule); border-radius: 10px; padding: calc(var(--c-sp) * 2); }
+.indice-caixa h2 {
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--c-dim); margin: 0 0 calc(var(--c-sp) * 1.5);
+  font-family: var(--c-mono); font-weight: 600;
+}
+.indice-caixa ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.indice-grupo {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--c-dim); font-family: var(--c-mono); padding: 4px 0;
+}
+.indice-grupo + .indice-grupo, li + .indice-grupo { margin-top: calc(var(--c-sp) * 1.5); }
+.indice-caixa a {
+  display: flex; gap: 8px; align-items: baseline; text-decoration: none;
+  color: var(--c-ink-2); font-size: 13px; padding: 3px 6px; border-radius: 5px;
+}
+.indice-caixa a:hover { background: var(--c-bench); color: var(--c-ink); }
+.indice-caixa a .n { font-family: var(--c-mono); font-size: 11px; color: var(--c-dim); min-width: 20px; }
+.indice-caixa a[data-fora="1"] { opacity: .38; }
+
+/* ---------- seção de bloco ---------- */
+.blocos { display: flex; flex-direction: column; gap: calc(var(--c-sp) * 4); min-width: 0; }
+.bloco { scroll-margin-top: 78px; }
+.bloco[hidden] { display: none; }
+.bloco-cab { display: flex; flex-wrap: wrap; gap: calc(var(--c-sp) * 1.5); align-items: baseline; margin-bottom: calc(var(--c-sp) * 1.5); }
+.bloco-n {
+  font-family: var(--c-mono); font-size: 12px; font-weight: 600;
+  color: var(--c-paper); background: var(--c-ink);
+  padding: 3px 8px; border-radius: 5px; font-variant-numeric: tabular-nums;
+}
+.bloco-nome { font-size: 17px; font-weight: 700; letter-spacing: -.01em; margin: 0; }
+.bloco-regra { flex-basis: 100%; color: var(--c-ink-2); font-size: 13.5px; max-width: 80ch; margin: 0; }
+
+/* o estado vira FORMA, não só cor */
+.chip {
+  font-family: var(--c-mono); font-size: 10.5px; letter-spacing: .08em;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+}
+.chip[data-estado="ativo"] { background: var(--c-ink); color: var(--c-paper); }
+.chip[data-estado="previsto"] { border: 1px dashed var(--c-rule); color: var(--c-dim); }
+.chip[data-estado="derivado"] { border: 1px dotted var(--c-rule); color: var(--c-dim); }
+.chip[data-estado="navegacao"] { border: 1px solid var(--c-rule); color: var(--c-ink-2); }
+/* átomo: forma própria, porque ele não é escolhido — a prosa usa e pronto */
+.chip[data-estado="atomo"] { border: 1px solid var(--c-mark); color: var(--c-mark); }
+.chip[data-fora] { border: 1px solid var(--c-rule); color: var(--c-dim); background: var(--c-bench); }
+
+.palco { border: 1px solid var(--c-rule); border-radius: 12px; overflow: hidden; }
+.palco > [data-estilo] { padding: clamp(20px, 4vw, 40px); }
+.bloco[data-suportado="nao"] .palco { display: none; }
+
+.sem-suporte {
+  border: 1px dashed var(--c-rule); border-radius: 10px;
+  padding: calc(var(--c-sp) * 3); background: var(--c-paper);
+  color: var(--c-dim); font-size: 13.5px;
+}
+.bloco[data-suportado="sim"] .sem-suporte { display: none; }
+
+/* ---------- rodapé ---------- */
+.estender { background: var(--c-paper); border-top: 1px solid var(--c-rule); padding: calc(var(--c-sp) * 6) 0; }
+.estender h2 { font-size: 20px; margin: 0 0 calc(var(--c-sp) * 1.5); letter-spacing: -.015em; }
+.estender p, .estender ol { color: var(--c-ink-2); max-width: 70ch; font-size: 14.5px; }
+.estender p { margin: 0 0 calc(var(--c-sp) * 2); }
+.estender ol { padding-left: 20px; }
+.estender li { margin-bottom: 8px; }
+.estender pre {
+  background: var(--c-bench); border: 1px solid var(--c-rule); border-radius: 8px;
+  padding: calc(var(--c-sp) * 2); overflow-x: auto; color: var(--c-ink);
+  line-height: 1.6; margin: calc(var(--c-sp) * 2) 0 0;
+  font-family: var(--c-mono); font-size: 12.5px;
+}
+.estender pre code { background: transparent; padding: 0; }

@@ -1,0 +1,188 @@
+---
+/** Bloco 19 — Figura.
+ *
+ * O recipiente de prova, diagrama e ilustração spot. Quantas e de que papel é
+ * `referencias/imagens.md`; o que está aqui é o contrato de marcação do bloco 19
+ * de `referencias/arquitetura-pagina.md`, e ele é o mesmo para os três papéis.
+ *
+ * Alt e legenda fazem trabalhos diferentes: o alt é para quem NÃO vê a imagem e
+ * diz o que está nela; a legenda é para quem vê e diz por que ela está ali, com
+ * fonte e data. Copiar um no outro é o defeito mais comum do bloco, e por isso
+ * ele quebra a build em vez de virar aviso — igual ao teto de desvio de site.
+ */
+export type PapelFigura = "prova" | "diagrama" | "spot";
+
+export interface Props {
+  /** Prova e diagrama exigem legenda com fonte e data. A spot não. */
+  papel: PapelFigura;
+  /** Obrigatório. `alt=""` não existe no acervo: imagem decorativa é proibida. */
+  alt: string;
+  /** Local, nunca hotlink. Ausente, sai o marcador — que é estado de prévia. */
+  src?: string;
+  /** Exigidos em raster: sem eles a figura empurra o texto ao carregar (CLS). */
+  largura?: number;
+  altura?: number;
+  /** O que a imagem prova, ou por que ela está ali. Funciona sozinha. */
+  legenda?: string;
+  /** Fonte e data. É a regra de todo número na tela, onde ele está desenhado. */
+  fonte?: string;
+  /** Só quando a origem é de terceiro. Foto pública não é foto livre. */
+  credito?: string;
+  /** Acima da dobra: sai sem lazy e com fetchpriority. O hero é o caso. */
+  prioridade?: boolean;
+  /** Só para o estado de marcador: o que ainda falta produzir. */
+  pendencia?: string;
+}
+
+const {
+  papel, alt, src, largura, altura, legenda, fonte, credito,
+  prioridade = false, pendencia,
+} = Astro.props;
+
+/* Diagrama é código: entra pelo slot, como SVG inline, com o contrato próprio
+   dele em `imagens.md`. O <figure> e a <figcaption> continuam sendo estes. */
+const temDesenho = Astro.slots.has("default");
+
+const erro = (m: string) => {
+  throw new Error(`[bloco 19] ${m}`);
+};
+
+if (!alt.trim()) {
+  erro(
+    `figura sem alt. \`alt=""\` é a marcação de imagem decorativa, e imagem ` +
+      `decorativa é proibida por imagens.md: a que não descreve nada é a que ` +
+      `devia sair.`
+  );
+}
+if (legenda && legenda.trim() === alt.trim()) {
+  erro(
+    `alt e legenda com o mesmo texto. Quem usa leitor de tela recebe a frase ` +
+      `duas vezes e a imagem continua não descrita. O alt diz o que está na ` +
+      `imagem; a legenda diz por que ela está ali.`
+  );
+}
+if (papel !== "spot" && !legenda) {
+  erro(`${papel} sem legenda. Prova e diagrama sem legenda não nascem.`);
+}
+if (papel !== "spot" && !fonte) {
+  erro(
+    `${papel} sem fonte e data na legenda. É a regra de todo número na tela, ` +
+      `aplicada onde o número está desenhado.`
+  );
+}
+const raster = !!src && !/\.svgz?$/i.test(src);
+if (raster && (!largura || !altura)) {
+  erro(
+    `raster sem width/height explícitos (${src}). Sem eles a imagem empurra o ` +
+      `texto quando termina de carregar.`
+  );
+}
+if (temDesenho && src) {
+  erro(`figura com SVG inline e src ao mesmo tempo. Escolha um.`);
+}
+
+const ROTULO: Record<PapelFigura, string> = {
+  prova: "prova",
+  diagrama: "diagrama",
+  spot: "ilustração",
+};
+---
+
+<figure class="figura" data-papel={papel}>
+  {temDesenho && <div class="desenho"><slot /></div>}
+
+  {!temDesenho && src && (
+    <img
+      src={src}
+      alt={alt}
+      width={largura}
+      height={altura}
+      decoding="async"
+      loading={prioridade ? "eager" : "lazy"}
+      fetchpriority={prioridade ? "high" : undefined}
+    />
+  )}
+
+  {/* Estado de prévia: o arquivo ainda não existe, e o marcador diz o que falta.
+      Nunca vai ao ar — no post publicado ou existe a imagem, ou não existe a
+      figura. O alt continua exercido aqui de propósito: é onde ele é revisado. */}
+  {!temDesenho && !src && (
+    <div class="marcador" role="img" aria-label={alt}>
+      <span class="marcador-rot">{ROTULO[papel]} pendente</span>
+      <span class="marcador-txt">{pendencia ?? alt}</span>
+    </div>
+  )}
+
+  {(legenda || fonte || credito) && (
+    <figcaption>
+      {legenda && <span class="leg">{legenda}</span>}
+      {fonte && <span class="fonte">{fonte}</span>}
+      {credito && <span class="credito">{credito}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .figura { margin: 0; }
+
+  .figura img,
+  .desenho :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    box-shadow: var(--b-sombra);
+  }
+
+  /* o marcador se anuncia como provisório: tracejado, sem sombra, sem promessa */
+  .marcador {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 150px;
+    padding: 22px;
+    text-align: center;
+    border: 1px dashed var(--b-linha-forte);
+    border-radius: var(--b-radius);
+    background: var(--b-acento-fraco);
+  }
+  .marcador-rot {
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-acento-tinta);
+  }
+  .marcador-txt {
+    font-family: var(--b-fonte-meta);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--b-tinta-2);
+    max-width: 46ch;
+  }
+
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+    max-width: var(--b-medida);
+  }
+  /* a legenda é texto de leitura: ela precisa funcionar para quem leu só ela */
+  .leg {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--b-corpo);
+  }
+  .fonte,
+  .credito {
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--b-tinta-2);
+  }
+</style>

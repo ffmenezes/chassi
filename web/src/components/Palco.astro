@@ -1,0 +1,45 @@
+---
+/**
+ * A moldura de um bloco na bancada: cabeçalho com número, nome, estado e a
+ * regra resumida, mais o palco onde o espécime é renderizado.
+ *
+ * O `data-estilo`/`data-modo` ficam aqui e em nenhum lugar dentro do bloco.
+ * É o que garante que o componente não sabe em que estilo está.
+ */
+import { blocoPorId, estadoDe, numeroDe, ROTULO_ESTADO } from "../catalogo";
+import type { BlocoId } from "../catalogo";
+import type { Estilo, Modo } from "../sites";
+
+interface Props { id: BlocoId; estilo: Estilo; modo: Modo; suportado: boolean }
+const { id, estilo, modo, suportado } = Astro.props;
+const bloco = blocoPorId(id);
+const estado = estadoDe(id);
+const ancora = `b${String(id).toLowerCase()}`;
+---
+
+<section
+  class="bloco"
+  id={ancora}
+  data-bloco={String(id)}
+  data-suportado={suportado ? "sim" : "nao"}
+>
+  <div class="bloco-cab">
+    <span class="bloco-n">{numeroDe(id)}</span>
+    <h2 class="bloco-nome">{bloco.nome}</h2>
+    <span class="chip" data-estado={estado}>{ROTULO_ESTADO[estado]}</span>
+    <span class="chip" data-fora hidden={suportado}>fora deste estilo</span>
+    <p class="bloco-regra">{bloco.regra}</p>
+  </div>
+
+  <div class="palco">
+    <div data-estilo={estilo} data-modo={modo}>
+      <slot />
+    </div>
+  </div>
+
+  <p class="sem-suporte">
+    Este estilo não prevê o bloco. Ele continua no catálogo: para ativá-lo,
+    acrescente <code>{typeof id === "string" ? `"${id}"` : id}</code> em{" "}
+    <code>blocos</code> do site, em <code>src/sites/index.ts</code>.
+  </p>
+</section>

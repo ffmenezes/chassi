@@ -1,0 +1,363 @@
+---
+/**
+ * A bancada: todo bloco do catálogo, com dados fictícios, em todo estilo.
+ *
+ * O markup de cada bloco é o mesmo em qualquer estilo — os componentes são
+ * literalmente os mesmos que um site usa. Só os tokens mudam. Se um estilo
+ * novo exigir markup diferente, o problema não é o estilo: é que o bloco não
+ * estava bem definido.
+ */
+import Base from "../layouts/Base.astro";
+import Palco from "../components/Palco.astro";
+import { CATALOGO, GRUPOS, estadoDe, numeroDe } from "../catalogo";
+import { ESTILOS, SITES } from "../sites";
+import type { Estilo } from "../sites";
+import "../styles/chrome.css";
+
+import Abertura from "../components/blocos/Abertura.astro";
+import CaixaConclusoes from "../components/blocos/CaixaConclusoes.astro";
+import Sumario from "../components/blocos/Sumario.astro";
+import TabelaPanorama from "../components/blocos/TabelaPanorama.astro";
+import TabelaContraste from "../components/blocos/TabelaContraste.astro";
+import CitacaoDestacada from "../components/blocos/CitacaoDestacada.astro";
+import CitacaoFonte from "../components/blocos/CitacaoFonte.astro";
+import Checklist from "../components/blocos/Checklist.astro";
+import Faq from "../components/blocos/Faq.astro";
+import Fechamento from "../components/blocos/Fechamento.astro";
+import Figura from "../components/blocos/Figura.astro";
+import DiagramaDemo from "../components/blocos/_DiagramaDemo.astro";
+import Codigo from "../components/blocos/Codigo.astro";
+import Aviso from "../components/blocos/Aviso.astro";
+import AtomosDemo from "../components/blocos/_AtomosDemo.astro";
+import ListasDemo from "../components/blocos/_ListasDemo.astro";
+import Enquete from "../components/blocos/Enquete.astro";
+import Avaliacao from "../components/blocos/Avaliacao.astro";
+import Carrossel from "../components/blocos/Carrossel.astro";
+import CardRedeSocial from "../components/blocos/CardRedeSocial.astro";
+import Audio from "../components/blocos/Audio.astro";
+import Download from "../components/blocos/Download.astro";
+import Paginacao from "../components/blocos/Paginacao.astro";
+import GradeArtigos from "../components/blocos/GradeArtigos.astro";
+import Toast from "../components/blocos/Toast.astro";
+import Overlay from "../components/blocos/Overlay.astro";
+import Comentarios from "../components/blocos/Comentarios.astro";
+import Autor from "../components/blocos/Autor.astro";
+
+import * as m from "../mock/artigo";
+
+/* A bancada monta tudo. Um site monta o que declarou. */
+const estiloInicial: Estilo = "linho";
+const modoInicial = "claro";
+const palco = { estilo: estiloInicial, modo: modoInicial as "claro", suportado: true };
+
+/* mapa estilo -> blocos previstos, lido pelo script da barra */
+const previstos = {
+  linho: SITES.exemplo.blocos.map(String),
+  /* nenhum site do chassi adotou `concreto` ainda: mostra o catálogo inteiro */
+  concreto: CATALOGO.map((b) => String(b.id)),
+  vidro: CATALOGO.map((b) => String(b.id)),
+  circuito: CATALOGO.filter((b) => b.id !== 14).map((b) => String(b.id)),
+  /* nenhum site adotou `ceu` ainda: até adotar, a bancada mostra o catálogo inteiro */
+  ceu: CATALOGO.map((b) => String(b.id)),
+};
+---
+
+<Base
+  titulo="Bancada de Blocos"
+  descricao="Todo bloco do catálogo, com dados fictícios, em cinco estilos e dois modos."
+>
+  <header class="topo">
+    <div class="wrap topo-in">
+      <p class="sobrancelha">design system · holding de sites de nicho</p>
+      <h1 class="titulo">Bancada de Blocos</h1>
+      <p class="lede">
+        Cada bloco do catálogo, com dados fictícios, em cinco estilos e dois modos.
+        Os componentes aqui são <b>os mesmos</b> que um site usa: muda só o token, e o
+        token tem duas camadas — <code>[data-estilo]</code> carrega forma e tipografia,
+        <code>[data-modo]</code> carrega cor.
+      </p>
+      <p class="aviso">
+        <span aria-hidden="true">▲</span>
+        <span><b>Todo número desta página é fictício</b> e nunca sai de <code>src/mock/</code>.
+        O que é real é a forma: cada template reserva slot para o que a doutrina exige — a
+        ressalva ao lado do número, a lacuna declarada, o conflito de interesse ao lado do
+        nome, a data no card. Estilo que não consegue mostrar esses slots é estilo reprovado.</span>
+      </p>
+    </div>
+  </header>
+
+  <div class="barra">
+    <div class="wrap barra-in">
+      <div class="seg" role="group" aria-label="Escolher estilo">
+        {Object.entries(ESTILOS).map(([chave, e]) => (
+          <button type="button" data-estilo-btn={chave} aria-pressed={chave === estiloInicial}>
+            <span class="ponto" style={`background:${e.acento}`}></span>
+            {e.nome}
+          </button>
+        ))}
+      </div>
+      <div class="controles">
+        <div class="seg" role="group" aria-label="Escolher modo">
+          <button type="button" data-modo-btn="claro" aria-pressed="true">Claro</button>
+          <button type="button" data-modo-btn="escuro" aria-pressed="false">Escuro</button>
+        </div>
+        <label class="chave">
+          <input type="checkbox" id="mostrar-fora" checked />
+          Mostrar blocos fora do estilo
+        </label>
+        <span class="conta" id="conta">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap colunas">
+    <nav class="indice-trilho" aria-label="Índice de blocos">
+      <div class="indice-caixa">
+        <h2>Blocos</h2>
+        <ol>
+          {GRUPOS.map((g) => (
+            <>
+              <li class="indice-grupo">{g.rotulo}</li>
+              {CATALOGO.filter((b) => g.estados.includes(estadoDe(b.id))).map((b) => (
+                <li>
+                  <a href={`#b${String(b.id).toLowerCase()}`} data-indice={String(b.id)}>
+                    <span class="n">{numeroDe(b.id)}</span>
+                    <span>{b.nome}</span>
+                  </a>
+                </li>
+              ))}
+            </>
+          ))}
+        </ol>
+      </div>
+    </nav>
+
+    <div style="min-width:0">
+      <nav class="indice-inline" aria-label="Índice de blocos">
+        <div class="indice-caixa">
+          <h2>Blocos</h2>
+          <ol>
+            {CATALOGO.map((b) => (
+              <li>
+                <a href={`#b${String(b.id).toLowerCase()}`} data-indice={String(b.id)}>
+                  <span class="n">{numeroDe(b.id)}</span>
+                  <span>{b.nome}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </nav>
+
+      <main class="blocos">
+        <Palco id={1} {...palco}><Abertura {...m.abertura} /></Palco>
+        <Palco id={2} {...palco}><CaixaConclusoes itens={m.conclusoes} /></Palco>
+        <Palco id={3} {...palco}><Sumario itens={m.sumario} /></Palco>
+        <Palco id={4} {...palco}><TabelaPanorama {...m.panorama} /></Palco>
+        <Palco id={5} {...palco}><TabelaContraste {...m.contraste} /></Palco>
+        <Palco id={6} {...palco}><CitacaoDestacada texto={m.destaque} /></Palco>
+        <Palco id={7} {...palco}><CitacaoFonte {...m.citacao} /></Palco>
+        <Palco id={8} {...palco}>
+          <Checklist rotulo="Antes de trocar qualquer equipamento" itens={m.checklist} />
+        </Palco>
+        <Palco id={9} {...palco}><Faq itens={m.faq} /></Palco>
+        <Palco id={10} {...palco}><Fechamento paragrafos={m.fechamento} /></Palco>
+        <Palco id={19} {...palco}>
+          {/* os três papéis: o diagrama é código, a prova espera arquivo, a spot
+              não tem fonte porque não prova nada */}
+          <div style="display:flex;flex-direction:column;gap:26px">
+            <Figura {...m.figuras.diagrama.figura}>
+              <DiagramaDemo {...m.figuras.diagrama.dados} />
+            </Figura>
+            <Figura {...m.figuras.prova} />
+            <Figura {...m.figuras.spot} />
+          </div>
+        </Palco>
+        <Palco id={20} {...palco}>
+          <div style="display:flex;flex-direction:column;gap:22px">
+            {m.codigos.map((c) => <Codigo {...c} />)}
+          </div>
+        </Palco>
+        <Palco id={21} {...palco}>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            {m.avisos.map((a) => <Aviso {...a} />)}
+          </div>
+        </Palco>
+        <Palco id={22} {...palco}>
+          {/* as duas variantes juntas, que é o ponto: o mesmo dado no topo e no
+              fim, e o palco é o único lugar onde dá para conferir de um olhar */}
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <Autor autor={m.autor} variante="circle" />
+            <Autor autor={m.autor} variante="card" />
+          </div>
+        </Palco>
+        <Palco id="A1" {...palco}><AtomosDemo pico={m.atomos.pico} /></Palco>
+        <Palco id="A2" {...palco}>
+          <ListasDemo
+            passos={m.atomos.passos}
+            conjunto={m.atomos.conjunto}
+            glossario={m.atomos.glossario}
+          />
+        </Palco>
+        <Palco id={11} {...palco}><Enquete {...m.enquete} /></Palco>
+        <Palco id={12} {...palco}><Avaliacao /></Palco>
+        <Palco id={13} {...palco}>
+          <Carrossel rotulo="Como medir o pico, passo a passo" slides={m.carrossel} />
+        </Palco>
+        <Palco id={14} {...palco}><CardRedeSocial {...m.social} /></Palco>
+        <Palco id={15} {...palco}><Audio duracao={m.derivados.audio.duracao} /></Palco>
+        <Palco id={16} {...palco}><Download {...m.derivados.mapa} muro /></Palco>
+        <Palco id={17} {...palco}><Download {...m.derivados.pdf} muro /></Palco>
+        <Palco id={18} {...palco}><Comentarios itens={m.comentarios.slice(0, 2)} /></Palco>
+        <Palco id="N1" {...palco}>
+          <Paginacao total={9} atual={2} href={(p) => `#p${p}`} />
+        </Palco>
+        <Palco id="N2" {...palco}>
+          <GradeArtigos rotulo="Continue por aqui" artigos={m.irmas} />
+        </Palco>
+        <Palco id="N3" {...palco}>
+          <div style="display:flex;flex-direction:column;gap:11px">
+            {m.toasts.map((t) => <Toast {...t} />)}
+          </div>
+        </Palco>
+        <Palco id="N4" {...palco}>
+          <p class="b-p b-p--dim" style="font-size:14px">
+            O overlay não tem gatilho de entrada, tempo, rolagem ou saída do mouse.
+            Ele abre por clique num controle que anuncia o destino, e fecha por três
+            caminhos: o ✕, o <b>Esc</b> e o clique fora.
+          </p>
+          <button class="b-btn b-btn--forte" type="button" data-abre-overlay="overlay-pdf">
+            Receber o PDF
+          </button>
+          <Overlay id="overlay-pdf" {...m.overlay} pedeEmail />
+        </Palco>
+        <Palco id="N5" {...palco}>
+          <div class="demo-progresso" aria-hidden="true">
+            <span class="fio"><span class="fio-preenche"></span></span>
+            <span class="linha"></span><span class="linha"></span><span class="linha"></span>
+          </div>
+          <p class="b-p b-p--dim" style="font-size:14px;margin-top:14px">
+            No artigo ela fica fixa no topo e mede o <b>&lt;article&gt;</b>, não o documento.
+            Veja funcionando em <a href="/exemplo/linho/" style="color:var(--b-acento-tinta)">um artigo inteiro</a>.
+          </p>
+        </Palco>
+      </main>
+    </div>
+  </div>
+
+  <footer class="estender">
+    <div class="wrap">
+      <h2>Como adicionar um estilo</h2>
+      <p>
+        Nenhum passo toca no markup dos blocos. Se um estilo novo exigir HTML diferente,
+        o problema não é o estilo: é que o bloco não estava bem definido.
+      </p>
+      <ol>
+        <li><b>Forma e tipografia</b> em <code>[data-estilo="nome"]</code>: raio, borda, sombra, fontes. Nenhuma cor.</li>
+        <li><b>Cor</b> em <code>[data-modo="claro"]</code> e <code>[data-modo="escuro"]</code>. Nenhuma medida.</li>
+        <li>Acrescente o arquivo em <code>src/styles/estilos/index.css</code> e a entrada em <code>ESTILOS</code>.</li>
+        <li>Aponte um site para ele em <code>src/sites/index.ts</code>, com os blocos que ele monta.</li>
+      </ol>
+      <p style="margin-top:16px">
+        A separação em duas camadas existe para uma coisa: <b>escrever o modo escuro não pode
+        virar um segundo estilo</b>. Cor que vaza para a camada de forma some no outro modo, e cor
+        definida só dentro de um modo nunca aparece no outro.
+      </p>
+      <pre><code>{`/* src/styles/estilos/editorial.css */
+[data-estilo="editorial"]                     { --b-radius: 0; --b-peso-titulo: 700; }
+[data-estilo="editorial"][data-modo="claro"]  { --b-fundo: #fff; --b-tinta: #111; --b-acento: #b3121f; }
+[data-estilo="editorial"][data-modo="escuro"] { --b-fundo: #111; --b-tinta: #fff; --b-acento: #ff5a68; }`}</code></pre>
+      <p style="margin-top:24px">
+        A lista de blocos é a de
+        <code>.claude/skills/artigo/referencias/arquitetura-pagina.md</code>, que é a autoridade.
+        <code>src/catalogo.ts</code> é a projeção dela: componente novo nasce lá, com regra e
+        trava, e só depois vira código.
+      </p>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  .demo-progresso { display: flex; flex-direction: column; gap: 10px; }
+  .demo-progresso .fio {
+    display: block; height: 3px; border-radius: 2px;
+    background: color-mix(in srgb, var(--b-tinta) 8%, transparent);
+  }
+  .demo-progresso .fio-preenche {
+    display: block; height: 100%; width: 42%; border-radius: 2px; background: var(--b-acento);
+  }
+  .demo-progresso .linha {
+    height: 9px; border-radius: 3px; background: var(--b-tinta-2); opacity: .28;
+  }
+  .demo-progresso .linha:nth-child(3) { width: 88%; }
+  .demo-progresso .linha:nth-child(4) { width: 64%; }
+</style>
+
+<script is:inline define:vars={{ previstos }}>
+  document.body.classList.add("bancada");
+
+  const raiz = document.documentElement;
+  const secoes = [...document.querySelectorAll(".bloco")];
+  const palcos = [...document.querySelectorAll(".palco > [data-estilo]")];
+  const btnEstilo = [...document.querySelectorAll("[data-estilo-btn]")];
+  const btnModo = [...document.querySelectorAll("[data-modo-btn]")];
+  const mostrarFora = document.getElementById("mostrar-fora");
+  const conta = document.getElementById("conta");
+
+  let estilo = "linho";
+  let modo = matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro";
+
+  function aplicar() {
+    const lista = previstos[estilo] ?? [];
+    const esconder = !mostrarFora.checked;
+    let dentro = 0;
+
+    for (const p of palcos) {
+      p.setAttribute("data-estilo", estilo);
+      p.setAttribute("data-modo", modo);
+    }
+    /* o overlay vive fora dos palcos por ser <dialog> em camada de topo */
+    for (const d of document.querySelectorAll("dialog")) {
+      d.setAttribute("data-estilo", estilo);
+      d.setAttribute("data-modo", modo);
+    }
+    /* o mesmo controle rege o chrome, pelo data-theme que chrome.css já lê */
+    raiz.setAttribute("data-theme", modo === "escuro" ? "dark" : "light");
+
+    for (const sec of secoes) {
+      const id = sec.getAttribute("data-bloco");
+      const ok = lista.includes(id);
+      if (ok) dentro++;
+      sec.setAttribute("data-suportado", ok ? "sim" : "nao");
+      sec.hidden = !ok && esconder;
+      const chip = sec.querySelector("[data-fora]");
+      if (chip) chip.hidden = ok;
+    }
+
+    for (const a of document.querySelectorAll("[data-indice]")) {
+      a.setAttribute("data-fora", lista.includes(a.getAttribute("data-indice")) ? "0" : "1");
+    }
+    for (const b of btnEstilo) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-estilo-btn") === estilo));
+    }
+    for (const b of btnModo) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-modo-btn") === modo));
+    }
+    conta.textContent = `${dentro} de ${secoes.length} blocos neste estilo`;
+  }
+
+  btnEstilo.forEach((b) =>
+    b.addEventListener("click", () => {
+      estilo = b.getAttribute("data-estilo-btn");
+      aplicar();
+    })
+  );
+  btnModo.forEach((b) =>
+    b.addEventListener("click", () => {
+      modo = b.getAttribute("data-modo-btn");
+      aplicar();
+    })
+  );
+  mostrarFora.addEventListener("change", aplicar);
+  aplicar();
+</script>

@@ -1,0 +1,22 @@
+---
+/** Bloco 6 — Citação destacada.
+ * Conclusão NOSSA, no máximo duas por artigo. Citação de terceiro com fonte
+ * é o bloco 7, e as regras não se misturam. */
+interface Props { texto: string }
+const { texto } = Astro.props;
+---
+<blockquote class="destaque">{texto}</blockquote>
+<style>
+  .destaque {
+    margin: 0;
+    padding: 4px 0 4px 22px;
+    border-left: 3px solid var(--b-acento);
+    font-family: var(--b-fonte-titulo);
+    font-size: clamp(19px, 2.4vw, 23px);
+    line-height: 1.4;
+    letter-spacing: var(--b-titulo-track);
+    font-weight: var(--b-peso-titulo);
+    max-width: 34ch;
+    color: var(--b-tinta);
+  }
+</style>

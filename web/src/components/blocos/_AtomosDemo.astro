@@ -1,0 +1,40 @@
+---
+/**
+ * A1 — espécime de prosa com os átomos, para a bancada.
+ *
+ * Não é bloco: nenhum artigo instancia isto. É um parágrafo montado de propósito
+ * com um de cada átomo, para que um estilo novo seja julgado por eles também —
+ * código inline que some no fundo, tecla que não parece tecla e sigla sem
+ * sublinhado são defeitos que só aparecem em prosa corrida.
+ *
+ * O número chega por prop, de `mock/artigo.ts`: número não mora em componente.
+ */
+interface Props { pico: string }
+const { pico } = Astro.props;
+---
+
+{/* O `{" "}` no fim da linha não é enfeite: o Astro come o espaço entre um texto
+    que termina a linha e o elemento que abre a próxima, e o resultado sai grudado
+    ("e éele"). Só aparece na tela, nunca no type check. */}
+<div class="demo">
+  <p class="b-p">
+    O pico simultâneo desta casa chegou a <span class="b-num">{pico}</span>, e é{" "}
+    <strong>ele</strong> que derruba o inversor — não o consumo do mês, que era{" "}
+    <em>menor</em> que o do ano passado. O valor sai da coluna que a planilha grava
+    em <code class="b-code">medicoes-08-2026.csv</code>, e o termo que você procura no
+    datasheet do fabricante é <code class="b-code">surge power</code>, sempre com a
+    duração ao lado.
+  </p>
+  <p class="b-p">
+    No controlador, o histórico se lê apertando <kbd class="b-kbd">Esc</kbd> e depois{" "}
+    <kbd class="b-kbd">F2</kbd>. O que aparece na tela é a corrente contínua
+    (<abbr class="b-abbr" title="corrente contínua">CC</abbr>) do banco, e não a
+    corrente que sai para a casa. A conta completa está em{" "}
+    <a href="#a1">como medir o pico sem instrumento</a>.
+  </p>
+</div>
+
+<style>
+  .demo { max-width: var(--b-medida); }
+  .demo a { color: var(--b-acento-tinta); text-underline-offset: 3px; }
+</style>

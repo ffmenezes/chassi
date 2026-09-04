@@ -1,0 +1,131 @@
+/* ============================================================
+   ORDEM DAS CAMADAS — decidida uma vez, aqui.
+   ------------------------------------------------------------
+   Camada posterior vence, independente de especificidade. É o
+   que evita a armadilha clássica: `[data-site]` sozinho tem
+   especificidade (0,1,0) e perderia para `[data-estilo][data-modo]`,
+   que tem (0,2,0). O sintoma seria "mexi no token e nada mudou".
+
+   Com @layer ninguém precisa contar seletor nunca mais.
+   ============================================================ */
+@layer contrato, estilo, modo, site;
+
+/* ============================================================
+   CONTRATO DE TOKENS
+   ------------------------------------------------------------
+   Todo bloco fala só `--b-*`. Nenhum componente conhece cor,
+   fonte ou medida literal, e é isso que faz o markup ser o mesmo
+   em qualquer estilo.
+
+   Duas camadas, e a separação é o que impede o modo escuro de
+   virar um segundo estilo:
+
+     [data-estilo]              forma e tipografia. Nenhuma cor.
+     [data-estilo][data-modo]   cor. Nenhuma medida.
+
+   Cor que vaza para a camada de forma some no outro modo, e cor
+   definida só dentro de um modo nunca aparece no outro.
+   ============================================================ */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body { margin: 0; }
+
+img,
+picture,
+video,
+canvas,
+svg { display: block; max-width: 100%; }
+
+input,
+button,
+textarea,
+select { font: inherit; color: inherit; }
+
+h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
+
+ul[class], ol[class] { list-style: none; margin: 0; padding: 0; }
+
+:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- defaults do contrato ----------
+   Um estilo redefine o que precisar; o que não redefinir cai aqui. */
+@layer contrato {
+[data-estilo] {
+  /* forma */
+  --b-radius: 8px;
+  --b-borda: 1px solid var(--b-linha);
+  --b-sombra: none;
+  --b-sombra-hover: none;
+  --b-lift: none;
+  --b-blur: none;
+  --b-medida: 68ch;
+
+  /* tipografia */
+  --b-fonte-titulo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --b-fonte-corpo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --b-fonte-meta: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Código é monoespaçado por semântica, não por gosto: alinhamento de coluna e
+     distinção entre l, 1 e I fazem parte do conteúdo. Por isso é token próprio e
+     não `--b-fonte-meta`, que em `linho` é sans. */
+  --b-fonte-codigo: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --b-peso-titulo: 700;
+  --b-titulo-track: -.015em;
+  --b-caixa-rotulo: uppercase;
+  --b-track-rotulo: .1em;
+
+  /* derivados de cor, para o estilo não precisar declarar tudo */
+  --b-corpo: var(--b-tinta);
+  --b-acento-forte: var(--b-acento);
+  --b-sobre-acento: var(--b-fundo);
+  --b-sombra-cor: var(--b-tinta);
+  /* preenchimento e texto são acentos diferentes: lime preenche bem e lê mal */
+  --b-acento-tinta: var(--b-acento);
+  /* a régua herda a linha do modo; derivado, para o tema mexer só na forma */
+  --b-regua-cor: var(--b-linha);
+  /* fundo decorativo. Existe como token para poder ser sobrescrito por site:
+     o que não é token não é sobrescrevível, e vira regra que o site teria
+     que duplicar em seletor. */
+  --b-aurora: none;
+
+  /* A RÉGUA — a linha que demarca uma região de layout.
+     Não é `<hr>` nem `border`: é gradiente repetido, e é por isso que ela
+     acompanha o modo sozinha, sem o par de arquivos claro/escuro que a
+     solução em SVG obriga.
+
+     Os dois zeros são as chaves de desligar, e existem para que a classe possa
+     ficar no markup em todos os temas: `--b-regua-peso: 0` some com a régua,
+     `--b-regua-vao: 0` transforma o tracejado em linha sólida. Assim quem
+     decide o desenho é o tema, e não o gabarito. */
+  --b-regua-peso: 1px;
+  --b-regua-traco: 4px;
+  --b-regua-vao: 4px;
+  /* a cruzinha onde duas réguas se encontram. 0 desliga. */
+  --b-esquina: 0px;
+}
+
+/* A superfície do estilo. Fundo explícito sempre: superfície transparente
+   pega o fundo de quem hospeda, e o artigo passa a depender do vizinho. */
+[data-estilo] {
+  background: var(--b-fundo);
+  color: var(--b-tinta);
+  font-family: var(--b-fonte-corpo);
+}
+
+[data-estilo] :focus-visible { outline-color: var(--b-acento-tinta); }
+}

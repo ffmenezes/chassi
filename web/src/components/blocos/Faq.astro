@@ -1,0 +1,34 @@
+---
+/** Bloco 9 — FAQ em acordeão.
+ * <details>/<summary> nativo, zero JavaScript. A resposta existe no HTML
+ * inicial mesmo fechada, então quem não executa JS lê a FAQ inteira — que é
+ * a condição do infra.md. Acordeão montado no clique apaga a FAQ e ainda
+ * derruba o FAQPage, porque o markup exige texto idêntico ao publicado. */
+export interface Pergunta { pergunta: string; resposta: string; aberto?: boolean }
+interface Props { itens: Pergunta[] }
+const { itens } = Astro.props;
+---
+<div class="faq">
+  {itens.map((p) => (
+    <details class="b-card" open={p.aberto}>
+      <summary>{p.pergunta}</summary>
+      <div class="resposta">{p.resposta}</div>
+    </details>
+  ))}
+</div>
+<style>
+  .faq { display: flex; flex-direction: column; gap: 10px; }
+  details { overflow: hidden; }
+  summary {
+    cursor: pointer; list-style: none; padding: 15px 18px;
+    font-weight: 700; color: var(--b-tinta);
+    display: flex; justify-content: space-between; gap: 14px; align-items: center;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: "+"; font-family: var(--b-fonte-meta);
+    color: var(--b-acento-tinta); font-size: 18px; flex: none;
+  }
+  details[open] summary::after { content: "\2212"; }
+  .resposta { padding: 0 18px 16px; color: var(--b-tinta-2); line-height: 1.62; }
+</style>

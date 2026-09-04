@@ -1,0 +1,29 @@
+---
+/** Interno. A pele compartilhada das tabelas 4 e 5.
+ * Não é bloco do catálogo: é o que os dois blocos usam por dentro. */
+export type Celula = string | { vazio: string } | { sim: string };
+interface Props { colunas: string[]; linhas: Celula[][]; fonte?: string }
+const { colunas, linhas, fonte } = Astro.props;
+const classe = (c: Celula) =>
+  typeof c === "string" ? undefined : "vazio" in c ? "vazio" : "sim";
+const texto = (c: Celula) =>
+  typeof c === "string" ? c : "vazio" in c ? c.vazio : c.sim;
+---
+<div class="b-card envolve">
+  <div class="b-tabela-wrap">
+    <table class="b-tabela">
+      <thead>
+        <tr>{colunas.map((c) => <th>{c || " "}</th>)}</tr>
+      </thead>
+      <tbody>
+        {linhas.map((l) => (
+          <tr>{l.map((c) => <td class={classe(c)}>{texto(c)}</td>)}</tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+{fonte && <p class="b-fonte">{fonte}</p>}
+<style>
+  .envolve { padding: 6px 6px 2px; }
+</style>

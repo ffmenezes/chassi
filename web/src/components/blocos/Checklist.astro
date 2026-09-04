@@ -1,0 +1,27 @@
+---
+/** Bloco 8 — Checklist.
+ * Recapitula, nunca introduz: todo item tem uma seção que o sustenta.
+ * A caixa fica `disabled` de propósito enquanto não houver estado guardado —
+ * caixa que esquece o clique ao recarregar é promessa quebrada. */
+export interface ItemCheck { forte: string; resto: string }
+interface Props { rotulo?: string; itens: ItemCheck[]; teto?: number }
+const { rotulo, itens, teto = 7 } = Astro.props;
+const lista = itens.slice(0, teto);
+---
+<div class="checklist">
+  {rotulo && <p class="b-rotulo">{rotulo}</p>}
+  <ul>
+    {lista.map((i) => (
+      <li>
+        <input type="checkbox" disabled />
+        <span><b>{i.forte}</b> {i.resto}</span>
+      </li>
+    ))}
+  </ul>
+</div>
+<style>
+  ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  li { display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: start; color: var(--b-corpo); }
+  b { color: var(--b-tinta); }
+  input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--b-acento); }
+</style>

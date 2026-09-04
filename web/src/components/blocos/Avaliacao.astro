@@ -1,0 +1,31 @@
+---
+/** Bloco 12 — Avaliação (previsto).
+ * A pergunta é "isso respondeu sua dúvida?" e não "você gostou?", porque o
+ * valor está inteiro na fase 9. O "não" abre campo livre, e o campo livre é
+ * a saída mais valiosa do bloco. NUNCA emite AggregateRating: nota do próprio
+ * conteúdo, coletada por nós, é markup autosservido. */
+interface Props { pergunta?: string; ajuda?: string }
+const {
+  pergunta = "Isso respondeu sua dúvida?",
+  ajuda = "Respondendo “não”, abre um campo para você dizer o que faltou.",
+} = Astro.props;
+---
+<div class="b-card avaliacao">
+  <div>
+    <b>{pergunta}</b>
+    <div class="ajuda">{ajuda}</div>
+  </div>
+  <div class="botoes">
+    <button class="b-btn" type="button">Sim</button>
+    <button class="b-btn" type="button">Não</button>
+  </div>
+</div>
+<style>
+  .avaliacao {
+    padding: 18px 22px; display: flex; flex-wrap: wrap; gap: 14px;
+    align-items: center; justify-content: space-between;
+  }
+  b { color: var(--b-tinta); }
+  .ajuda { color: var(--b-tinta-2); font-size: 13.5px; margin-top: 3px; }
+  .botoes { display: flex; gap: 9px; }
+</style>

@@ -1,0 +1,134 @@
+---
+/** Bloco 22 — Autor (previsto). Duas variantes, um dado só.
+ *
+ * O dado é o `sites/<site>/base/AUTOR.md`, e as duas variantes leem o mesmo objeto
+ * de propósito: byline no topo e card no fim que divergem são a página dizendo
+ * duas coisas sobre quem escreveu, e o leitor que percebe a diferença perde a
+ * confiança nas duas.
+ *
+ *  - `circle`  o byline do topo, dentro da meta-faixa do cabeçalho: foto
+ *              pequena e nome, colados na data. Autoria e data são o par que o
+ *              leitor usa para decidir se confia, e por isso moram juntos.
+ *  - `card`    o fim do artigo, depois do fechamento: foto, nome, cargo e as
+ *              frases de credencial do `AUTOR.md`.
+ *
+ * As travas:
+ *
+ *  - campo faltando ou com `[DEFINIR]`, e o bloco NÃO NASCE. É o gate Autor da
+ *    fase 8 em tempo de render; a razão está em `autor.ts`.
+ *  - a foto sai com `alt=""` porque o nome está do lado, visível, no mesmo
+ *    componente. Repetir o nome no alt é o leitor de tela ouvindo duas vezes.
+ *    É a exceção declarada à regra de alt do bloco 19, e vale só aqui.
+ *  - o card tem UMA saída, e ela é a página do autor. CTA de produto aqui sem
+ *    declaração é o que o item 8 da raiz proíbe para link de afiliado e o que o
+ *    `base/EDITORIAL.md` proíbe para produto próprio, onde o site tem esse
+ *    arquivo; o texto fixo da declaração é o do `base/DECLARACOES.md`, e ele
+ *    mora na primeira menção no corpo, não aqui. E o fim do artigo já é o lugar
+ *    mais disputado da página.
+ *  - nada de contagem de seguidores, pela razão do bloco 14: número na tela sem
+ *    origem, e que não prova competência nenhuma.
+ */
+import { autorAssina, pendenciaDoAutor } from "../../autor";
+/* aliasado porque o componente já se chama Autor neste escopo, e o tipo com o
+   mesmo nome vira ambiguidade de identificador na build do Astro */
+import type { Autor as DadosDoAutor } from "../../autor";
+
+interface Props {
+  autor?: DadosDoAutor | null;
+  variante?: "circle" | "card";
+}
+const { autor, variante = "card" } = Astro.props;
+
+/* Não nascer é silencioso para o leitor e barulhento para quem constrói: a
+   build diz qual campo falta, que é a informação que o `null` perderia. */
+const pendencia = pendenciaDoAutor(autor);
+if (pendencia) console.warn(`[bloco 22] byline não nasce: ${pendencia}`);
+
+const a = autorAssina(autor) ? autor : null;
+const primeiroNome = a ? a.nome.trim().split(/\s+/)[0] : "";
+---
+
+{a && variante === "circle" && (
+  <span class="circle">
+    <img class="foto" src={a.image} alt="" width="22" height="22" loading="lazy" decoding="async" />
+    {/* Sem a página de autor no ar, o nome é texto. Link para 404 é pior que
+        ausência de link, e some sozinho no dia em que `perfil` chegar. */}
+    {a.perfil ? <a class="nome" href={a.perfil}>{a.nome}</a> : <span class="nome">{a.nome}</span>}
+  </span>
+)}
+
+{a && variante === "card" && (
+  <aside class="cartao b-card" aria-label={`Sobre ${a.nome}`}>
+    <img class="retrato" src={a.image} alt="" width="64" height="64" loading="lazy" decoding="async" />
+    <div class="quem">
+      <p class="linha-nome">
+        {a.perfil ? <a class="nome" href={a.perfil}>{a.nome}</a> : <b class="nome">{a.nome}</b>}
+        <span class="cargo">{a.jobTitle}</span>
+      </p>
+      <p class="bio">{a.description}</p>
+      {a.perfil && (
+        <a class="saida" href={a.perfil}>Todos os artigos de {primeiroNome} <span aria-hidden="true">→</span></a>
+      )}
+    </div>
+  </aside>
+)}
+
+<style>
+  /* ---- circle: um item da meta-faixa, e por isso veste a roupa dela ---- */
+  .circle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-tinta-2);
+  }
+  .circle .foto {
+    width: 22px; height: 22px; flex: none;
+    border-radius: 50%; object-fit: cover;
+    /* a borda separa a foto do fundo nos estilos claros, onde retrato de fundo
+       claro encosta na superfície e some */
+    border: 1px solid var(--b-linha);
+  }
+  .circle .nome { color: var(--b-tinta-2); text-decoration: none; }
+  .circle a.nome:hover { color: var(--b-acento-tinta); text-decoration: underline; }
+
+  /* ---- card: o fim do artigo ---- */
+  .cartao {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px;
+  }
+  .retrato {
+    width: 64px; height: 64px; flex: none;
+    border-radius: 50%; object-fit: cover;
+    border: 1px solid var(--b-linha);
+  }
+  .quem { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+  .linha-nome { margin: 0; display: flex; flex-direction: column; gap: 2px; }
+  .cartao .nome {
+    font-size: 15.5px; font-weight: 700; color: var(--b-tinta); text-decoration: none;
+  }
+  .cartao a.nome:hover { color: var(--b-acento-tinta); text-decoration: underline; }
+  .cargo {
+    font-family: var(--b-fonte-meta); font-size: 11.5px;
+    letter-spacing: var(--b-track-rotulo); color: var(--b-tinta-2);
+  }
+  .bio { margin: 0; font-size: 14.5px; line-height: 1.62; color: var(--b-corpo); max-width: 62ch; }
+  .saida {
+    font-family: var(--b-fonte-meta); font-size: 12px; font-weight: 600;
+    color: var(--b-acento-tinta); text-decoration: none; align-self: flex-start;
+  }
+  .saida:hover { text-decoration: underline; }
+
+  /* no celular a foto sobe para cima do nome: 64px ao lado de bio deixa a bio
+     com meia dúzia de palavras por linha */
+  @media (max-width: 480px) {
+    .cartao { flex-direction: column; gap: 12px; }
+  }
+</style>

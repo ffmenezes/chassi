@@ -1,0 +1,39 @@
+---
+/** Bloco 15 — Escute em áudio (derivado).
+ * Único dos previstos que é ganho de ACESSO e não de conveniência, e por isso
+ * NUNCA tem muro: ele toca na página, é a leitura acontecendo, e murar a
+ * leitura é murar o artigo. Voz sintética se declara. Sem transcrição embaixo:
+ * a transcrição é a página. */
+interface Props { titulo?: string; duracao: string; sintetica?: boolean }
+const { titulo = "Escute este artigo", duracao, sintetica = true } = Astro.props;
+const meta = sintetica
+  ? `${duracao} · locução em voz sintética, declarada no início`
+  : duracao;
+---
+<div class="b-card audio">
+  <button class="play" type="button" aria-label="Tocar a locução do artigo">▶</button>
+  <div class="txt">
+    <b>{titulo}</b>
+    <span>{meta}</span>
+  </div>
+  <div class="barra" role="presentation"></div>
+</div>
+<style>
+  .audio { padding: 16px 18px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .play {
+    width: 44px; height: 44px; border-radius: 50%; border: var(--b-borda);
+    background: var(--b-acento); color: var(--b-sobre-acento);
+    display: grid; place-items: center; flex: none; cursor: pointer; font-size: 15px;
+  }
+  .txt { flex: 1 1 200px; min-width: 150px; }
+  .txt b { display: block; font-size: 14.5px; color: var(--b-tinta); }
+  .txt span { color: var(--b-tinta-2); font-size: 12.5px; font-family: var(--b-fonte-meta); }
+  .barra {
+    flex: 1 1 160px; height: 4px; border-radius: 4px;
+    background: var(--b-linha); position: relative; min-width: 120px;
+  }
+  .barra::after {
+    content: ""; position: absolute; inset: 0 62% 0 0;
+    background: var(--b-acento); border-radius: 4px;
+  }
+</style>

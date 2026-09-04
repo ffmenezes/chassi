@@ -1,0 +1,91 @@
+/* ============================================================
+   CÉU — canvas de névoa, hairline, um azul só
+   ------------------------------------------------------------
+   Tokens do Bluesky. Três marcas do sistema deles:
+
+   1. Sombra nenhuma, em lugar nenhum. A borda de 1px é a ÚNICA
+      estrutura — o que flutua flutua por borda, não por eixo z.
+   2. Um acento cromático e só um. O resto é cinza frio, e o azul
+      existe para pontuar ação e link, nunca para decorar.
+   3. Hierarquia por PESO, não por caixa alta. Daí o único
+      `--b-caixa-rotulo: none` do repo: aqui o rótulo é o mesmo
+      texto em 700, e não a versão espaçada de si mesmo.
+
+   O escuro é derivação declarada: a referência é light-only. Foi
+   construído no mesmo eixo azul-acinzentado, e o #8798b0 dos
+   metadados atravessa os dois modos sem mudar.
+   ============================================================ */
+@layer estilo {
+[data-estilo="ceu"] {
+  --b-fonte-titulo: InterVariable, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --b-fonte-corpo: InterVariable, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* meta em sans, e não em mono: no sistema de origem o timestamp é o mesmo
+     Inter em outro peso. Código continua mono por `--b-fonte-codigo`, que é
+     semântica e não gosto. */
+  --b-fonte-meta: InterVariable, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* o peso É a hierarquia deste tema: 700 contra 400, sem tamanho no meio */
+  --b-peso-titulo: 700;
+  --b-titulo-track: -.02em;
+  /* 21px é o raio de card da referência, não arredondamento meu */
+  --b-radius: 21px;
+  --b-medida: 64ch;
+
+  /* rótulo sem caixa alta e sem tracking: a única diferença é o peso */
+  --b-caixa-rotulo: none;
+  --b-track-rotulo: .01em;
+
+  /* nada de profundidade — nem no hover, nem no que flutua */
+  --b-sombra: none;
+  --b-sombra-hover: none;
+  --b-lift: none;
+
+  /* régua sólida de um fio, sem cruz: divisor hairline é toda a marcenaria
+     que este sistema admite */
+  --b-regua-peso: 1px;
+  --b-regua-vao: 0px;
+  --b-esquina: 0px;
+}
+}
+
+@layer modo {
+[data-estilo="ceu"][data-modo="claro"] {
+  --b-fundo: #f9fafb;
+  --b-superficie: #ffffff;
+  /* preto puro, e com parcimônia: é o que a referência reserva para onde a
+     legibilidade máxima importa. O texto corrido não usa isto, usa o slate. */
+  --b-tinta: #000000;
+  --b-corpo: #405168;
+  /* o hazy steel #8798b0 da referência dá 2.9:1 sobre branco e reprova em AA.
+     Aqui ele desce no mesmo matiz até 4.9:1 — metadado de artigo longo é para
+     ser lido, não para ser sugerido. No escuro o #8798b0 original volta. */
+  --b-tinta-2: #61728a;
+  --b-linha: #dce2ea;
+  --b-linha-forte: #c5cfdc;
+  --b-acento: #006aff;
+  /* o #006aff fica em 4.4:1 e não passa em texto normal; a versão tinta desce */
+  --b-acento-tinta: #0059d6;
+  --b-acento-forte: #0050c0;
+  --b-acento-fraco: #e6f0ff;
+  --b-sobre-acento: #ffffff;
+  --b-erro: #c2263c;
+}
+}
+
+@layer modo {
+[data-estilo="ceu"][data-modo="escuro"] {
+  --b-fundo: #0f171f;
+  --b-superficie: #18222d;
+  --b-tinta: #f1f5f9;
+  --b-corpo: #c8d3e0;
+  --b-tinta-2: #8798b0;
+  --b-linha: #26323f;
+  --b-linha-forte: #37475a;
+  --b-acento: #4a9bff;
+  --b-acento-tinta: #4a9bff;
+  --b-acento-forte: #7fb8ff;
+  --b-acento-fraco: #10243d;
+  /* o azul claro pede tinta escura em cima, não branco */
+  --b-sobre-acento: #0a1119;
+  --b-erro: #ff8a94;
+}
+}

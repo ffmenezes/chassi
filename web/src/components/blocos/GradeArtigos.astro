@@ -1,0 +1,59 @@
+---
+/** N2 — Card de artigo. Chrome de site.
+ *
+ * A trava vem de fora: o item 16 da fase 7 manda tecer as irmãs DENTRO da
+ * prosa. O grid não revoga aquilo, porque um é navegacional e o outro é
+ * editorial — mas o que está no grid NÃO CONTA como link tecido.
+ *
+ * Título de FEED e não de SERP, porque quem olha card está navegando.
+ * `descricao` vem literal do meta.md, nunca dos 160 primeiros caracteres do
+ * corpo: com abertura em cena, texto truncado vira fragmento sem sentido.
+ * A data é a de dateModified, e é por ela que o leitor decide o clique. */
+export interface Artigo {
+  tituloFeed: string;
+  descricao: string;
+  atualizadoEm: string;
+  href: string;
+  temHero?: boolean;
+}
+interface Props { rotulo?: string; artigos: Artigo[] }
+const { rotulo, artigos } = Astro.props;
+---
+<div class="envolve">
+  {rotulo && <p class="b-rotulo">{rotulo}</p>}
+  <div class="grade">
+    {artigos.map((a) => (
+      <a class="b-card cartao" href={a.href}>
+        {/* sem hero, o card não tem slot de imagem: foto de banco é célula inventada */}
+        {a.temHero !== false && <span class="fig" aria-hidden="true">hero</span>}
+        <span class="corpo">
+          <span class="tit">{a.tituloFeed}</span>
+          <span class="desc">{a.descricao}</span>
+          <span class="data">atualizado em {a.atualizadoEm}</span>
+        </span>
+      </a>
+    ))}
+  </div>
+</div>
+<style>
+  /* o grid encolhe quando falta irmã publicada; não completa fileira */
+  .grade { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 680px) { .grade { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); } }
+  .cartao {
+    overflow: hidden; display: flex; flex-direction: column;
+    text-decoration: none; color: inherit; transition: transform .15s, box-shadow .15s;
+  }
+  .cartao:hover { box-shadow: var(--b-sombra-hover); transform: var(--b-lift); }
+  .fig {
+    height: 108px; background: var(--b-acento-fraco); display: grid; place-items: center;
+    color: var(--b-tinta-2); font-family: var(--b-fonte-meta); font-size: 11px;
+  }
+  .corpo { padding: 13px 15px 15px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .tit {
+    font-family: var(--b-fonte-titulo); font-weight: var(--b-peso-titulo);
+    font-size: 15.5px; line-height: 1.28; letter-spacing: var(--b-titulo-track);
+    color: var(--b-tinta);
+  }
+  .desc { color: var(--b-tinta-2); font-size: 13px; line-height: 1.5; flex: 1; }
+  .data { font-family: var(--b-fonte-meta); font-size: 11px; color: var(--b-tinta-2); }
+</style>

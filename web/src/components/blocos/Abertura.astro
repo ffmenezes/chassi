@@ -1,0 +1,17 @@
+---
+/** Bloco 1 — Abertura.
+ * Cena é permitida como veículo. O problema tem que estar enunciado até a
+ * segunda frase, e o teste é esse, não a ausência de cena. */
+interface Props { cena: string; problema: string }
+const { cena, problema } = Astro.props;
+---
+<div class="abertura">
+  <p class="b-p cena">{cena}</p>
+  <p class="b-p b-p--dim">{problema}</p>
+</div>
+<style>
+  /* A cena se destaca por corpo maior, e só. A primeira letra em peso de título
+     era capitular pela metade: aparecia como defeito de renderização, não como
+     escolha. */
+  .cena { font-size: 18px; }
+</style>

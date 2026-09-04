@@ -1,0 +1,59 @@
+---
+/** Bloco 14 — Card de rede social (previsto). Duas variantes, regras separadas.
+ *
+ * A, embed: o post É fonte, obedece à fase 3 inteira, e o texto citado vive no
+ * NOSSO HTML fora do iframe — o crawler não executa o embed, e o post pode ser
+ * apagado amanhã. Sustentar número em embed é generalização de n=1 por imagem.
+ *
+ * B, perfil: entra quando é lá que o leitor resolve o que o artigo não resolve.
+ * Contagem de seguidores não é prova de nada e não entra. */
+export interface Embed { autor: string; handle: string; data: string; texto: string; nota: string }
+export interface Perfil { titulo: string; motivo: string; ancora: string; href: string }
+interface Props { embed?: Embed; perfil?: Perfil }
+const { embed, perfil } = Astro.props;
+---
+<div class="social">
+  {embed && (
+    <figure class="b-card cartao">
+      <p class="b-rotulo">A · embed de post de terceiro</p>
+      <div class="cab">
+        <span class="av" aria-hidden="true"></span>
+        <span class="quem">
+          <b>{embed.autor}</b>
+          <span>{embed.handle} · {embed.data}</span>
+        </span>
+      </div>
+      <blockquote class="texto">{embed.texto}</blockquote>
+      <figcaption class="nota">{embed.nota}</figcaption>
+    </figure>
+  )}
+  {perfil && (
+    <div class="b-card cartao perfil">
+      <div>
+        <p class="b-rotulo">B · card de perfil</p>
+        <b class="tit">{perfil.titulo}</b>
+        <span class="motivo">{perfil.motivo}</span>
+      </div>
+      <a class="b-btn" href={perfil.href}>{perfil.ancora}</a>
+    </div>
+  )}
+</div>
+<style>
+  .social { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .social { grid-template-columns: 1fr 1fr; } }
+  .cartao { padding: 16px 18px; margin: 0; }
+  .cab { display: flex; gap: 10px; align-items: center; margin-bottom: 11px; }
+  .av { width: 34px; height: 34px; border-radius: 50%; background: var(--b-acento-fraco); flex: none; }
+  .quem { line-height: 1.25; }
+  .quem b { display: block; font-size: 14px; color: var(--b-tinta); }
+  .quem span { font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2); }
+  .texto { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--b-corpo); }
+  .nota {
+    margin-top: 10px; font-family: var(--b-fonte-meta);
+    font-size: 11.5px; color: var(--b-tinta-2);
+  }
+  .perfil { display: flex; flex-direction: column; gap: 11px; justify-content: space-between; }
+  .tit { display: block; margin-bottom: 4px; color: var(--b-tinta); }
+  .motivo { color: var(--b-tinta-2); font-size: 13.5px; }
+  .perfil .b-btn { align-self: flex-start; }
+</style>

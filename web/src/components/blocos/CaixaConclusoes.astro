@@ -1,0 +1,34 @@
+---
+/** Bloco 2 — Caixa de conclusões.
+ * Uma linha por conclusão, com o número dentro dela. A ressalva viaja junto
+ * com o número: é o item 15 da fase 7 aplicado na origem. */
+export interface Conclusao {
+  antes?: string;
+  numero?: string;
+  depois?: string;
+  ressalva?: string;
+}
+interface Props { rotulo?: string; itens: Conclusao[] }
+const { rotulo = "O que este artigo conclui", itens } = Astro.props;
+---
+<div class="b-card caixa">
+  <p class="b-rotulo">{rotulo}</p>
+  <ul>
+    {itens.map((c) => (
+      <li>
+        <span class="marca" aria-hidden="true"></span>
+        <span>
+          {c.antes}{c.numero && <span class="num">{c.numero}</span>}{c.depois}
+          {c.ressalva && <> <span class="b-ressalva">[{c.ressalva}]</span></>}
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>
+<style>
+  .caixa { padding: 20px 22px; }
+  ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  li { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; line-height: 1.55; color: var(--b-corpo); }
+  .marca { width: 6px; height: 6px; margin-top: 9px; border-radius: 2px; background: var(--b-acento); }
+  .num { font-weight: 700; color: var(--b-acento-tinta); font-variant-numeric: tabular-nums; }
+</style>

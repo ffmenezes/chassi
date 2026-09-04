@@ -1,0 +1,68 @@
+---
+/** Bloco 21 — Aviso.
+ *
+ * Aviso é sobre consequência que o leitor não consegue desfazer. Nada mais.
+ * A mesma caixa amarela do mercado serve para "cuidado, 220 V" e para "últimas
+ * vagas", e é por isso que aqui ela tem tipo fechado e fonte obrigatória.
+ *
+ * Não é `role="alert"`: alerta anuncia o que ACABOU de acontecer, e isto é
+ * texto que já estava na página quando ela carregou. Essa é a diferença entre
+ * este bloco e o N3.
+ */
+export type TipoAviso = "atencao" | "nota";
+
+export interface Props {
+  /** Dois tipos, e só dois. Um terceiro é o começo do enfeite. */
+  tipo: TipoAviso;
+  titulo: string;
+  texto: string;
+  /** Obrigatório em `atencao`: norma, manual ou lei, com data. */
+  fonte?: string;
+}
+const { tipo, titulo, texto, fonte } = Astro.props;
+
+if (tipo === "atencao" && !fonte) {
+  throw new Error(
+    `[bloco 21] aviso de atenção sem fonte. O risco carrega norma, manual ou ` +
+      `artigo de lei, com data — é o que a legenda da figura exige do número, ` +
+      `aplicado ao perigo.`
+  );
+}
+
+const ROTULO: Record<TipoAviso, string> = { atencao: "atenção", nota: "nota" };
+---
+
+<aside class="b-card aviso" data-tipo={tipo} aria-label={`${ROTULO[tipo]}: ${titulo}`}>
+  <p class="cab">
+    <span class="chip">{ROTULO[tipo]}</span>
+    <b class="titulo">{titulo}</b>
+  </p>
+  <p class="texto">{texto}</p>
+  {fonte && <p class="b-fonte fonte">{fonte}</p>}
+</aside>
+
+<style>
+  .aviso {
+    padding: 16px 18px;
+    max-width: var(--b-medida);
+    /* o tipo vira FORMA, não só cor: a faixa lateral distingue no print em
+       preto e branco e para quem não separa as duas cores */
+    border-left: 4px solid var(--b-tinta-2);
+  }
+  .aviso[data-tipo="atencao"] { border-left-color: var(--b-erro); }
+  .aviso[data-tipo="nota"] { border-left-style: dotted; border-left-color: var(--b-acento); }
+
+  .cab { display: flex; flex-wrap: wrap; gap: 9px; align-items: baseline; margin: 0 0 7px; }
+  .chip {
+    font-family: var(--b-fonte-meta);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: uppercase;
+    color: var(--b-tinta-2);
+  }
+  .aviso[data-tipo="atencao"] .chip { color: var(--b-erro); }
+  .titulo { color: var(--b-tinta); font-size: 15.5px; }
+  .texto { margin: 0; color: var(--b-corpo); font-size: 15px; line-height: 1.6; }
+  .fonte { margin-top: 9px; }
+</style>

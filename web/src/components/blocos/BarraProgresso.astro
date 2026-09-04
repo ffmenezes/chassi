@@ -1,0 +1,70 @@
+---
+/** N5 — Barra de progresso de leitura. Chrome de site.
+ *
+ * Ela mede o ARTIGO, não o documento: barra que chega a 100% enquanto o leitor
+ * ainda tem parágrafos, ou que fica em 70% quando o que sobra é rodapé e grade
+ * de cards, mente sobre quanto falta. É número na tela, e número na tela é
+ * honesto ou não aparece.
+ *
+ * E ELA NÃO DISPARA NADA. Nem overlay, nem enquete, nem pedido de e-mail. A
+ * barra de progresso é o lugar preferido do mercado para pendurar um gatilho de
+ * rolagem, e gatilho de rolagem é exatamente o que o N4 proíbe. Não haver
+ * callback aqui é a forma mais forte de manter a proibição.
+ */
+interface Props {
+  /** Seletor do elemento medido. O padrão é o artigo, nunca o documento. */
+  alvo?: string;
+  /** Distância do topo, para não cobrir cabeçalho fixo. */
+  topo?: string;
+}
+const { alvo = "article", topo = "0" } = Astro.props;
+---
+
+<div class="barra" aria-hidden="true" data-alvo={alvo} style={`--topo:${topo}`}>
+  <span class="preenche"></span>
+</div>
+
+<style>
+  .barra {
+    position: fixed; top: var(--topo); left: 0; right: 0; height: 3px;
+    z-index: 60; pointer-events: none;
+    background: color-mix(in srgb, var(--b-tinta) 8%, transparent);
+  }
+  .preenche {
+    display: block; height: 100%; width: 0;
+    background: var(--b-acento);
+    transform-origin: left;
+    transition: width .08s linear;
+  }
+  @media (prefers-reduced-motion: reduce) { .preenche { transition: none; } }
+</style>
+
+<script>
+  for (const barra of document.querySelectorAll<HTMLElement>(".barra[data-alvo]")) {
+    const alvo = document.querySelector<HTMLElement>(barra.dataset.alvo!);
+    const preenche = barra.querySelector<HTMLElement>(".preenche")!;
+    if (!alvo) { barra.remove(); continue; }
+
+    let pedido = 0;
+
+    function medir() {
+      pedido = 0;
+      const caixa = alvo!.getBoundingClientRect();
+      const alturaJanela = window.innerHeight;
+      /* percorrido = do topo do artigo até o fim dele.
+         O que sobra depois (rodapé, grade de cards) não é artigo e não conta. */
+      const total = caixa.height - alturaJanela;
+      const andado = -caixa.top;
+      const pct = total <= 0 ? (caixa.bottom <= alturaJanela ? 1 : 0) : andado / total;
+      preenche.style.width = `${Math.min(1, Math.max(0, pct)) * 100}%`;
+    }
+
+    function agendar() {
+      if (!pedido) pedido = requestAnimationFrame(medir);
+    }
+
+    addEventListener("scroll", agendar, { passive: true });
+    addEventListener("resize", agendar);
+    medir();
+  }
+</script>

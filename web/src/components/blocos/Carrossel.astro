@@ -1,0 +1,94 @@
+---
+/** Bloco 13 — Carrossel (previsto).
+ * O mais perigoso: esconde conteúdo por desenho. Então a rolagem é CSS, todos
+ * os slides existem no HTML inicial, e cada legenda funciona sozinha para quem
+ * só viu o slide três. Não entra no schema.json. */
+export interface Slide { titulo: string; legenda: string; fig?: string }
+interface Props { rotulo?: string; slides: Slide[] }
+const { rotulo, slides } = Astro.props;
+---
+<div class="envolve">
+  {rotulo && <p class="b-rotulo">{rotulo}</p>}
+  <div class="carrossel" role="group" aria-label={rotulo ?? "Sequência de imagens"}>
+    {slides.map((s) => (
+      <figure class="b-card slide">
+        <div class="fig" aria-hidden="true">{s.fig ?? "imagem"}</div>
+        <figcaption class="leg"><b>{s.titulo}</b>{s.legenda}</figcaption>
+      </figure>
+    ))}
+  </div>
+</div>
+<style>
+  .carrossel {
+    display: flex; gap: 14px; overflow-x: auto; padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+    /* no dedo o arrasto é nativo; o cursor só muda onde há mouse */
+    overscroll-behavior-x: contain;
+  }
+  .carrossel.arrastavel { cursor: grab; }
+  .carrossel.arrastando { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+  .carrossel.arrastando .fig,
+  .carrossel.arrastando .leg { pointer-events: none; }
+  .slide { flex: 0 0 min(74%, 260px); scroll-snap-align: start; overflow: hidden; margin: 0; }
+  .fig {
+    height: 118px; background: var(--b-acento-fraco);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--b-tinta-2); font-family: var(--b-fonte-meta); font-size: 11px;
+  }
+  .leg { padding: 12px 14px; font-size: 13.5px; line-height: 1.5; color: var(--b-corpo); }
+  .leg b { display: block; margin-bottom: 3px; color: var(--b-tinta); }
+</style>
+
+<script>
+  /* Arrastar com o mouse. É melhoria progressiva: sem JS o carrossel continua
+     rolando por dedo, trackpad, roda e teclado, e nenhum slide fica escondido —
+     todos já estão no HTML inicial. */
+  for (const el of document.querySelectorAll<HTMLElement>(".carrossel")) {
+    el.classList.add("arrastavel");
+
+    let ativo = false;
+    let arrastou = false;
+    let x0 = 0;
+    let scroll0 = 0;
+
+    el.addEventListener("pointerdown", (e) => {
+      /* no toque o navegador já faz, e melhor: não sequestramos */
+      if (e.pointerType === "touch") return;
+      if (e.button !== 0) return;
+      ativo = true;
+      arrastou = false;
+      x0 = e.clientX;
+      scroll0 = el.scrollLeft;
+      el.setPointerCapture(e.pointerId);
+      el.classList.add("arrastando");
+    });
+
+    el.addEventListener("pointermove", (e) => {
+      if (!ativo) return;
+      const d = e.clientX - x0;
+      if (Math.abs(d) > 3) arrastou = true;
+      el.scrollLeft = scroll0 - d;
+    });
+
+    const soltar = (e: PointerEvent) => {
+      if (!ativo) return;
+      ativo = false;
+      el.classList.remove("arrastando");
+      if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+    };
+    el.addEventListener("pointerup", soltar);
+    el.addEventListener("pointercancel", soltar);
+
+    /* arrastar não pode virar clique num link dentro do slide */
+    el.addEventListener(
+      "click",
+      (e) => {
+        if (!arrastou) return;
+        e.preventDefault();
+        e.stopPropagation();
+        arrastou = false;
+      },
+      true
+    );
+  }
+</script>

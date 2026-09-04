@@ -1,0 +1,128 @@
+---
+/** Bloco 24 — Oferta de isca.
+ *
+ * O convite para o leitor levar embora um arquivo nosso, em troca do e-mail dele.
+ * Regra integral em `.claude/skills/artigo/referencias/arquitetura-pagina.md`.
+ *
+ * É o único bloco do catálogo cuja razão de existir é comercial, e por isso é o
+ * que tem mais trava por linha. As que viram código aqui:
+ *
+ *  - **fica no fechamento**, e o componente não impede sozinho que alguém o
+ *    coloque no topo, então a trava real é a arquitetura do esqueleto. O que ele
+ *    faz é não parecer um banner: sem escassez, sem contagem, sem selo.
+ *  - **a promessa é literal**, e o que chega, com que frequência e como sair
+ *    estão na mesma tela, vindos de `src/consentimento.ts`.
+ *  - **sem contagem de downloads.** Não existe prop para isso, de propósito.
+ *  - **é `<form method="post">` de verdade**, então funciona sem JavaScript. Só o
+ *    Turnstile precisa de script, e sem ele o formulário é recusado pelo servidor
+ *    em vez de aceitar em silêncio.
+ *
+ * O que ele NÃO renderiza: a declaração de produto da casa. Ela é texto fixo de
+ * `base/DECLARACOES.md` e mora no corpo, na primeira menção. Disclosure embutido
+ * no componente é disclosure que ninguém revisa.
+ */
+import { CONSENTIMENTO_ISCA, PROMESSA_DA_ISCA } from "../../consentimento";
+
+export interface Props {
+  /** Chave da isca no catálogo fechado de `functions/api/isca.ts`. */
+  isca: string;
+  /** Slug do site, para o remetente sair do domínio certo. */
+  site: string;
+  /** O que é o arquivo, em substantivo concreto. Nunca "seu material". */
+  titulo: string;
+  /** Contagem, formato e aplicação. É o que POSTURAS exige da promessa. */
+  promessa: string;
+  /** O texto do botão diz o que ele entrega. "Enviar" e "Quero" não dizem nada. */
+  ancora: string;
+}
+const { isca, site, titulo, promessa, ancora } = Astro.props;
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
+
+const erro = (m: string) => {
+  throw new Error(`[bloco 24] ${m}`);
+};
+
+/* A promessa precisa carregar número. "Se o número não puder ser dito, a isca não
+   está pronta" é regra do base/POSTURAS.md, e ela quebra a build aqui em vez de
+   virar item de revisão. */
+if (!/\d/.test(promessa)) {
+  erro(
+    `promessa sem número: ${JSON.stringify(promessa)}. Contagem, formato e aplicação. ` +
+      `Se o número não puder ser dito, a isca não está pronta.`,
+  );
+}
+if (/\b(?:faturamento|faturar|lucro|renda|ganhe|ganhar)\b/i.test(`${titulo} ${promessa} ${ancora}`)) {
+  erro(`promessa financeira na oferta. Regra inegociável da postura isca.`);
+}
+if (/\b(?:últim|vagas?|agora|corre|expira|somente hoje|por tempo)\b/i.test(`${titulo} ${promessa} ${ancora}`)) {
+  erro(`escassez na oferta. O arquivo é o mesmo amanhã.`);
+}
+---
+
+<aside class="b-card oferta">
+  <p class="b-rotulo">Leve a conta com você</p>
+  <h3 class="titulo">{titulo}</h3>
+  <p class="promessa">{promessa}</p>
+
+  <form method="post" action="/api/isca">
+    <input type="hidden" name="isca" value={isca} />
+    <input type="hidden" name="site" value={site} />
+    {/* campo-armadilha, invisível para gente e irresistível para robô */}
+    <input type="text" name="website" tabindex="-1" autocomplete="off" class="armadilha" aria-hidden="true" />
+
+    <div class="linha">
+      <label for={`isca-email-${isca}`}>Seu e-mail</label>
+      <input
+        id={`isca-email-${isca}`}
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        maxlength="254"
+        placeholder="voce@exemplo.com.br"
+      />
+    </div>
+
+    <p class="consent">{CONSENTIMENTO_ISCA}</p>
+    <p class="b-ressalva">{PROMESSA_DA_ISCA}</p>
+
+    {sitekey && <div class="cf-turnstile" data-sitekey={sitekey}></div>}
+
+    <button class="b-btn b-btn--forte" type="submit">{ancora}</button>
+  </form>
+
+  <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+</aside>
+
+<style>
+  .oferta { padding: 20px 22px; max-width: var(--b-medida); }
+  .titulo {
+    font-family: var(--b-fonte-titulo);
+    font-weight: var(--b-peso-titulo);
+    letter-spacing: var(--b-titulo-track);
+    font-size: 19px;
+    color: var(--b-tinta);
+    margin: 0 0 5px;
+  }
+  .promessa { color: var(--b-corpo); font-size: 14.5px; line-height: 1.6; margin: 0 0 16px; }
+
+  .armadilha { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+  .linha { display: flex; flex-direction: column; gap: 5px; max-width: 30em; }
+  label { font-size: 13.5px; color: var(--b-corpo); }
+  input[type="email"] {
+    padding: 10px 12px;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    background: var(--b-fundo);
+    color: var(--b-tinta);
+    width: 100%;
+  }
+  input[type="email"]:hover { border-color: var(--b-acento); }
+
+  .consent { margin: 12px 0 4px; font-size: 13px; color: var(--b-corpo); }
+  .b-ressalva { display: block; margin-bottom: 14px; }
+
+  .cf-turnstile { margin-bottom: 14px; }
+  button { margin-top: 2px; }
+</style>

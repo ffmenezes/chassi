@@ -1,0 +1,40 @@
+---
+/** Casca mínima. Só o que toda página precisa. */
+import "../styles/base.css";
+import "../styles/estilos/index.css";
+import "../styles/atomos.css";
+
+interface Props {
+  titulo: string;
+  descricao?: string;
+  lang?: string;
+  /** Página de serviço, que existe para quem já está no site e não para busca. */
+  noindex?: boolean;
+}
+const { titulo, descricao, lang = "pt-BR", noindex = false } = Astro.props;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/*
+      A ordem das camadas é decidida AQUI, antes de qualquer folha entrar.
+
+      Camada é ordenada por primeira aparição, e em desenvolvimento o Vite
+      injeta as folhas depois do HTML da página — então declarar a ordem só
+      dentro de base.css fazia `site` aparecer primeiro e PERDER, com o sintoma
+      clássico: "mexi no token do site e nada mudou".
+
+      `is:inline` para o Astro não processar nem mover este bloco.
+    */}
+    <style is:inline>@layer contrato, estilo, modo, site;</style>
+    <title>{titulo}</title>
+    {descricao && <meta name="description" content={descricao} />}
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🧱</text></svg>" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

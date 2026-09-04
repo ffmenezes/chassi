@@ -1,0 +1,130 @@
+---
+/** N4 — Overlay de tela cheia. Chrome de site.
+ *
+ * É o único componente do catálogo com custo de ranqueamento documentado: o
+ * Google trata como *intrusive interstitial* o painel que cobre o conteúdo
+ * principal logo depois de o leitor chegar pela busca, e é sinal negativo
+ * declarado desde janeiro de 2017.
+ *
+ * A trava que define o bloco:
+ *
+ *   O overlay é o recipiente de uma ação que o leitor começou.
+ *   Nunca a interrupção de uma que ele não começou.
+ *
+ * Por isso este componente NÃO expõe gatilho de tempo, rolagem, saída de mouse
+ * ou entrada. Ele abre por `data-abre-overlay="<id>"` num controle que anuncia
+ * o que vai abrir, e só.
+ *
+ * E é <dialog> pelo mesmo motivo que a FAQ é <details>: o elemento já traz
+ * trava de foco, Esc, camada de topo e semântica de diálogo. Reimplementar em
+ * div perde as quatro de uma vez, começando pela que menos se testa, o teclado.
+ */
+interface Props {
+  id: string;
+  rotulo?: string;
+  titulo: string;
+  texto: string;
+  ancoraPrimaria: string;
+  ancoraSecundaria?: string;
+  /** Vale a mesma promessa do muro: literal, com saída em um clique. */
+  pedeEmail?: boolean;
+}
+const {
+  id,
+  rotulo,
+  titulo,
+  texto,
+  ancoraPrimaria,
+  ancoraSecundaria = "Agora não",
+  pedeEmail = false,
+} = Astro.props;
+const tituloId = `${id}-titulo`;
+---
+
+<dialog class="dlg" id={id} aria-labelledby={tituloId}>
+  <div class="veu">
+    <div class="b-card painel">
+      <button class="fechar" type="button" data-fecha-overlay aria-label="Fechar">✕</button>
+      {rotulo && <p class="b-rotulo">{rotulo}</p>}
+      <h2 class="tit" id={tituloId}>{titulo}</h2>
+      <p class="txt">{texto}</p>
+      {pedeEmail && (
+        <input class="campo" type="email" placeholder="seu@email.com" aria-label="Seu e-mail" />
+      )}
+      <div class="acoes">
+        <button class="b-btn b-btn--forte" type="button" data-fecha-overlay>{ancoraPrimaria}</button>
+        <button class="b-btn" type="button" data-fecha-overlay>{ancoraSecundaria}</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .dlg {
+    border: 0; padding: 0; background: transparent;
+    width: 100%; height: 100%; max-width: 100%; max-height: 100%;
+    overflow: hidden;
+  }
+  .dlg::backdrop { background: rgba(8, 8, 12, .62); backdrop-filter: blur(5px); }
+  .veu { position: fixed; inset: 0; display: grid; place-items: center; padding: 20px; }
+  .painel { max-width: 460px; width: 100%; padding: 24px; position: relative; }
+  .tit {
+    font-family: var(--b-fonte-titulo); font-weight: var(--b-peso-titulo);
+    font-size: 21px; letter-spacing: var(--b-titulo-track);
+    margin: 0 0 9px; line-height: 1.22; color: var(--b-tinta);
+  }
+  .txt { margin: 0 0 16px; color: var(--b-corpo); font-size: 14.5px; line-height: 1.6; }
+  .acoes { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .fechar {
+    position: absolute; top: 12px; right: 12px; width: 30px; height: 30px;
+    display: grid; place-items: center; border-radius: 50%; cursor: pointer;
+    background: transparent; border: var(--b-borda); color: var(--b-tinta); font-size: 15px;
+  }
+  .campo {
+    width: 100%; padding: 11px 13px; margin-bottom: 11px; font-size: 14.5px;
+    border: var(--b-borda); border-radius: var(--b-radius);
+    background: var(--b-fundo); color: var(--b-tinta);
+  }
+</style>
+
+<script>
+  /* Abre por clique num controle que anuncia o destino. Não existe gatilho de
+     entrada, tempo, rolagem, saída do mouse ou segunda visita: esses são os
+     proibidos, e não estar implementado é a forma mais forte de proibir. */
+  const abertoPor = new WeakMap<HTMLDialogElement, HTMLElement>();
+
+  document.addEventListener("click", (ev) => {
+    const alvo = ev.target as HTMLElement | null;
+    if (!alvo?.closest) return;
+
+    const gatilho = alvo.closest<HTMLElement>("[data-abre-overlay]");
+    if (gatilho) {
+      const id = gatilho.getAttribute("data-abre-overlay");
+      const dlg = id ? document.getElementById(id) : null;
+      if (dlg instanceof HTMLDialogElement) {
+        abertoPor.set(dlg, gatilho);
+        dlg.showModal();
+        document.body.style.overflow = "hidden";
+      }
+      return;
+    }
+
+    const fecha = alvo.closest("[data-fecha-overlay]");
+    if (fecha) fecha.closest("dialog")?.close();
+  });
+
+  /* Fecha por três caminhos: o botão acima, o Esc que o <dialog> já entrega,
+     e o clique fora — que é o clique no véu, nunca no painel. */
+  document.querySelectorAll<HTMLDialogElement>("dialog.dlg").forEach((dlg) => {
+    dlg.addEventListener("click", (ev) => {
+      const alvo = ev.target as HTMLElement;
+      if (!alvo.closest(".painel")) dlg.close();
+    });
+    /* Fechar devolve o leitor exatamente onde ele estava. */
+    dlg.addEventListener("close", () => {
+      document.body.style.overflow = "";
+      abertoPor.get(dlg)?.focus();
+      abertoPor.delete(dlg);
+    });
+  });
+</script>

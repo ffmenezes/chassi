@@ -1,0 +1,99 @@
+/* ============================================================
+   VIDRO — translúcido sobre aurora
+   ------------------------------------------------------------
+   Tokens da ibe.ia.br. A aurora não é enfeite: sem ela o blur
+   não tem o que borrar e a superfície vira cinza chapado.
+   ============================================================ */
+@layer estilo {
+[data-estilo="vidro"] {
+  --b-fonte-titulo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --b-fonte-corpo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --b-fonte-meta: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --b-peso-titulo: 700;
+  --b-titulo-track: -.02em;
+  --b-radius: 18px;
+  --b-blur: blur(14px) saturate(180%);
+  --b-medida: 68ch;
+  --b-track-rotulo: .12em;
+  /* traço mais curto e vão maior: sobre a aurora, o tracejado do tecnológico
+     vira cerca. Aqui ele precisa ser quase um sussurro. */
+  --b-regua-traco: 3px;
+  --b-regua-vao: 5px;
+  --b-esquina: 7px;
+  position: relative;
+  isolation: isolate;
+}
+}
+
+@layer modo {
+[data-estilo="vidro"][data-modo="claro"] {
+  --b-fundo: #eef1f8;
+  --b-superficie: rgba(255, 255, 255, .58);
+  --b-tinta: #0f172a;
+  --b-corpo: #26314a;
+  --b-tinta-2: #5b6779;
+  --b-linha: rgba(15, 23, 42, .10);
+  --b-linha-forte: rgba(15, 23, 42, .20);
+  --b-acento: #00897a;
+  --b-acento-tinta: #00655a;
+  --b-acento-forte: #00655a;
+  --b-acento-fraco: rgba(0, 137, 122, .10);
+  --b-sombra: 0 8px 30px rgba(15, 23, 42, .10);
+  --b-sobre-acento: #ffffff;
+  --b-erro: #c8372d;
+  --b-aurora:
+    radial-gradient(56% 42% at 12% 8%, rgba(0, 137, 122, .16), transparent 62%),
+    radial-gradient(48% 40% at 88% 22%, rgba(99, 102, 241, .16), transparent 64%),
+    radial-gradient(60% 50% at 60% 100%, rgba(14, 165, 233, .13), transparent 66%);
+}
+}
+
+@layer modo {
+[data-estilo="vidro"][data-modo="escuro"] {
+  --b-fundo: #08080e;
+  --b-superficie: rgba(255, 255, 255, .055);
+  --b-tinta: #fbf9f4;
+  --b-corpo: #e6e4ec;
+  --b-tinta-2: #a8a8b3;
+  --b-linha: rgba(255, 255, 255, .12);
+  --b-linha-forte: rgba(255, 255, 255, .22);
+  --b-acento: #00e5cc;
+  --b-acento-tinta: #00e5cc;
+  --b-acento-forte: #5cf5e2;
+  --b-acento-fraco: rgba(0, 229, 204, .12);
+  --b-sombra: 0 8px 32px rgba(0, 0, 0, .38);
+  --b-sobre-acento: #08080e;
+  --b-erro: #ff6b6b;
+  --b-aurora:
+    radial-gradient(56% 42% at 12% 8%, rgba(0, 229, 204, .20), transparent 62%),
+    radial-gradient(48% 40% at 88% 22%, rgba(94, 92, 230, .24), transparent 64%),
+    radial-gradient(60% 50% at 60% 100%, rgba(0, 140, 190, .16), transparent 66%);
+}
+}
+
+[data-estilo="vidro"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+[data-estilo="vidro"][data-modo="escuro"]::before {
+  background:
+    radial-gradient(56% 42% at 12% 8%, rgba(0, 229, 204, .20), transparent 62%),
+    radial-gradient(48% 40% at 88% 22%, rgba(94, 92, 230, .24), transparent 64%),
+    radial-gradient(60% 50% at 60% 100%, rgba(0, 140, 190, .16), transparent 66%);
+}
+
+[data-estilo="vidro"][data-modo="claro"]::before {
+  background:
+    radial-gradient(56% 42% at 12% 8%, rgba(0, 137, 122, .16), transparent 62%),
+    radial-gradient(48% 40% at 88% 22%, rgba(99, 102, 241, .16), transparent 64%),
+    radial-gradient(60% 50% at 60% 100%, rgba(14, 165, 233, .13), transparent 66%);
+}
+
+@layer estilo {
+/* o conteúdo sobe acima da aurora */
+[data-estilo="vidro"] > * { position: relative; z-index: 1; }
+}

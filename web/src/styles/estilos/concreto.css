@@ -1,0 +1,65 @@
+/* ============================================================
+   CONCRETO — borda grossa, sombra dura, zero blur
+   ------------------------------------------------------------
+   Tokens da certfique.com.br: borda 2px na cor da tinta, sombra
+   sem desfoque, e hover que desloca a peça para dentro da sombra.
+   ============================================================ */
+@layer estilo {
+[data-estilo="concreto"] {
+  --b-fonte-titulo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --b-fonte-corpo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --b-fonte-meta: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --b-peso-titulo: 900;
+  --b-titulo-track: -.02em;
+  --b-radius: 12px;
+  --b-borda: 2px solid var(--b-linha);
+  --b-sombra: 4px 4px 0 var(--b-sombra-cor);
+  --b-sombra-hover: 6px 6px 0 var(--b-sombra-cor);
+  --b-lift: translate(-2px, -2px);
+  --b-medida: 70ch;
+  /* aqui a régua é traço grosso e sólido, do mesmo peso da borda dos cards.
+     Tracejado neste tema lê como rascunho, e o sistema de origem não rascunha.
+     A cor vem de graça: neste tema `--b-linha` já é a tinta cheia. */
+  --b-regua-peso: 2px;
+  --b-regua-vao: 0px;
+}
+}
+
+@layer modo {
+[data-estilo="concreto"][data-modo="claro"] {
+  --b-fundo: #fafafa;
+  --b-superficie: #ffffff;
+  --b-tinta: #1d1b4b;
+  --b-corpo: #24224f;
+  --b-tinta-2: #5b5a80;
+  --b-linha: #1d1b4b;
+  --b-linha-forte: #1d1b4b;
+  --b-sombra-cor: #1d1b4b;
+  --b-acento: #7c4dee;
+  --b-acento-tinta: #5b2fd0;
+  --b-acento-forte: #5b2fd0;
+  --b-acento-fraco: #efe9ff;
+  --b-sobre-acento: #ffffff;
+  --b-erro: #d92d20;
+}
+}
+
+@layer modo {
+[data-estilo="concreto"][data-modo="escuro"] {
+  --b-fundo: #100f24;
+  --b-superficie: #1b1943;
+  --b-tinta: #f4f3ff;
+  --b-corpo: #dedcf5;
+  --b-tinta-2: #9d9ac9;
+  --b-linha: #f4f3ff;
+  --b-linha-forte: #f4f3ff;
+  /* a sombra vira roxa no escuro: é o --shadow-brutal-primary do sistema deles */
+  --b-sombra-cor: #a78bfa;
+  --b-acento: #a78bfa;
+  --b-acento-tinta: #c4b5fd;
+  --b-acento-forte: #c4b5fd;
+  --b-acento-fraco: #2a2563;
+  --b-sobre-acento: #100f24;
+  --b-erro: #ff8a80;
+}
+}

@@ -1,0 +1,14 @@
+# Cloudflare Pages: o site estático mais as Functions de `functions/`.
+#
+# Nenhum segredo mora aqui. O único que o v0 usa é o do Turnstile, e ele entra
+# por `wrangler pages secret put TURNSTILE_SECRET`. A chave PÚBLICA do
+# Turnstile é outra coisa: vai no HTML, então é variável de BUILD
+# (`PUBLIC_TURNSTILE_SITEKEY`) no painel do Pages. Sem ela o formulário sai sem
+# anti-spam, de propósito — ver o README.
+#
+# D1 (comentários) e Resend (newsletter) chegam nas aulas 5 e 6, pelo
+# `scripts/atualizar`.
+
+name = "meu-blog"
+compatibility_date = "2026-08-15"
+pages_build_output_dir = "dist"

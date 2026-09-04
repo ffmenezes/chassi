@@ -1,0 +1,502 @@
+---
+/**
+ * Um artigo inteiro, o MESMO nos cinco temas.
+ *
+ * A rota é por tema e não por site de propósito: assim a única variável entre
+ * /exemplo/linho e /exemplo/concreto é o tema, e dá para julgar a diferença
+ * sem que o conteúdo mude junto. Quem mapeia site → tema é `src/sites/index.ts`.
+ *
+ * Quem monta a página são os mesmos componentes da bancada. Nada aqui é cópia:
+ * se um bloco muda, muda nos dois lugares.
+ *
+ * O texto é LOREM IPSUM, de `mock/lorem.ts`, e isso é decisão e não preguiça:
+ * conteúdo verossímil prende o olho no assunto, e aqui o que está em julgamento
+ * é tipografia, ritmo e densidade. O conteúdo com cara de real fica na bancada,
+ * onde ele tem outro trabalho — provar que cada slot da doutrina cabe.
+ *
+ * Em troca, cada elemento se identifica. A <Etiqueta> envolve o elemento e diz,
+ * no hover, número de catálogo, nome em português e componente; o próprio texto
+ * do slot diz o que ele é ("Ressalva —", "Fonte e data —"). A chave da barra de
+ * prévia fixa todas as etiquetas, para varrer o mapa de uma vez.
+ */
+import Base from "../../layouts/Base.astro";
+import { ESTILOS, SITES, cssDoSite } from "../../sites";
+import type { Estilo } from "../../sites";
+import "../../styles/chrome.css";
+
+import Abertura from "../../components/blocos/Abertura.astro";
+import CaixaConclusoes from "../../components/blocos/CaixaConclusoes.astro";
+import Sumario from "../../components/blocos/Sumario.astro";
+import TabelaPanorama from "../../components/blocos/TabelaPanorama.astro";
+import TabelaContraste from "../../components/blocos/TabelaContraste.astro";
+import CitacaoDestacada from "../../components/blocos/CitacaoDestacada.astro";
+import CitacaoFonte from "../../components/blocos/CitacaoFonte.astro";
+import Checklist from "../../components/blocos/Checklist.astro";
+import Faq from "../../components/blocos/Faq.astro";
+import Fechamento from "../../components/blocos/Fechamento.astro";
+import Figura from "../../components/blocos/Figura.astro";
+import Codigo from "../../components/blocos/Codigo.astro";
+import Aviso from "../../components/blocos/Aviso.astro";
+import Enquete from "../../components/blocos/Enquete.astro";
+import Avaliacao from "../../components/blocos/Avaliacao.astro";
+import Carrossel from "../../components/blocos/Carrossel.astro";
+import CardRedeSocial from "../../components/blocos/CardRedeSocial.astro";
+import Audio from "../../components/blocos/Audio.astro";
+import Download from "../../components/blocos/Download.astro";
+import GradeArtigos from "../../components/blocos/GradeArtigos.astro";
+import Overlay from "../../components/blocos/Overlay.astro";
+import BarraProgresso from "../../components/blocos/BarraProgresso.astro";
+import Comentarios from "../../components/blocos/Comentarios.astro";
+import Autor from "../../components/blocos/Autor.astro";
+import DiagramaDemo from "../../components/blocos/_DiagramaDemo.astro";
+import Etiqueta from "../../components/Etiqueta.astro";
+import CabecalhoArtigo from "../../components/CabecalhoArtigo.astro";
+import Titulo from "../../components/Titulo.astro";
+
+import * as m from "../../mock/lorem";
+
+export function getStaticPaths() {
+  return (Object.keys(ESTILOS) as Estilo[]).map((estilo) => ({ params: { estilo } }));
+}
+
+const { estilo } = Astro.params as { estilo: Estilo };
+const tema = ESTILOS[estilo];
+const temas = Object.keys(ESTILOS) as Estilo[];
+/* quais sites hoje apontam para este tema */
+const usam = Object.values(SITES).filter((s) => s.estilo === estilo);
+/* a terceira camada: o desvio declarado de cada site que usa este tema.
+   Sai como <style> na camada `site`, que vence sem depender de especificidade. */
+const desvios = usam.map(cssDoSite).filter(Boolean).join("");
+
+const titulo = m.titulo;
+/* headings e sumário saem da mesma lista: ver o comentário em mock/lorem.ts */
+const sec = Object.fromEntries(m.secoes.map((x) => [x.id, x]));
+---
+
+<Base
+  titulo={`${titulo} — tema ${tema.nome}`}
+  descricao="O mesmo artigo, renderizado em cada tema. Só o tema muda."
+>
+  <div class="previa">
+    <div class="previa-in">
+      <span class="previa-rot">tema</span>
+      <div class="seg" role="group" aria-label="Trocar de tema">
+        {temas.map((e) => (
+          <a href={`/exemplo/${e}/`} aria-current={e === estilo ? "page" : undefined}>
+            <span class="ponto" style={`background:${ESTILOS[e].acento}`}></span>
+            {ESTILOS[e].nome}
+          </a>
+        ))}
+      </div>
+      <div class="seg" role="group" aria-label="Trocar de modo">
+        <button type="button" data-modo-btn="claro" aria-pressed="true">Claro</button>
+        <button type="button" data-modo-btn="escuro" aria-pressed="false">Escuro</button>
+      </div>
+      {usam.length > 0 && (
+        <div class="seg" role="group" aria-label="Aplicar desvio de site">
+          <button type="button" data-site-btn="" aria-pressed="true">Sem desvio</button>
+          {usam.map((s) => (
+            <button type="button" data-site-btn={s.slug} aria-pressed="false">{s.nome}</button>
+          ))}
+        </div>
+      )}
+      {usam.length === 0 && (
+        <span class="previa-nota">nenhum site usa este tema ainda</span>
+      )}
+      {/* por padrão a etiqueta só aparece no hover do elemento: trinta e quatro
+          rótulos permanentes viram a página em legenda. Fixar serve para varrer
+          o mapa inteiro de uma vez. */}
+      <label class="chave">
+        <input type="checkbox" id="ver-etiquetas" />
+        Fixar etiquetas
+      </label>
+      {/* a régua é token, então dá para desligá-la sem tocar no markup: é o
+          mesmo `--b-regua-peso: 0` que o tema usaria para dispensá-la. Aqui a
+          chave existe para julgar a página com e sem, lado a lado. */}
+      <label class="chave">
+        <input type="checkbox" id="ver-regua" checked />
+        Réguas
+      </label>
+      <a class="previa-link" href="/bancada/">ver a bancada &rarr;</a>
+    </div>
+  </div>
+
+  {desvios && <style set:html={desvios} />}
+
+  <div class="pagina" data-estilo={estilo} data-modo="claro">
+    {/* mede o <article>, nunca o documento: o rodapé e a grade não são artigo */}
+    <BarraProgresso alvo="article.artigo" />
+    <div class="colunas">
+      {/* as verticais emolduram a coluna de leitura; a do trilho separa artigo
+          de sumário e some sozinha no celular, junto com o trilho */}
+      <article class="artigo b-regua-lados">
+        <Etiqueta bloco="N5" nome="Barra de progresso, fixa no topo" codigo="BarraProgresso.astro" ancorado />
+
+        <Etiqueta nome="Cabeçalho do artigo — selo, título, linha de meta com o byline" codigo="CabecalhoArtigo.astro">
+          <CabecalhoArtigo
+            selo={`Selo — ${tema.origem}`}
+            titulo={titulo}
+            atualizado={m.atualizado}
+            minutos={m.minutos}
+            autor={m.autor}
+          />
+        </Etiqueta>
+
+        <Etiqueta bloco={1} nome="Abertura" codigo="Abertura.astro">
+          <Abertura {...m.abertura} />
+        </Etiqueta>
+
+        <Etiqueta bloco={2} nome="Caixa de conclusões" codigo="CaixaConclusoes.astro">
+          <CaixaConclusoes itens={m.conclusoes} />
+        </Etiqueta>
+
+        {/* A MESMA nav sai nos dois lugares. Inline é o mínimo, e é o que o
+            celular recebe; o trilho fixo é o extra do desktop. Nunca só o trilho. */}
+        <Etiqueta bloco={3} nome="Sumário, versão inline do celular" codigo="Sumario.astro">
+          <div class="sumario-inline"><Sumario itens={m.sumario} /></div>
+        </Etiqueta>
+
+        <Titulo id={sec.s1.id}>{sec.s1.texto}</Titulo>
+        <p class="b-p">{m.paragrafos[0]}</p>
+
+        <Etiqueta bloco={4} nome="Tabela de panorama" codigo="TabelaPanorama.astro">
+          <TabelaPanorama {...m.panorama} />
+        </Etiqueta>
+
+        <Etiqueta bloco={19} nome="Figura — papel prova, em estado de marcador" codigo="Figura.astro">
+          <Figura {...m.figuras.prova} />
+        </Etiqueta>
+
+        <Titulo id={sec.s2.id}>{sec.s2.texto}</Titulo>
+
+        <Etiqueta bloco={6} nome="Citação destacada — conclusão nossa" codigo="CitacaoDestacada.astro">
+          <CitacaoDestacada texto={m.destaque} />
+        </Etiqueta>
+
+        <Etiqueta bloco={5} nome="Tabela de contraste" codigo="TabelaContraste.astro">
+          <TabelaContraste {...m.contraste} />
+        </Etiqueta>
+
+        {/* Num artigo de verdade este diagrama não ficaria colado na tabela de
+            contraste: gráfico que repete a tabela ao lado não nasce, e escolhe-se
+            um dos dois. Aqui os dois estão porque a página é mapa de elementos. */}
+        <Etiqueta bloco={19} nome="Figura — papel diagrama, SVG inline pelo slot" codigo="Figura.astro + <svg>">
+          <Figura {...m.figuras.diagrama.figura}>
+            <DiagramaDemo {...m.figuras.diagrama.dados} />
+          </Figura>
+        </Etiqueta>
+
+        <Titulo nivel={3} id={sec.s2a.id}>{sec.s2a.texto}</Titulo>
+
+        <Etiqueta bloco={21} nome="Aviso — tipo atenção" codigo="Aviso.astro">
+          <Aviso {...m.avisos[0]} />
+        </Etiqueta>
+
+        <Etiqueta bloco={13} nome="Carrossel" codigo="Carrossel.astro">
+          <Carrossel rotulo="Rótulo do carrossel — sequência visual" slides={m.carrossel} />
+        </Etiqueta>
+
+        <Titulo nivel={3} id={sec.s2b.id}>{sec.s2b.texto}</Titulo>
+
+        <Etiqueta bloco="A1" nome="Prosa e seus átomos" codigo="<strong> <em> <code> <kbd> <abbr> <a>">
+          <p class="b-p">
+            Parágrafo com um de cada átomo — <strong>forte</strong> é o que o leitor não
+            pode perder, <em>ênfase</em> é entonação, e o número anda colado na unidade,
+            como em <span class="b-num">{m.atomos.pico}</span>. O literal que se digita ou
+            se procura vai em <code class="b-code">lorem-ipsum.csv</code>, a tecla que se
+            aperta vai em <kbd class="b-kbd">Esc</kbd> e depois{" "}
+            <kbd class="b-kbd">F2</kbd>, e a sigla se expande por escrito na primeira
+            aparição — corrente contínua{" "}
+            (<abbr class="b-abbr" title="corrente contínua">CC</abbr>) — porque o{" "}
+            <code class="b-code">title</code> é reforço, nunca a expansão. O{" "}
+            <a href="#s3">link diz o destino</a>, e não "clique aqui".
+          </p>
+        </Etiqueta>
+
+        <Etiqueta bloco={20} nome="Bloco de código — sem alteração de estado" codigo="Codigo.astro">
+          <Codigo {...m.codigos[0]} />
+        </Etiqueta>
+
+        <Etiqueta bloco={20} nome="Bloco de código — altera estado, então avisa antes" codigo="Codigo.astro">
+          <Codigo {...m.codigos[1]} />
+        </Etiqueta>
+
+        <Etiqueta bloco="A2" nome="Lista ordenada — a ordem existe" codigo={'<ol class="b-lista-num">'}>
+          <ol class="b-lista-num">{m.atomos.passos.map((p) => <li>{p}</li>)}</ol>
+        </Etiqueta>
+
+        <Etiqueta bloco="A2" nome="Lista não ordenada, com o segundo nível" codigo={'<ul class="b-lista">'}>
+          <ul class="b-lista">
+            {m.atomos.conjunto.map((c) => <li>{c}</li>)}
+            <li>
+              Item com sublista — dois níveis é o teto:
+              <ul>
+                <li>Segundo nível — lorem ipsum dolor sit amet</li>
+                <li>Segundo nível — consectetur adipiscing elit</li>
+              </ul>
+            </li>
+          </ul>
+        </Etiqueta>
+
+        <Titulo id={sec.s3.id}>{sec.s3.texto}</Titulo>
+        <p class="b-p">{m.paragrafos[1]}</p>
+
+        <Etiqueta bloco={7} nome="Citação de fonte nomeada" codigo="CitacaoFonte.astro">
+          <CitacaoFonte {...m.citacao} />
+        </Etiqueta>
+
+        <Etiqueta bloco={14} nome="Card de rede social — embed e perfil" codigo="CardRedeSocial.astro">
+          <CardRedeSocial {...m.social} />
+        </Etiqueta>
+
+        <Etiqueta bloco={11} nome="Enquete" codigo="Enquete.astro">
+          <Enquete {...m.enquete} />
+        </Etiqueta>
+
+        <Titulo id={sec.s4.id}>{sec.s4.texto}</Titulo>
+
+        <Etiqueta bloco="A2" nome="Glossário — termo e definição" codigo={'<dl class="b-glossario">'}>
+          <dl class="b-glossario">
+            {m.atomos.glossario.map((g) => (
+              <>
+                <dt>{g.termo}</dt>
+                <dd>{g.definicao}</dd>
+              </>
+            ))}
+          </dl>
+        </Etiqueta>
+
+        <Etiqueta bloco={21} nome="Aviso — tipo nota" codigo="Aviso.astro">
+          <Aviso {...m.avisos[1]} />
+        </Etiqueta>
+
+        <Etiqueta bloco={8} nome="Checklist" codigo="Checklist.astro">
+          <Checklist rotulo="Rótulo do checklist — o que se confere antes de agir" itens={m.checklist} />
+        </Etiqueta>
+
+        <Etiqueta bloco={15} nome="Escute em áudio — derivado" codigo="Audio.astro">
+          <Audio duracao={m.derivados.audio.duracao} />
+        </Etiqueta>
+
+        <Etiqueta bloco={19} nome="Figura — papel ilustração spot, na virada de bloco" codigo="Figura.astro">
+          <Figura {...m.figuras.spot} />
+        </Etiqueta>
+
+        <Etiqueta bloco={9} nome="FAQ em acordeão" codigo="Faq.astro">
+          <Faq itens={m.faq} />
+        </Etiqueta>
+
+        <Etiqueta bloco={10} nome="Fechamento" codigo="Fechamento.astro">
+          <Fechamento paragrafos={m.fechamento} />
+        </Etiqueta>
+
+        <Etiqueta bloco={16} nome="Baixe o mapa mental — derivado com muro" codigo="Download.astro">
+          <Download {...m.derivados.mapa} muro />
+        </Etiqueta>
+
+        {/* o muro fica no arquivo que sai daqui, e o botão fica no fim */}
+        <Etiqueta bloco={17} nome="Baixe em PDF — o botão que abre o overlay" codigo="b-card + b-btn">
+          <div class="b-card cta">
+            <div>
+              <b>{m.derivados.pdf.titulo}</b>
+              <span>{m.derivados.pdf.texto}</span>
+            </div>
+            <button class="b-btn b-btn--forte" type="button" data-abre-overlay="overlay-pdf">
+              {m.derivados.pdf.ancora}
+            </button>
+          </div>
+        </Etiqueta>
+
+        <Etiqueta bloco={12} nome="Avaliação — isso respondeu sua dúvida?" codigo="Avaliacao.astro">
+          <Avaliacao />
+        </Etiqueta>
+
+        <Etiqueta bloco={22} nome="Autor — card do fim do artigo" codigo="Autor.astro">
+          <Autor autor={m.autor} variante="card" />
+        </Etiqueta>
+
+        <Etiqueta bloco={18} nome="Comentários" codigo="Comentarios.astro">
+          <Comentarios itens={m.comentarios} />
+        </Etiqueta>
+
+        <div class="irmas b-sangra b-regua-topo b-esquinas-topo">
+          <Etiqueta bloco="N2" nome="Grade de cards de artigo" codigo="GradeArtigos.astro">
+            <GradeArtigos rotulo="Rótulo da grade — continue por aqui" artigos={m.irmas} />
+          </Etiqueta>
+        </div>
+
+        <Etiqueta bloco="N4" nome="Overlay — abre só por clique no botão acima" codigo="Overlay.astro" ancorado>
+          <Overlay id="overlay-pdf" {...m.overlay} pedeEmail />
+        </Etiqueta>
+      </article>
+
+      <aside class="sumario-trilho" aria-label="Sumário do artigo">
+        <Etiqueta bloco={3} nome="Sumário, trilho do desktop" codigo="Sumario.astro">
+          <Sumario itens={m.sumario} />
+        </Etiqueta>
+      </aside>
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* barra de prévia: chrome, em --c-*, para não se misturar ao espécime */
+  .previa { background: var(--c-paper); border-bottom: 1px solid var(--c-rule); font-family: var(--c-ui); }
+  .previa-in {
+    max-width: 1100px; margin: 0 auto; padding: 10px 20px;
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  .previa-rot {
+    font-family: var(--c-mono); font-size: 10.5px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--c-dim);
+  }
+  .previa .seg { display: flex; border: 1px solid var(--c-rule); border-radius: 8px; overflow: hidden; }
+  .previa .seg a,
+  .previa .seg button {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 13px; font-size: 12.5px; font-weight: 600;
+    color: var(--c-ink-2); text-decoration: none; background: transparent;
+    border: 0; border-right: 1px solid var(--c-rule); cursor: pointer; font-family: inherit;
+  }
+  .previa .seg a:last-child,
+  .previa .seg button:last-child { border-right: 0; }
+  .previa .seg a[aria-current="page"],
+  .previa .seg button[aria-pressed="true"] { background: var(--c-ink); color: var(--c-paper); }
+  .previa .ponto { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); }
+  .previa-nota { font-family: var(--c-mono); font-size: 11px; color: var(--c-dim); }
+  .previa .chave {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12.5px; font-weight: 600; color: var(--c-ink-2); cursor: pointer;
+  }
+
+  /* a etiqueta se revela no hover (regra em Etiqueta.astro); `etiquetas-fixas`
+     mostra todas de uma vez, e é a chave da barra de prévia */
+  .previa-link { margin-left: auto; font-size: 12.5px; color: var(--c-mark); text-decoration: none; }
+
+  .pagina { min-height: 100vh; }
+
+  /* Uma linha desliga a moldura inteira, verticais, horizontais e cruzes: o
+     peso zera e todo desenho da régua sai de escala. É a mesma chave que
+     `linho` teria usado se quisesse dispensá-la. */
+  .pagina.sem-regua { --b-regua-peso: 0; }
+
+  /* No celular: uma coluna, com o sumário inline antes do primeiro H2.
+     No desktop: o trilho aparece ao lado e o inline some. */
+  .colunas {
+    display: grid; grid-template-columns: minmax(0, 836px);
+    justify-content: center; gap: 40px;
+    max-width: 892px; margin-inline: auto;
+    padding: 0 clamp(18px, 4vw, 28px);
+  }
+  .sumario-trilho { display: none; }
+  @media (min-width: 1180px) {
+    .colunas { grid-template-columns: minmax(0, 836px) 232px; max-width: 1164px; }
+    .sumario-inline { display: none; }
+    .sumario-trilho {
+      display: block; position: sticky; top: 24px;
+      align-self: start; max-height: calc(100vh - 48px); overflow-y: auto;
+      /* O trilho não leva régua: a vertical direita do artigo já fecha a coluna
+         de leitura, e uma segunda tracejada a 40px dela, com a altura do
+         sumário e sem horizontal que a encontre, lê como sobra e não como
+         planta baixa.
+
+         A folga lateral e a de baixo não são respiro: `overflow-y: auto` clipa
+         num retângulo sem raio, e a sombra do card mora FORA da caixa dele.
+         Sem esta folga o clip corta a sombra em ângulo reto e o canto
+         arredondado fica com um quadrado atrás — visível em `concreto`, que
+         tem sombra sólida, e em `vidro`. */
+      padding: clamp(24px, 5vw, 56px) var(--folga-sombra) var(--folga-sombra);
+      --folga-sombra: 14px;
+    }
+  }
+
+  /* A moldura mora AQUI, e não na grade: colada na coluna de leitura, ela é a
+     única largura que as faixas de dentro conseguem alcançar. Daí o padding
+     lateral, que é o que dá às verticais um lugar próprio, e o `--b-sangria`,
+     que é o mesmo número — é por ele que a linha de meta chega até a moldura
+     em vez de morrer no meio do quadro. */
+  .artigo {
+    /* A folga entre o texto e as verticais da régua. Cresce com a tela: no
+       celular 40px comeriam a largura de leitura, e ali a régua já está perto
+       da borda do vidro, onde ela não compete com o texto. */
+    --b-sangria: clamp(28px, 4.5vw, 40px);
+    max-width: 836px; min-width: 0;
+    padding: clamp(24px, 5vw, 56px) var(--b-sangria) 80px;
+    display: flex; flex-direction: column; gap: 26px;
+  }
+
+  /* a virada para "continue por aqui": dali para baixo não é mais o artigo */
+  .irmas { padding: 30px var(--b-sangria) 0; }
+  .cta {
+    padding: 18px 20px; display: flex; flex-wrap: wrap; gap: 14px;
+    align-items: center; justify-content: space-between;
+  }
+  .cta b { display: block; margin-bottom: 3px; color: var(--b-tinta); }
+  .cta span { color: var(--b-tinta-2); font-size: 13.5px; }
+</style>
+
+<script>
+  document.body.classList.add("previa-body");
+  const pagina = document.querySelector<HTMLElement>(".pagina")!;
+  const raiz = document.documentElement;
+  const botoes = [...document.querySelectorAll<HTMLButtonElement>("[data-modo-btn]")];
+
+  let modo = matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro";
+  try {
+    const salvo = localStorage.getItem("modo");
+    if (salvo === "claro" || salvo === "escuro") modo = salvo;
+  } catch {}
+
+  const botoesSite = [...document.querySelectorAll<HTMLButtonElement>("[data-site-btn]")];
+  let site = "";
+
+  function aplicar() {
+    pagina.setAttribute("data-modo", modo);
+    /* sem desvio o atributo sai do DOM, e não fica um data-site="" mentindo */
+    if (site) pagina.setAttribute("data-site", site);
+    else pagina.removeAttribute("data-site");
+
+    for (const d of document.querySelectorAll("dialog")) {
+      d.setAttribute("data-estilo", pagina.getAttribute("data-estilo")!);
+      d.setAttribute("data-modo", modo);
+      /* o <dialog> vive na top layer, fora do wrapper: os três atributos
+         precisam ser copiados na mão, senão o overlay sai sem o desvio */
+      if (site) d.setAttribute("data-site", site);
+      else d.removeAttribute("data-site");
+    }
+    for (const b of botoesSite) {
+      b.setAttribute("aria-pressed", String((b.dataset.siteBtn ?? "") === site));
+    }
+    raiz.setAttribute("data-theme", modo === "escuro" ? "dark" : "light");
+    for (const b of botoes) b.setAttribute("aria-pressed", String(b.dataset.modoBtn === modo));
+    /* a escolha sobrevive à troca de tema, que é o ponto da comparação */
+    try { localStorage.setItem("modo", modo); } catch {}
+  }
+
+  botoes.forEach((b) =>
+    b.addEventListener("click", () => {
+      modo = b.dataset.modoBtn!;
+      aplicar();
+    })
+  );
+  botoesSite.forEach((b) =>
+    b.addEventListener("click", () => {
+      site = b.dataset.siteBtn ?? "";
+      aplicar();
+    })
+  );
+
+  /* etiquetas: melhoria progressiva. Sem JS o hover continua revelando cada
+     uma, que é o comportamento padrão — a chave só fixa todas. */
+  const verEtiquetas = document.getElementById("ver-etiquetas") as HTMLInputElement | null;
+  verEtiquetas?.addEventListener("change", () => {
+    pagina.classList.toggle("etiquetas-fixas", verEtiquetas.checked);
+  });
+
+  const verRegua = document.getElementById("ver-regua") as HTMLInputElement | null;
+  verRegua?.addEventListener("change", () => {
+    pagina.classList.toggle("sem-regua", !verRegua.checked);
+  });
+
+  aplicar();
+</script>

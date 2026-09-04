@@ -1,0 +1,247 @@
+---
+/** Bloco 18 — Comentários (previsto).
+ *
+ * Ele vale o custo porque é a fonte mais barata de pauta que existe: a pergunta
+ * que o leitor faz embaixo do texto é a pergunta que faltou, com as palavras
+ * dele, e alimenta a escuta da fase 4 sem custar apuração.
+ *
+ * O que vem junto é conteúdo que nós não apuramos, morando debaixo do nosso
+ * nome. Daí as travas visíveis aqui:
+ *
+ *  - separado do artigo, com título próprio, para o leitor saber sem pensar
+ *    onde acaba o que nós assinamos
+ *  - todo link de comentário sai com rel="nofollow ugc"
+ *  - comentário NÃO É FONTE: número ali não entra em conta nenhuma
+ *  - sem contagem no topo, que é número na tela sem origem e métrica de vaidade
+ *  - moderação antes de publicar, ou o bloco não nasce
+ */
+import type { Comentario } from "../../comentarios";
+import { CONSENTIMENTO_NEWSLETTER, PROMESSA_DO_EMAIL } from "../../consentimento";
+
+export type { Comentario };
+
+interface Props {
+  titulo?: string;
+  convite?: string;
+  itens: Comentario[];
+  /** Sem fila de moderação o bloco não nasce. O default é o lado seguro. */
+  moderado?: boolean;
+  /**
+   * De qual post é esta conversa. Sem os dois o formulário sai **inerte**, sem
+   * `action` e sem botão: é o que a bancada e a página de exemplo usam, onde um
+   * envio de verdade cairia no banco apontando para um post que não existe.
+   */
+  site?: string;
+  slug?: string;
+  /** Para onde o erro devolve o leitor. O caminho da página, não a URL inteira. */
+  voltar?: string;
+}
+/* A copy aqui pede contribuição, não reclamação. Abrir com "achou erro?" ensina
+   o leitor a procurar defeito no texto; o que ele tem e nós não temos é o caso
+   dele, e é isso que alimenta a escuta da fase 4. Mesma troca no placeholder do
+   campo: pergunta pelo dado dele, não pelo buraco nosso. */
+const {
+  titulo = "Comentários",
+  convite = "O que você viu na prática não está aqui — e é o que falta. Conta o seu caso, ou a dúvida que o texto deixou de pé: leio todos, e é daqui que saem os próximos artigos.",
+  itens,
+  moderado = true,
+  site,
+  slug,
+  voltar = Astro.url.pathname,
+} = Astro.props;
+
+/* A chave pública do widget. Ausente, o formulário sai inerte: sem Turnstile a
+   Function recusa tudo, e um formulário que sempre falha é pior que nenhum. */
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
+const previa = !site || !slug || !sitekey;
+---
+
+{moderado && (
+  <section
+    class="comentarios b-sangra b-regua-topo b-esquinas-topo"
+    aria-labelledby="comentarios-titulo"
+  >
+    {/* separado do artigo na aparência e no markup: o leitor precisa saber
+        sem pensar onde acaba o que nós assinamos */}
+    <h2 class="tit" id="comentarios-titulo">{titulo}</h2>
+    <p class="convite">{convite}</p>
+
+    {/* Formulário HTML comum, com `method="post"` e sem fetch. É o que permite
+        o bloco funcionar sem JavaScript próprio: o único script da página é o
+        do Turnstile, e a resposta ao leitor é um redirect. */}
+    <form class="b-card formulario" method="post" action={previa ? undefined : "/api/comentario"}>
+      {!previa && (
+        <>
+          <input type="hidden" name="site" value={site} />
+          <input type="hidden" name="slug" value={slug} />
+          <input type="hidden" name="voltar" value={voltar} />
+          {/* Carimbo de quando a página abriu, preenchido pelo script no fim
+              deste arquivo. Sem JS ele fica vazio, e o servidor ignora — quem
+              barra bot é o Turnstile, não isto. */}
+          <input type="hidden" name="t" value="" data-carimbo />
+          {/* Isca. Não existe campo de site para o humano preencher: campo de
+              site em comentário é o motivo econômico do spam de link. Este aqui
+              é escondido, e bot preenche tudo que encontra. */}
+          <div class="mel" aria-hidden="true">
+            <label>Seu site<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+          </div>
+        </>
+      )}
+
+      <div class="duplo">
+        <div class="campo-bloco">
+          <label class="rotulo b-rotulo" for="c-nome">Seu nome</label>
+          <input class="campo" id="c-nome" name="nome" type="text" maxlength="60" required disabled={previa} />
+        </div>
+        <div class="campo-bloco">
+          <label class="rotulo b-rotulo" for="c-email">Seu e-mail</label>
+          <input class="campo" id="c-email" name="email" type="email" maxlength="254" required disabled={previa}
+            aria-describedby="c-email-nota" />
+          <span class="nota" id="c-email-nota">{PROMESSA_DO_EMAIL}</span>
+        </div>
+      </div>
+
+      <div class="campo-bloco">
+        <label class="rotulo b-rotulo" for="c-texto">Seu comentário</label>
+        <textarea class="campo" id="c-texto" name="texto" rows="3" maxlength="4000" required disabled={previa}
+          placeholder="No seu caso, como foi?"></textarea>
+      </div>
+
+      {/* Desmarcada, e é assim que fica. Caixa pré-marcada não é consentimento
+          na LGPD, e enche a lista de quem não quer — que é o mesmo dano de
+          entrega, com a aparência de crescimento. */}
+      <label class="opcao">
+        <input type="checkbox" name="newsletter" value="on" disabled={previa} />
+        <span>{CONSENTIMENTO_NEWSLETTER}</span>
+      </label>
+
+      {!previa && <div class="cf-turnstile" data-sitekey={sitekey}></div>}
+
+      <div class="acoes">
+        <button class="b-btn b-btn--forte" type="submit" disabled={previa}>Enviar</button>
+        <span class="nota">
+          {previa ? "Prévia: este formulário não envia." : "Passa por moderação antes de aparecer."}
+        </span>
+      </div>
+    </form>
+
+    {!previa && (
+      <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+    )}
+
+    <ol class="lista">
+      {itens.map((c) => (
+        <li class="b-card item">
+          <div class="cab">
+            <span class="autor">{c.autor}</span>
+            <span class="quando">{c.quando}</span>
+          </div>
+          <p class="texto">{c.texto}</p>
+          {c.resposta && (
+            <div class="resposta">
+              <div class="cab">
+                <span class="autor autor--casa">Resposta do autor</span>
+                <span class="quando">{c.resposta.quando}</span>
+              </div>
+              <p class="texto">{c.resposta.texto}</p>
+            </div>
+          )}
+        </li>
+      ))}
+    </ol>
+
+    <p class="rodape">
+      Comentário é a palavra de quem escreveu, não apuração nossa: número que aparece
+      aqui não entra em conta nenhuma do artigo. Correção no texto não apaga a conversa,
+      e por isso cada comentário mostra a data.
+    </p>
+  </section>
+)}
+
+<style>
+  /* Linha TRACEJADA, com as esquinas: daqui para baixo não é mais o artigo, e
+     no vocabulário da página o tracejado é o que marca fronteira de região.
+     Mesma faixa do cabeçalho e da grade de irmãs. A sólida ficou para o que
+     separa por dentro, como o fechamento.
+
+     Ela sangra porque horizontal que morre antes da moldura lê como linha
+     solta em vez de grade, e o padding lateral volta no mesmo número para o
+     conteúdo continuar alinhado ao corpo do texto. Onde `--b-sangria` não
+     existe, o fallback é 0 e o bloco fica como sempre foi.
+     Regra em `referencias/arquitetura-pagina.md`. */
+  .comentarios {
+    padding: 26px var(--b-sangria, 0px) 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .tit {
+    font-family: var(--b-fonte-titulo); font-weight: var(--b-peso-titulo);
+    font-size: clamp(20px, 2.6vw, 26px); letter-spacing: var(--b-titulo-track);
+    margin: 0; color: var(--b-tinta);
+  }
+  .convite { margin: 0; color: var(--b-tinta-2); font-size: 14.5px; max-width: 60ch; line-height: 1.6; }
+
+  .formulario { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .rotulo { margin: 0; }
+  .campo-bloco { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  /* Nome e e-mail lado a lado onde cabe, empilhados onde não cabe. */
+  .duplo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) { .duplo { grid-template-columns: 1fr; } }
+  .campo {
+    width: 100%; padding: 11px 13px; font-size: 14.5px; line-height: 1.55;
+    border: var(--b-borda); border-radius: var(--b-radius);
+    background: var(--b-fundo); color: var(--b-tinta); resize: vertical;
+    font-family: inherit;
+  }
+  .campo:disabled { opacity: .6; cursor: not-allowed; }
+
+  .opcao { display: flex; gap: 9px; align-items: flex-start; font-size: 13.5px; color: var(--b-corpo); line-height: 1.5; }
+  .opcao input { margin-top: 3px; flex: none; accent-color: var(--b-acento); }
+
+  /* A isca sai do fluxo visual sem sair do DOM: `display:none` é o primeiro
+     lugar onde um bot esperto olha para saber o que ignorar. */
+  .mel {
+    position: absolute; left: -9999px; width: 1px; height: 1px;
+    overflow: hidden; white-space: nowrap;
+  }
+
+  .acoes { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .nota { font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2); }
+
+  .lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .item { padding: 15px 18px; }
+  .cab { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 7px; }
+  .autor { font-weight: 700; font-size: 14px; color: var(--b-tinta); }
+  .autor--casa { color: var(--b-acento-tinta); }
+  .quando { font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2); }
+  .texto { margin: 0; font-size: 14.5px; line-height: 1.62; color: var(--b-corpo); }
+
+  .resposta {
+    margin-top: 13px; padding-top: 12px; padding-left: 13px;
+    border-top: 1px solid var(--b-linha);
+    border-left: 2px solid var(--b-acento);
+  }
+
+  .rodape {
+    margin: 0; font-family: var(--b-fonte-meta); font-size: 11.5px;
+    color: var(--b-tinta-2); line-height: 1.6; max-width: 70ch;
+  }
+</style>
+
+<script>
+  /* Todo link que o leitor escrever sai com rel="nofollow ugc". É o atributo
+     que existe exatamente para isto, e sem ele a seção vira alvo de spam de
+     link em uma semana. No servidor isto é obrigação da renderização; aqui
+     serve de rede de segurança para o que o cliente montar. */
+  for (const a of document.querySelectorAll<HTMLAnchorElement>(".comentarios .texto a")) {
+    a.rel = "nofollow ugc";
+  }
+
+  /* Quando a página abriu. O servidor recusa envio em menos de três segundos,
+     que é menos tempo do que qualquer pessoa leva para formular a dúvida.
+     É melhoria progressiva: sem JS o campo fica vazio e o servidor ignora. */
+  for (const campo of document.querySelectorAll<HTMLInputElement>(".comentarios [data-carimbo]")) {
+    campo.value = String(Date.now());
+  }
+</script>
