@@ -1,0 +1,18 @@
+{
+  "//": "As Functions rodam no runtime da Cloudflare, não no navegador. Elas têm tsconfig próprio (e ficam fora do `astro check`) porque os globais são outros: sem `document`, com `D1Database`.",
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["@cloudflare/workers-types"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "//include": "Ajustado do original de blogs/web: lá o include trazia src/sites/index.ts, src/catalogo.ts e src/consentimento.ts porque functions/ de lá importa consentimento.ts. Aqui nenhuma Function ainda importa de src/, e src/sites/index.ts usa import.meta.glob (tipo de vite/client, ausente deste tsconfig) — trazê-lo quebraria o check por um motivo que não é deste diretório. Quando uma Function daqui passar a importar de src/, este include volta a crescer.",
+  "include": ["**/*.ts"],
+  "//exclude": "Os testes rodam no Node, sob o vitest, e usam `node:crypto` para conferir a assinatura por um caminho diferente do da implementação. Deixar o Node entrar em `types` aqui apagaria justamente o que este arquivo existe para garantir: que o código das Functions não use nada que só existe no Node.",
+  "exclude": ["**/*.test.ts"]
+}

@@ -4,11 +4,11 @@ import type { Autor } from "./autor";
 
 /** Um autor completo, para cada teste estragar um campo de cada vez. */
 const cheio = (): Autor => ({
-  nome: "Marina Vasques",
-  slug: "marina-vasques",
-  jobTitle: "Eletricista, 12 anos em sistemas off-grid",
-  description: "Montou e mediu sistemas isolados no interior de Minas desde 2014. Opera hoje três bancos de bateria fora da rede.",
-  image: "/autores/marina-vasques.jpg",
+  nome: "Fulano de Tal",
+  slug: "fulano-de-tal",
+  jobTitle: "Profissional-exemplo, 12 anos de experiência de mentirinha",
+  description: "Preencheu esta biografia só para o teste passar, sem ligação com nicho nenhum. Não existe pessoa real por trás deste nome de exemplo.",
+  image: "/autores/fulano-de-tal.jpg",
   sameAs: [],
 });
 
@@ -38,7 +38,7 @@ describe("pendenciaDoAutor", () => {
   );
 
   it("não aceita primeiro nome solto: byline é pessoa inteira", () => {
-    expect(pendenciaDoAutor({ ...cheio(), nome: "Marina" })).toMatch(/sobrenome/i);
+    expect(pendenciaDoAutor({ ...cheio(), nome: "Fulano" })).toMatch(/sobrenome/i);
   });
 
   it.each(["Equipe", "Redação", "Redacao", "Equipe Editorial", "A REDAÇÃO"])(
