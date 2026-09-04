@@ -1,0 +1,22 @@
+---
+/**
+ * Slot de anúncio. Não é porta: é um lugar reservado no layout.
+ *
+ * INERTE no v0. A aula 7 (AdSense) preenche, e a régua de lá é 15 artigos
+ * publicados — aplicar antes é reprovar por "baixo valor", que é o motivo
+ * número 1 na taxonomia de reprovações que a gente estudou.
+ *
+ * Renderiza NADA sem `adsenseId`: espaço vazio reservado é pior que espaço
+ * nenhum, porque desloca o layout e conta como CLS.
+ */
+import type { Site } from "../sites/tipos";
+
+interface Props { site: Site; posicao: "topo" | "meio" | "rodape" }
+const { site, posicao } = Astro.props;
+const id = site.adsenseId;
+---
+{id && (
+  <aside class="anuncio" data-posicao={posicao} aria-label="Publicidade">
+    <ins class="adsbygoogle" data-ad-client={id} data-ad-format="auto"></ins>
+  </aside>
+)}
