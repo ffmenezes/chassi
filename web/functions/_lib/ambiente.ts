@@ -4,6 +4,7 @@
  * mora nas funções puras que ele chama.
  */
 import type { PortasDeContato } from "./contato";
+import { escolherEnviador } from "./email/porta";
 
 export interface Env {
   /** Chave privada do Turnstile. Ausente = verificação inerte. */
@@ -12,9 +13,17 @@ export interface Env {
   RESEND_API_KEY?: string;
   /** Para onde vai o formulário de contato. Ausente = porta de e-mail inerte. */
   EMAIL_CONTATO?: string;
+  /** Binding `send_email` do Pages/Workers, quando configurado. */
+  EMAIL_BINDING?: unknown;
+  /** Remetente do adaptador Cloudflare. Precisa ser do domínio do site. */
+  EMAIL_REMETENTE?: string;
 }
 
-export function portasDeContato(_env: Env, _request: Request): PortasDeContato {
-  // Preenchido pelas Tasks 6 (e-mail) e 7 (verificação humana).
-  return { verificar: async () => true, enviar: async () => false, destino: null };
+export function portasDeContato(env: Env, _request: Request): PortasDeContato {
+  const email = escolherEnviador(env);
+  return {
+    verificar: async () => true, // a Task 7 substitui
+    enviar: email.enviar,
+    destino: email.destino,
+  };
 }
