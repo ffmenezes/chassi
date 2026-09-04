@@ -1,0 +1,88 @@
+/**
+ * O template futuro de cada site.
+ *
+ * Um site escolhe **um estilo** e declara **quais blocos do catálogo ele monta**.
+ * Nada aqui é por artigo: é a decisão de site que o `infra.md` e o `DESIGN.md`
+ * do site guardam. Muro de e-mail que aparece num artigo e não no outro é o
+ * leitor descobrindo a regra por tentativa.
+ */
+import type { BlocoId } from "../catalogo";
+
+/**
+ * Antes era união de literais. A varredura de pasta (`styles/estilos/index.ts`)
+ * descobre o conjunto só em tempo de build, então a união deixou de ser
+ * sustentável aqui. A perda de type check é consciente: a validação equivalente
+ * (estilo inexistente quebra a build) entra como checagem em tempo de build.
+ */
+export type Estilo = string;
+export type Modo = "claro" | "escuro";
+
+/**
+ * Os tokens que um site pode sobrescrever. A união existe para que um typo
+ * (`--b-acent`) falhe no type check em vez de virar CSS morto.
+ */
+export type TokenB =
+  | "--b-fundo" | "--b-superficie"
+  | "--b-tinta" | "--b-corpo" | "--b-tinta-2"
+  | "--b-linha" | "--b-linha-forte"
+  | "--b-acento" | "--b-acento-tinta" | "--b-acento-forte" | "--b-acento-fraco"
+  | "--b-sobre-acento" | "--b-sombra-cor" | "--b-erro"
+  | "--b-radius" | "--b-borda" | "--b-sombra" | "--b-sombra-hover" | "--b-lift"
+  | "--b-blur" | "--b-medida" | "--b-aurora"
+  | "--b-peso-titulo" | "--b-titulo-track" | "--b-track-rotulo" | "--b-caixa-rotulo";
+
+export type DesvioDeSite = Partial<Record<Modo, Partial<Record<TokenB, string>>>>;
+
+/**
+ * Pessoa física e jurídica se comportam diferente na página jurídica: CNPJ é
+ * registro público e é o que Ads e Meta esperam; CPF exposto em página
+ * indexada é convite a fraude e não é exigido por lei nenhuma para
+ * identificar controlador. Ver `renderizarResponsavel` na Task 11.
+ */
+export interface Responsavel {
+  nome: string;
+  tipo: "pf" | "pj";
+  /** CPF ou CNPJ. Só o CNPJ é renderizado. */
+  documento?: string;
+}
+
+export interface Site {
+  slug: string;
+  nome: string;
+  dominio: string;
+  /** Forma e tipografia. A cor vem do modo. */
+  estilo: Estilo;
+  /** Ponto de partida. O leitor troca, e a escolha dele vence. */
+  modoPadrao: Modo;
+  /** Os blocos que este site monta. Bloco fora daqui não existe na página. */
+  blocos: BlocoId[];
+  /**
+   * Muro de e-mail nos derivados que saem como arquivo (16 e 17).
+   * Nunca vale para o artigo nem para o áudio: ver a seção do muro na doutrina.
+   */
+  muroDeEmail: boolean;
+  /**
+   * Desvio declarado sobre o estilo. Dois sites podem usar `vidro` e divergir
+   * só nisto.
+   *
+   *   SITE SOBRESCREVE TOKEN. SITE NUNCA ESCREVE SELETOR.
+   *
+   * No minuto em que um site mirar o interior de um componente
+   * (`.b-card .fig { ... }`), o template quebrou para o próximo site, porque
+   * passou a existir CSS que conhece a estrutura de um bloco. Enquanto o
+   * desvio for só valor de variável, o site novo nasce limpo por construção.
+   */
+  tokens?: DesvioDeSite;
+  /** Quem responde pelo site. Alimenta as páginas jurídicas. */
+  responsavel: Responsavel;
+  /** Para onde vai a mensagem do formulário de contato. */
+  emailContato: string;
+  /** Qual adaptador de analytics este site usa. Decide a página de cookies. */
+  analytics?: "ga4" | "cloudflare" | "posthog" | "nenhum";
+  /** Identificador da conta de analytics (G-XXXX, chave do PostHog, etc.). */
+  analyticsId?: string;
+  /** Conta do AdSense. Ausente = o slot de anúncio não renderiza nada. */
+  adsenseId?: string;
+}
+
+export type { BlocoId } from "../catalogo";
