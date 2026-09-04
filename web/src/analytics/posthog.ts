@@ -8,9 +8,22 @@
  * quando há isca para funilar.
  *
  * Concatenação com `+`, nunca template literal — ver o comentário em `ga4.ts`.
- * O carregador oficial do PostHog é minificado; aqui vai só o essencial
- * (import do array.js e o init com a chave do projeto), suficiente para o
- * dia em que este adaptador deixar de ser inerte.
+ *
+ * O carregador oficial do PostHog é um stub minificado que enfileira chamadas
+ * feitas ANTES do `array.js` terminar de carregar (`window.posthog` nasce
+ * objeto com fila de métodos, não array — um array não tem `.init`, e chamar
+ * `.init` nele estoura `TypeError` de forma síncrona no `<head>`). Reproduzir
+ * esse stub à mão é frágil — foi o que quebrou na primeira versão deste
+ * arquivo.
+ *
+ * Em vez disso, `onload`: o `<script async>` só chama `posthog.init(...)`
+ * depois que `array.js` já definiu `window.posthog` de verdade. Isso é
+ * SUFICIENTE aqui porque nada mais nesta página chama `posthog` fora deste
+ * bloco — não há janela em que algo dispare um evento antes do load. Este
+ * carregador NÃO enfileira eventos disparados antes do `array.js` carregar;
+ * se o site um dia passar a emitir eventos próprios (ex.: em outro
+ * componente, fora deste `<head>`), a fila do stub oficial deixa de ser
+ * opcional e este arquivo precisa voltar a usá-la.
  */
 import type { AdaptadorDeAnalytics } from "./porta";
 
@@ -23,11 +36,8 @@ export const posthog: AdaptadorDeAnalytics = {
   script(idDaConta: string): string | null {
     if (!idDaConta) return null;
     return (
-      '<script async src="https://app.posthog.com/static/array.js"></script>' +
-      "<script>" +
-      "window.posthog = window.posthog || [];" +
-      "window.posthog.init('" + idDaConta + "', { api_host: 'https://app.posthog.com' });" +
-      "</script>"
+      '<script async src="https://us-assets.i.posthog.com/static/array.js" ' +
+      "onload=\"posthog.init('" + idDaConta + "', {api_host:'https://us.i.posthog.com'})\"></script>"
     );
   },
 };

@@ -33,8 +33,7 @@ export interface EscolhaDeDados {
   adaptador: "d1" | "nenhum";
 }
 
-export function escolherDeposito(env: { DB?: unknown }): EscolhaDeDados {
-  // O adaptador `d1` ainda não existe — `env.DB` não muda a escolha por ora.
-  void env.DB;
+export function escolherDeposito(_env: { DB?: unknown }): EscolhaDeDados {
+  // O adaptador `d1` ainda não existe — `_env.DB` não muda a escolha por ora.
   return { deposito: nenhum, adaptador: "nenhum" };
 }
