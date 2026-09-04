@@ -5,6 +5,7 @@
  */
 import type { PortasDeContato } from "./contato";
 import { escolherEnviador } from "./email/porta";
+import { escolherVerificador } from "./verificacao/porta";
 
 export interface Env {
   /** Chave privada do Turnstile. Ausente = verificação inerte. */
@@ -22,7 +23,7 @@ export interface Env {
 export function portasDeContato(env: Env, _request: Request): PortasDeContato {
   const email = escolherEnviador(env);
   return {
-    verificar: async () => true, // a Task 7 substitui
+    verificar: escolherVerificador(env).verificar,
     enviar: email.enviar,
     destino: email.destino,
   };

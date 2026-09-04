@@ -361,8 +361,11 @@ export const derivados = {
 };
 
 /**
- * O autor do bloco 22. **Marina Vasques não existe**, e este objeto nunca sai
- * deste arquivo — o byline de verdade é o `sites/<site>/base/AUTOR.md`, e o
+ * O autor do bloco 22. **Fulano de Tal não existe** — mesmo placeholder que
+ * `src/autor.test.ts` usa, e de propósito: um nome plausível como "Marina
+ * Vasques" é exatamente o tipo de coisa que um participante copia sem
+ * perceber, e num repositório-template isso vira autor de verdade no blog de
+ * alguém. O byline de verdade é o `sites/<site>/base/AUTOR.md`, e o
  * `VISION.md` da raiz não permite inventar pessoa em página publicada.
  *
  * O que ele testa é a FORMA: nome com sobrenome, cargo que descreve a relação
@@ -377,13 +380,13 @@ export const derivados = {
  * e o estado sem link é o que os cinco estilos precisam saber desenhar hoje.
  */
 export const autor: Autor = {
-  nome: "Marina Vasques",
-  slug: "marina-vasques",
-  jobTitle: "Técnica de redes, 12 anos configurando internet doméstica",
+  nome: "Fulano de Tal",
+  slug: "fulano-de-tal",
+  jobTitle: "Técnico de redes, 12 anos configurando internet doméstica",
   description:
-    "Configura e mede redes domésticas no interior de Minas desde 2014. Atende hoje dezenas de casas com home office, e os números deste artigo saíram do monitor dela.",
+    "Configura e mede redes domésticas no interior do estado desde 2014. Atende hoje dezenas de casas com home office, e os números deste artigo saíram do monitor dele.",
   image:
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23cfc7ba'/%3E%3Ctext x='32' y='42' font-family='sans-serif' font-size='26' fill='%23615a4e' text-anchor='middle'%3EMV%3C/text%3E%3C/svg%3E",
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23cfc7ba'/%3E%3Ctext x='32' y='42' font-family='sans-serif' font-size='26' fill='%23615a4e' text-anchor='middle'%3EFT%3C/text%3E%3C/svg%3E",
   sameAs: [],
 };
 
