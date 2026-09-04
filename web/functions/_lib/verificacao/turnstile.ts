@@ -7,6 +7,8 @@
  * Google e não conhece o site.
  */
 
+import { registrarErro } from "../erros";
+
 const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 /**
@@ -25,7 +27,8 @@ export function verificarPeloTurnstile(segredo: string, fetchImpl: typeof fetch 
       const resposta = await fetchImpl(SITEVERIFY, { method: "POST", body: corpo });
       const dados = (await resposta.json()) as { success?: boolean };
       return dados.success === true;
-    } catch {
+    } catch (e) {
+      registrarErro(e, { porta: "verificacao" });
       return false;
     }
   };

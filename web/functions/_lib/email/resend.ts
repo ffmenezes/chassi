@@ -1,4 +1,5 @@
 import type { MensagemDeContato } from "../contato";
+import { registrarErro } from "../erros";
 
 const API = "https://api.resend.com/emails";
 
@@ -29,7 +30,8 @@ export function enviarPelaResend(chave: string, fetchImpl: typeof fetch = fetch)
         }),
       });
       return r.ok;
-    } catch {
+    } catch (e) {
+      registrarErro(e, { porta: "email" });
       return false;
     }
   };
