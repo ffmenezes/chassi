@@ -10,14 +10,14 @@ import {
 
 const campos: CampoCalculo[] = [
   { id: "pecas", rotulo: "Peças por mês", inicial: 100, origem: "premissa", unidade: "un" },
-  { id: "caneca", rotulo: "Caneca crua", inicial: 10, origem: "duas lojas, ago/2026", unidade: "R$" },
+  { id: "insumo", rotulo: "Insumo bruto", inicial: 10, origem: "duas lojas, ago/2026", unidade: "R$" },
   { id: "hora", rotulo: "Sua hora", inicial: 30, origem: "premissa", unidade: "R$" },
   { id: "minutos", rotulo: "Minutos por peça", inicial: 6, origem: "premissa", unidade: "min" },
 ];
 
 const saidas: SaidaCalculo[] = [
   { id: "trabalho", rotulo: "Trabalho por peça", expr: "hora * minutos / 60", unidade: "R$" },
-  { id: "custo", rotulo: "Custo por peça", expr: "caneca + trabalho", unidade: "R$" },
+  { id: "custo", rotulo: "Custo por peça", expr: "insumo + trabalho", unidade: "R$" },
 ];
 
 describe("avaliador de expressão", () => {
@@ -43,7 +43,7 @@ describe("avaliador de expressão", () => {
   });
 
   it("usa o valor do leitor no lugar do de partida", () => {
-    const r = calcular(campos, saidas, { hora: 60, caneca: 12 });
+    const r = calcular(campos, saidas, { hora: 60, insumo: 12 });
     expect(r[0].valor).toBe(6);
     expect(r[1].valor).toBe(18);
   });
@@ -121,7 +121,7 @@ describe("formato", () => {
 describe("travas que quebram a build", () => {
   it("recusa campo sem origem", () => {
     expect(() =>
-      validarCalculadora([{ id: "a", rotulo: "Caneca", inicial: 1, origem: "" }], [
+      validarCalculadora([{ id: "a", rotulo: "Insumo", inicial: 1, origem: "" }], [
         { id: "x", rotulo: "x", expr: "a" },
       ])
     ).toThrow(/sem origem declarada/);
@@ -144,27 +144,27 @@ describe("travas que quebram a build", () => {
 
   it("recusa id repetido", () => {
     expect(() =>
-      validarCalculadora(campos, [{ id: "caneca", rotulo: "x", expr: "1" }])
+      validarCalculadora(campos, [{ id: "insumo", rotulo: "x", expr: "1" }])
     ).toThrow(/id repetido/);
   });
 
   it("recusa percentual sem ressalva, item 10 de integridade", () => {
     expect(() =>
-      validarCalculadora(campos, [{ id: "m", rotulo: "Margem", expr: "caneca", unidade: "%" }])
+      validarCalculadora(campos, [{ id: "m", rotulo: "Margem", expr: "insumo", unidade: "%" }])
     ).toThrow(/percentual carrega a base/);
   });
 
   it("aceita percentual com ressalva", () => {
     expect(() =>
       validarCalculadora(campos, [
-        { id: "m", rotulo: "Margem", expr: "caneca", unidade: "%", ressalva: "sobre o custo" },
+        { id: "m", rotulo: "Margem", expr: "insumo", unidade: "%", ressalva: "sobre o custo" },
       ])
     ).not.toThrow();
   });
 
   it("recusa caractere que não é aritmética", () => {
     expect(() =>
-      validarCalculadora(campos, [{ id: "x", rotulo: "x", expr: "caneca ** 2" }])
+      validarCalculadora(campos, [{ id: "x", rotulo: "x", expr: "insumo ** 2" }])
     ).toThrow(/\[bloco 23\]/);
   });
 

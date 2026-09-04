@@ -72,26 +72,26 @@ describe("carregarComentarios", () => {
 
   it("lê o arquivo do post e devolve os itens prontos para o bloco", () => {
     gravar(
-      "naopagueluz",
-      "como-montar-sistema-off-grid",
+      "exemplo",
+      "como-configurar-o-roteador",
       JSON.stringify(arq([{ id: "a", autor: "Cleide", em: "2026-08-11", texto: "texto do comentário" }])),
     );
-    const itens = carregarComentarios("naopagueluz", "como-montar-sistema-off-grid", raiz);
+    const itens = carregarComentarios("exemplo", "como-configurar-o-roteador", raiz);
     expect(itens).toEqual([{ autor: "Cleide", quando: "11/08/2026", texto: "texto do comentário" }]);
   });
 
   it("post sem arquivo devolve lista vazia, e não erro", () => {
     // O normal é o post não ter comentário nenhum. Isso não é falha de build.
-    expect(carregarComentarios("naopagueluz", "post-novo", raiz)).toEqual([]);
+    expect(carregarComentarios("exemplo", "post-novo", raiz)).toEqual([]);
   });
 
   it("arquivo corrompido quebra a build em vez de publicar página capenga", () => {
-    gravar("naopagueluz", "post-torto", "{ isso não é json");
-    expect(() => carregarComentarios("naopagueluz", "post-torto", raiz)).toThrow(/post-torto/);
+    gravar("exemplo", "post-torto", "{ isso não é json");
+    expect(() => carregarComentarios("exemplo", "post-torto", raiz)).toThrow(/post-torto/);
   });
 
   it("versão desconhecida quebra a build, porque o formato mudou embaixo", () => {
-    gravar("naopagueluz", "post-futuro", JSON.stringify({ versao: 2, itens: [] }));
-    expect(() => carregarComentarios("naopagueluz", "post-futuro", raiz)).toThrow(/versão/i);
+    gravar("exemplo", "post-futuro", JSON.stringify({ versao: 2, itens: [] }));
+    expect(() => carregarComentarios("exemplo", "post-futuro", raiz)).toThrow(/versão/i);
   });
 });

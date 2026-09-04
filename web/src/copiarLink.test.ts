@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { urlDaAncora } from "./copiarLink";
 
-const PAGINA = "https://naopagueluz.com.br/quanto-custa/";
+const PAGINA = "https://exemplo.com.br/quanto-custa/";
 
 describe("urlDaAncora", () => {
   it("gruda a âncora da seção na URL absoluta da página", () => {
