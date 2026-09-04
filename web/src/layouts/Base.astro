@@ -3,6 +3,8 @@
 import "../styles/base.css";
 import "../styles/estilos/index";
 import "../styles/atomos.css";
+import Analytics from "../components/Analytics.astro";
+import type { Site } from "../sites/tipos";
 
 interface Props {
   titulo: string;
@@ -10,8 +12,10 @@ interface Props {
   lang?: string;
   /** Página de serviço, que existe para quem já está no site e não para busca. */
   noindex?: boolean;
+  /** Ausente na bancada, de propósito: espécime não é site, e não mede nada. */
+  site?: Site;
 }
-const { titulo, descricao, lang = "pt-BR", noindex = false } = Astro.props;
+const { titulo, descricao, lang = "pt-BR", noindex = false, site } = Astro.props;
 ---
 <!doctype html>
 <html lang={lang}>
@@ -33,6 +37,7 @@ const { titulo, descricao, lang = "pt-BR", noindex = false } = Astro.props;
     {descricao && <meta name="description" content={descricao} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🧱</text></svg>" />
+    {site && <Analytics site={site} />}
   </head>
   <body>
     <slot />

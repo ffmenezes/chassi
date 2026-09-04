@@ -1,0 +1,17 @@
+---
+/**
+ * O único ponto onde script de terceiro entra na página.
+ *
+ * JS novo aqui precisa de justificativa: crawler de IA não executa JavaScript,
+ * e o que só aparece depois do JS não existe para ele. Medição é a
+ * justificativa aceita — e mesmo assim o padrão é `nenhum`.
+ */
+import { analyticsDoSite } from "../analytics/porta";
+import type { Site } from "../sites/tipos";
+
+interface Props { site: Site }
+const { site } = Astro.props;
+const adaptador = analyticsDoSite(site);
+const codigo = adaptador.script(site.analyticsId ?? "");
+---
+{codigo && <Fragment set:html={codigo} />}
