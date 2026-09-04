@@ -41,8 +41,17 @@ describe("validar", () => {
   });
 
   it("conta o mesmo token nos dois modos uma vez so", () => {
-    const tokens = { claro: { "--b-acento": "#a" }, escuro: { "--b-acento": "#b" } };
-    expect(() => validar([base({ tokens } as never)], ["linho"])).not.toThrow();
+    // Quatro tokens distintos, cada um nos dois modos: deduplicado dá 4
+    // (abaixo do teto de 6, not.toThrow()); sem dedupe dá 8 (acima do teto),
+    // e o teste falha. Um token só não prova nada, porque dobrado ainda cabe
+    // no teto.
+    const claro = {
+      "--b-fundo": "#a1", "--b-tinta": "#a2", "--b-acento": "#a3", "--b-linha": "#a4",
+    };
+    const escuro = {
+      "--b-fundo": "#b1", "--b-tinta": "#b2", "--b-acento": "#b3", "--b-linha": "#b4",
+    };
+    expect(() => validar([base({ tokens: { claro, escuro } } as never)], ["linho"])).not.toThrow();
   });
 
   it("recusa dois sites com o mesmo slug", () => {

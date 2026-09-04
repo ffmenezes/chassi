@@ -32,8 +32,6 @@ const descobertos: Site[] = Object.values(modulos).filter(
   (site): site is Site => Boolean(site && site.slug),
 );
 
-validar(descobertos, nomesDeEstilo());
-
 export const SITES: Record<string, Site> = Object.fromEntries(
   descobertos.map((s) => [s.slug, s]),
 );
@@ -54,5 +52,10 @@ export const SITE_DEMO: Site = {
   responsavel: { nome: "Bancada", tipo: "pf" },
   analytics: "nenhum",
 };
+
+// SITE_DEMO escapa da varredura por não ser arquivo de site descoberto, mas
+// usa estilo de verdade (`vidro`) e precisa da mesma garantia: se o estilo
+// sumir de src/styles/estilos/, a build avisa aqui, não em runtime silencioso.
+validar([...descobertos, SITE_DEMO], nomesDeEstilo());
 
 export const listaDeSites = (): Site[] => Object.values(SITES);

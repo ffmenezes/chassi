@@ -63,13 +63,17 @@ export const CATALOGO: readonly Bloco[] = [
   // base/AUTOR.md preenchido — e enquanto não estiver, ele não nasce, que é a
   // trava dele.
   { id: 22, estado: "ativo", nome: "Autor", regra: "Byline no topo e card no fim leem o mesmo base/AUTOR.md. Campo vazio ou com placeholder, e o bloco não nasce. Coletivo não assina, e o card tem uma saída só: a página do autor." },
-  // 23 e 24 são ATIVOS com dependência satisfeita, e é isso que os separa de um
-  // previsto: a calculadora exige JavaScript no cliente e o artigo continua
-  // inteiro sem ele; a oferta exige um endpoint, e ele existe em
-  // functions/api/isca.ts. Bloco ativo é bloco cuja dependência está no ar, não
-  // bloco sem dependência nenhuma.
+  // 23 é ATIVO e 24 é PREVISTO, e é a mesma régua que separa os dois: bloco
+  // ativo é bloco cuja dependência está no ar, não bloco sem dependência
+  // nenhuma. A calculadora exige JavaScript no cliente, e só isso — o artigo
+  // continua inteiro sem ela, então a dependência está satisfeita por
+  // construção. A oferta de isca exige um endpoint (`functions/api/isca.ts`),
+  // e este repositório não o tem: chega junto com a aula de iscas do
+  // workshop. Até lá, 24 é previsto, igual a qualquer outro bloco esperando
+  // a infra dele — e nenhum site declara 24, então `OfertaIsca.astro` não
+  // nasce.
   { id: 23, estado: "ativo", nome: "Calculadora", regra: "A conta que o corpo já fez por extenso, com as variáveis abertas. Todo campo diz de onde veio o valor de partida, a fórmula é a mesma do texto, e ela não pede e-mail, não esconde resultado e não projeta faturamento." },
-  { id: 24, estado: "ativo", nome: "Oferta de isca", regra: "No fechamento, uma por artigo. Promessa literal com número, o que chega e como sair na mesma tela. Sem contagem de downloads, sem escassez, e o arquivo não carrega nada que a página não tenha." },
+  { id: 24, estado: "previsto", nome: "Oferta de isca", regra: "No fechamento, uma por artigo. Promessa literal com número, o que chega e como sair na mesma tela. Sem contagem de downloads, sem escassez, e o arquivo não carrega nada que a página não tenha." },
   { id: 11, estado: "previsto", nome: "Enquete", regra: "Pergunta e opções no HTML inicial. Voto não fica atrás de e-mail. Resultado só vira fato com n, data e amostra rotulada." },
   { id: 12, estado: "previsto", nome: "Avaliação", regra: "“Isso respondeu sua dúvida?”, e o não abre campo livre. Nunca emite AggregateRating." },
   { id: 13, estado: "previsto", nome: "Carrossel", regra: "Rolagem em CSS, todos os slides no HTML inicial. Cada legenda funciona sozinha. Só para sequência visual." },
