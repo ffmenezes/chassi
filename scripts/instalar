@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Roda UMA vez, logo depois do clone.
+#
+# Existe por um motivo só: git guarda symlink como modo 120000, e num checkout
+# nativo de Windows sem core.symlinks=true o clone entrega um ARQUIVO DE TEXTO
+# com o caminho dentro, em silêncio. O participante não vê erro — só não tem
+# skill nenhuma. Aqui a gente detecta e conserta copiando.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+consertar_link() {
+  local link="$1" alvo="$2"
+  [ -L "$link" ] && return 0
+  if [ -f "$link" ] && [ "$(wc -l <"$link")" -le 1 ] && [ -e "$(dirname "$link")/$(cat "$link")" ]; then
+    echo "  symlink degradado: $link — copiando de $alvo"
+    rm -f "$link"; cp -r "$alvo" "$link"
+  fi
+}
+
+echo "chassi — instalação"
+consertar_link "CLAUDE.md" "AGENTS.md"
+consertar_link ".claude/skills" ".agents/skills"
+
+command -v node >/dev/null || { echo "ERRO: node não encontrado"; exit 1; }
+echo "  node $(node --version)"
+
+if [ -d web ]; then (cd web && npm install); fi
+
+echo
+echo "Pronto. Próximos passos:"
+echo "  1. git remote rename origin upstream"
+echo "  2. git remote add origin <seu-repo-privado>"
+echo "  3. cp web/src/sites/exemplo.ts web/src/sites/<seu-slug>.ts e edite"
+echo "  4. apague web/src/sites/exemplo.ts depois que o seu existir"
+echo "  5. cd web && npm run dev"
