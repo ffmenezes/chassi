@@ -55,16 +55,13 @@ import * as m from "../mock/artigo";
 /* A bancada monta o catálogo inteiro, em todo estilo — ela é o inventário,
  * não um site. Estilo é forma e cor (raio, borda, sombra, fonte, tinta); ele
  * não tem opinião sobre se um bloco existe. Quem decide isso é o site, na
- * lista `blocos` do arquivo em `src/sites/<slug>.ts`. Por isso `suportado`
- * fica fixo em `true` para os 36 blocos, nos cinco estilos: nenhum bloco é
- * "deste site" aqui, e nenhum fica "fora" de estilo nenhum — essa noção não
- * existe em nível de estilo. (O chip "fora deste estilo" e o parágrafo
- * `.sem-suporte` em `Palco.astro` ficam como código morto até esse
- * componente ganhar sua própria limpeza — não é este arquivo que o possui.)
+ * lista `blocos` do arquivo em `src/sites/<slug>.ts`. `Palco` não carrega
+ * mais a noção de bloco "fora de estilo" (removida em 65efbee): aqui ele só
+ * recebe `estilo`/`modo`, os mesmos para os 36 blocos, nos cinco estilos.
  */
 const estiloInicial: Estilo = "linho";
 const modoInicial = "claro";
-const palco = { estilo: estiloInicial, modo: modoInicial as "claro", suportado: true };
+const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
 ---
 
 <Base
