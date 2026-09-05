@@ -1,0 +1,59 @@
+---
+/**
+ * Página de erro 404. O Cloudflare Pages serve `404.html` (o build de uma
+ * rota `404.astro`) automaticamente pra qualquer caminho que não bate com
+ * nenhuma página estática — sem configuração nenhuma no `wrangler.toml`.
+ *
+ * `noindex`: página de serviço, não conteúdo pra busca — mesma régua de
+ * `contato-recebido.astro`. Usa `Artigo`, e não `Institucional`, porque não é
+ * prosa jurídica: é a mesma casca de qualquer outra página do site, com
+ * cabeçalho e rodapé, pra quem cai aqui por link quebrado nunca ficar sem
+ * saída.
+ */
+import Artigo from "../layouts/Artigo.astro";
+import { siteInstitucional } from "../institucional/dados";
+
+const site = siteInstitucional();
+---
+
+<Artigo site={site} titulo={`Página não encontrada — ${site.nome}`} noindex>
+  <div class="pagina-404">
+    <p class="codigo">404</p>
+    <h1 class="b-h1">Esta página não existe, ou mudou de endereço.</h1>
+    <p class="b-p">
+      Confira o link que te trouxe aqui. Se veio de uma busca, o conteúdo pode ter
+      mudado de lugar — as saídas abaixo levam ao que continua no ar.
+    </p>
+    <div class="saidas">
+      <a class="b-btn b-btn--forte" href="/">Início</a>
+      <a class="b-btn" href="/sobre/">Sobre</a>
+      <a class="b-btn" href="/contato/">Contato</a>
+    </div>
+  </div>
+</Artigo>
+
+<style>
+  .pagina-404 {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 90px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .codigo {
+    margin: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 13px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-tinta-2);
+  }
+  .saidas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+</style>
