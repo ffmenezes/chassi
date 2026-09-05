@@ -33,7 +33,24 @@ const ACERVO = import.meta.glob<{ default: ImageMetadata }>(
 
 const RAIZ = "/src/imagens/";
 
-const erro = (m: string) => {
+/**
+ * A coluna de leitura, em número: `.artigo` tem `max-width: 836px` menos a
+ * `--b-sangria` dos dois lados (`pages/[artigo].astro`), o que dá ~756px de
+ * conteúdo — e 768 é a aproximação de sempre para essa medida.
+ *
+ * Aproximação CONHECIDA, e declarada aqui para não virar surpresa: a partir de
+ * 1180px, num artigo SEM sumário, a mesma coluna abre para `max-width: 1108px`
+ * (~1028px de conteúdo) e este `sizes` continua dizendo 768. Nesse caso o
+ * navegador escolhe o candidato de 768w para um espaço de ~1000px, e a imagem
+ * sai um pouco mole. Trocar o número é decisão de layout que pede medição, não
+ * palpite; até lá, o custo está escrito.
+ */
+const SIZES = "(max-width: 768px) 100vw, 768px";
+
+/** Os candidatos do `srcset`, filtrados pelo que o arquivo original comporta. */
+const LARGURAS = [480, 768, 1024, 1440];
+
+const erro: (m: string) => never = (m: string) => {
   throw new Error(`[imagens] ${m}`);
 };
 
@@ -42,6 +59,19 @@ export async function otimizar(
   largura?: number,
   altura?: number,
 ): Promise<FiguraOtimizada> {
+  /* SVG não entra por aqui, e a mensagem tem de dizer isso: sem esta guarda o
+     autor recebe "nao existe no acervo" e sai caçando um erro de digitação que
+     não existe. Desenho é código — entra inline pelo slot da figura, com o
+     contrato próprio dele. */
+  if (/\.svgz?$/i.test(src)) {
+    erro(
+      `"${src}": SVG nao entra por \`src\`. Desenho e codigo — ele entra ` +
+        `inline pelo slot da figura (<Figura ...><svg .../></Figura>), que e ` +
+        `onde ele herda cor e tipografia do estilo. O acervo de \`src\` e so ` +
+        `de raster (png, jpg, jpeg, webp, avif).`,
+    );
+  }
+
   const chave = `${RAIZ}${src}`;
   const modulo = ACERVO[chave];
 
@@ -56,7 +86,7 @@ export async function otimizar(
     );
   }
 
-  const original = modulo!.default;
+  const original = modulo.default;
 
   if (largura !== undefined && largura !== original.width) {
     erro(
@@ -71,20 +101,20 @@ export async function otimizar(
     );
   }
 
-  const larguras = [480, 768, 1024, 1440].filter((l) => l <= original.width);
+  const larguras = LARGURAS.filter((l) => l <= original.width);
   if (!larguras.includes(original.width)) larguras.push(original.width);
 
   const otimizada = await getImage({
     src: original,
     format: "webp",
     widths: larguras,
-    sizes: "(max-width: 768px) 100vw, 768px",
+    sizes: SIZES,
   });
 
   return {
     src: otimizada.src,
     srcset: otimizada.srcSet.attribute,
-    sizes: "(max-width: 768px) 100vw, 768px",
+    sizes: SIZES,
     largura: original.width,
     altura: original.height,
   };
