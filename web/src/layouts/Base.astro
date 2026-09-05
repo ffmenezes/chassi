@@ -4,6 +4,9 @@ import "../styles/base.css";
 import "../styles/estilos/index";
 import "../styles/atomos.css";
 import Analytics from "../components/Analytics.astro";
+import Cabecalho from "../components/Cabecalho.astro";
+import Rodape from "../components/Rodape.astro";
+import Consentimento from "../components/Consentimento.astro";
 import type { Site } from "../sites/tipos";
 import { LANG_HTML } from "../idioma";
 
@@ -41,6 +44,19 @@ const { titulo, descricao, lang = LANG_HTML, noindex = false, site } = Astro.pro
     {site && <Analytics site={site} />}
   </head>
   <body>
+    {/*
+      O gate é `site` truthy, o mesmo que já decidia se `<Analytics>` entra.
+      Bancada e vitrine de estilo não passam `site` pra `Base` — de propósito,
+      ver o comentário de `Cabecalho.astro` — e por isso nascem sem chrome de
+      navegação nenhum.
+    */}
+    {site && <Cabecalho site={site} />}
     <slot />
+    {site && (
+      <>
+        <Rodape site={site} />
+        <Consentimento site={site} />
+      </>
+    )}
   </body>
 </html>

@@ -1,0 +1,81 @@
+---
+/**
+ * Cabeçalho magro: nome do site (linka pra "/"), Sobre, Contato. Só isso —
+ * a lista jurídica completa mora no rodapé (ver `Rodape.astro`), porque a
+ * regra que exige navegação em toda página é legal, não estética: a política
+ * de privacidade precisa estar alcançável de qualquer lugar, e o revisor
+ * humano do AdSense precisa conseguir navegar o site sem digitar URL na mão.
+ *
+ * Recebe `site` como prop em vez de chamar `siteInstitucional()` por conta
+ * própria: quem decide SE este componente aparece é `Base.astro`, que já
+ * resolve essa mesma pergunta pra `<Analytics>`. A bancada (`/bancada/`) e a
+ * vitrine (`/exemplo/<estilo>/`) não passam `site` a `Base` — de propósito,
+ * porque não são página de blog: são ferramenta interna de quem ainda está
+ * escolhendo estilo e olhando o catálogo de blocos, e não existe "Sobre" nem
+ * "Contato" nem política de privacidade daquilo pra linkar. Sem `site`, este
+ * componente não renderiza (o gate mora em `Base.astro`).
+ *
+ * Vive FORA da `<div class="pagina" data-estilo=... data-modo=... data-site=...>`
+ * que `Artigo.astro`/`Institucional.astro` abrem dentro do `<slot />` — por
+ * isso carrega os três atributos de token na mão, no próprio `<header>`. Mesma
+ * razão pela qual `Artigo.astro` já copia esses três atributos pro `<dialog>`,
+ * que também vive fora daquela div: sem eles, o cabeçalho pegaria a forma do
+ * ESTILO (que não muda) mas ficaria cego pro desvio do SITE (a cara própria).
+ *
+ * Zero JS: navegação é link.
+ */
+import type { Site } from "../sites/tipos";
+
+interface Props { site: Site }
+const { site } = Astro.props;
+---
+
+<header
+  class="cabecalho"
+  aria-label="Navegação principal"
+  data-estilo={site.estilo}
+  data-modo={site.modoPadrao}
+  data-site={site.slug}
+>
+  <nav class="cabecalho-nav">
+    <a class="cabecalho-nome" href="/">{site.nome}</a>
+    <div class="cabecalho-links">
+      <a href="/sobre/">Sobre</a>
+      <a href="/contato/">Contato</a>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .cabecalho {
+    background: var(--b-fundo);
+    border-bottom: var(--b-borda);
+  }
+  .cabecalho-nav {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .cabecalho-nome {
+    font-family: var(--b-fonte-titulo);
+    font-weight: var(--b-peso-titulo);
+    font-size: 16px;
+    color: var(--b-tinta);
+    text-decoration: none;
+  }
+  .cabecalho-links {
+    display: flex;
+    gap: 18px;
+  }
+  .cabecalho-links a {
+    font-size: 14px;
+    color: var(--b-tinta-2);
+    text-decoration: none;
+  }
+  .cabecalho-links a:hover { color: var(--b-tinta); }
+</style>

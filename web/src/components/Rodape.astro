@@ -1,0 +1,79 @@
+---
+/**
+ * Rodapé completo: as quatro páginas jurídicas, Sobre, Contato, mais uma
+ * linha de copyright com o responsável pelo site. Ver o comentário de
+ * `Cabecalho.astro` para o porquê da navegação se dividir em magro (cabeçalho)
+ * e completo (aqui) em vez de tudo num lugar só: cabeçalho é o que se olha
+ * pra voltar à home, rodapé é onde a lista jurídica cabe sem competir com a
+ * marca — e é essa lista que a regra do item exige em TODA página.
+ *
+ * `renderizarResponsavel` já resolve a regra de nunca estampar CPF (ver
+ * `institucional/dados.ts`); este componente só chama, não decide nada
+ * sobre isso de novo.
+ *
+ * Mesma razão de `Cabecalho.astro` pra receber `site` como prop (o gate de
+ * "aparece só quando há site" mora em `Base.astro`, não aqui) e pra carregar
+ * os três atributos de token na mão: também vive fora da `div.pagina` que o
+ * `<slot />` abre.
+ *
+ * Zero JS: navegação é link.
+ */
+import type { Site } from "../sites/tipos";
+import { renderizarResponsavel } from "../institucional/dados";
+
+interface Props { site: Site }
+const { site } = Astro.props;
+const ano = new Date().getFullYear();
+---
+
+<footer
+  class="rodape"
+  aria-label="Rodapé"
+  data-estilo={site.estilo}
+  data-modo={site.modoPadrao}
+  data-site={site.slug}
+>
+  <div class="rodape-conteudo">
+    <nav class="rodape-nav" aria-label="Páginas institucionais">
+      <a href="/sobre/">Sobre</a>
+      <a href="/contato/">Contato</a>
+      <a href="/privacidade/">Privacidade</a>
+      <a href="/cookies/">Cookies</a>
+      <a href="/termos/">Termos de uso</a>
+      <a href="/direitos-autorais/">Direitos autorais</a>
+    </nav>
+    <p class="rodape-copyright">© {ano} {renderizarResponsavel(site.responsavel)}</p>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    border-top: var(--b-borda);
+    background: var(--b-superficie);
+  }
+  .rodape-conteudo {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 28px 20px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .rodape-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+  .rodape-nav a {
+    font-size: 13.5px;
+    color: var(--b-tinta-2);
+    text-decoration: none;
+  }
+  .rodape-nav a:hover { color: var(--b-tinta); }
+  .rodape-copyright {
+    margin: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+    color: var(--b-tinta-2);
+  }
+</style>
