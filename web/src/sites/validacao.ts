@@ -34,6 +34,41 @@ export function validar(sites: Site[], estilosConhecidos: string[]): void {
       );
     }
 
+    /*
+     * O domínio é configuração do participante, e por isso é conferido AQUI,
+     * uma vez por site no import, e não dentro de `url.ts` — lá a conferência
+     * rodaria duas vezes por página, em toda página, e um site que não
+     * renderiza página nenhuma nunca seria conferido. `og:url` relativo é card
+     * que não abre, e descobrir isso no WhatsApp é caro demais perto de
+     * descobrir no build.
+     */
+    const dominio = site.dominio.trim();
+    const ondeArrumar = `Arrume em web/src/sites/${site.slug}.ts.`;
+    if (!dominio) {
+      throw new Error(
+        `[sites] ${site.slug} está com dominio vazio. Sem ele não existe og:url nem ` +
+          `canonical. ${ondeArrumar}`
+      );
+    }
+    if (/^[a-z]+:\/\//i.test(dominio)) {
+      throw new Error(
+        `[sites] ${site.slug} declara dominio com esquema ("${site.dominio}"), e o ` +
+          `og:url sairia dobrado. Escreva só o host: "exemplo.com.br". ${ondeArrumar}`
+      );
+    }
+    if (dominio.endsWith("/")) {
+      throw new Error(
+        `[sites] ${site.slug} declara dominio com barra final ("${site.dominio}"). ` +
+          `A barra vem do caminho, nunca do host. ${ondeArrumar}`
+      );
+    }
+    if (/\s/.test(site.dominio)) {
+      throw new Error(
+        `[sites] ${site.slug} declara dominio com espaço ("${site.dominio}"). ` +
+          `Host não tem espaço. ${ondeArrumar}`
+      );
+    }
+
     if (site.avisoBarra) {
       if (!site.avisoBarra.texto.trim()) {
         throw new Error(

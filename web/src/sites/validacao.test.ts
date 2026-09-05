@@ -58,6 +58,35 @@ describe("validar", () => {
     expect(() => validar([base(), base()], ["linho"])).toThrow(/slug repetido/);
   });
 
+  it("aceita o dominio de um site de verdade e o localhost do SITE_DEMO", () => {
+    expect(() => validar([base({ dominio: "exemplo.com.br" })], ["linho"])).not.toThrow();
+    expect(() => validar([base({ dominio: "localhost" })], ["linho"])).not.toThrow();
+  });
+
+  it("recusa dominio vazio, que e configuracao incompleta", () => {
+    expect(() => validar([base({ dominio: "   " })], ["linho"])).toThrow(/dominio vazio/i);
+  });
+
+  it("recusa dominio com esquema: og:url sairia dobrado", () => {
+    expect(() => validar([base({ dominio: "https://exemplo.com.br" })], ["linho"]))
+      .toThrow(/esquema/i);
+  });
+
+  it("recusa dominio com barra final", () => {
+    expect(() => validar([base({ dominio: "exemplo.com.br/" })], ["linho"]))
+      .toThrow(/barra final/i);
+  });
+
+  it("recusa dominio com espaco", () => {
+    expect(() => validar([base({ dominio: "exemplo .com.br" })], ["linho"]))
+      .toThrow(/espaço/i);
+  });
+
+  it("diz qual arquivo abrir quando o dominio esta torto", () => {
+    expect(() => validar([base({ slug: "meu-blog", dominio: "exemplo.com.br/" })], ["linho"]))
+      .toThrow(/web\/src\/sites\/meu-blog\.ts/);
+  });
+
   it("aceita site sem avisoBarra", () => {
     expect(() => validar([base()], ["linho"])).not.toThrow();
   });

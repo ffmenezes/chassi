@@ -19,22 +19,9 @@ describe("urlAbsoluta", () => {
     expect(urlAbsoluta(site("exemplo.com.br"), "/")).toBe("https://exemplo.com.br/");
   });
 
-  it("recusa dominio com esquema: og:url sairia dobrado", () => {
-    expect(() => urlAbsoluta(site("https://exemplo.com.br"), "/")).toThrow(/esquema/i);
-  });
-
-  it("recusa dominio com barra final", () => {
-    expect(() => urlAbsoluta(site("exemplo.com.br/"), "/")).toThrow(/barra final/i);
-  });
-
-  it("recusa dominio vazio, que e configuracao incompleta", () => {
-    expect(() => urlAbsoluta(site("   "), "/")).toThrow(/vazio/i);
-  });
-
-  it("recusa dominio com espaco no meio", () => {
-    expect(() => urlAbsoluta(site("exemplo .com.br"), "/")).toThrow(/espaco|espaço/i);
-  });
-
+  /* As regras do `dominio` moram em `sites/validacao.test.ts`: elas conferem
+     configuração do participante, uma vez por site no import. Aqui fica só a
+     asserção sobre a NOSSA chamada. */
   it("recusa caminho sem barra inicial, porque a chamada e nossa", () => {
     expect(() => urlAbsoluta(site("exemplo.com.br"), "sobre/")).toThrow(/barra inicial/i);
   });

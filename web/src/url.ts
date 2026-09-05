@@ -1,5 +1,5 @@
 /**
- * A URL absoluta de uma página deste site.
+ * A URL absoluta de uma página deste site. Só formatação — nada mais.
  *
  * O domínio sai de `web/src/sites/<slug>.ts` e daqui só — a mesma doutrina de
  * `institucional/dados.ts`, que é o que faz o participante nunca precisar
@@ -8,29 +8,24 @@
  * os dois cria conflito exatamente onde o desenho do repositório existe para
  * não ter nenhum.
  *
- * Falha em vez de emendar: `og:url` relativo é card que não abre, e descobrir
- * isso no WhatsApp é caro demais perto de descobrir no build.
+ * As regras do `dominio` (vazio, com esquema, com barra final, com espaço) NÃO
+ * moram aqui: são configuração do participante e por isso são conferidas em
+ * `sites/validacao.ts`, uma vez por site no import, junto das outras regras
+ * que quebram a build. Aqui ficaria conferindo o mesmo campo duas vezes por
+ * página e deixaria de fora o site que não renderiza página nenhuma.
+ *
+ * A checagem que sobrou é de outra natureza: `caminho` é argumento NOSSO, de
+ * chamada nossa. Caminho torto não é configuração errada do participante — é
+ * bug nosso, e some assim que alguém corrige a chamada.
  */
 import type { Site } from "./sites/tipos";
 
-const erro = (m: string) => {
-  throw new Error(`[url] ${m}`);
-};
-
 export function urlAbsoluta(site: Site, caminho: string): string {
-  const d = site.dominio.trim();
-
-  if (!d) erro("dominio vazio em web/src/sites/<slug>.ts. Sem ele nao existe og:url.");
-  if (/^[a-z]+:\/\//i.test(d)) {
-    erro(`dominio com esquema ("${d}"). Escreva so o host: "exemplo.com.br".`);
-  }
-  if (d.endsWith("/")) {
-    erro(`dominio com barra final ("${d}"). A barra vem do caminho, nao do host.`);
-  }
-  if (/\s/.test(d)) erro(`dominio com espaco ("${d}").`);
   if (!caminho.startsWith("/")) {
-    erro(`caminho sem barra inicial ("${caminho}"). A chamada e nossa: passe "/sobre/".`);
+    throw new Error(
+      `[url] caminho sem barra inicial ("${caminho}"). A chamada e nossa: passe "/sobre/".`,
+    );
   }
 
-  return `https://${d}${caminho}`;
+  return `https://${site.dominio}${caminho}`;
 }

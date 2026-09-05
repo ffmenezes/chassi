@@ -33,6 +33,13 @@ const NEUTROS = {
 /** O acento do estilo, com o desvio declarado do site vencendo. */
 function acentoDoSite(site: Site): string {
   const estilo = ESTILOS[site.estilo];
+  /*
+   * Defesa DECLARADAMENTE redundante, e fica: `sites/validacao.ts` já recusa
+   * estilo inexistente no import, então nenhum site que chega ao build passa
+   * por aqui com estilo torto. Isto existe para o dia em que esta função pura
+   * for chamada de fora dessa garantia (um teste, uma ferramenta, um módulo
+   * novo) — aí ela falha alto em vez de devolver um card sem cor.
+   */
   if (!estilo) {
     throw new Error(
       `[social] estilo "${site.estilo}" nao existe. Os que existem: ` +
