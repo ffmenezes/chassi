@@ -5,19 +5,69 @@ description: Use quando o dono quiser um bloco novo no catálogo do chassi ou um
 
 # Criar um bloco novo
 
-Um bloco é uma peça de artigo com regra própria, e a regra nasce em
-`.claude/skills/artigo/referencias/arquitetura-pagina.md` — a autoridade —
-antes de virar código. `web/src/catalogo.ts` é a **projeção** daquele arquivo:
-mesma numeração, mesmo estado, mesma regra resumida. Um `.astro` sem entrada
-no catálogo não é bloco, é componente solto.
+Um bloco é uma peça de artigo com regra própria. A doutrina deveria nascer em
+`.claude/skills/artigo/referencias/arquitetura-pagina.md`, mas **esse arquivo
+não existe neste repositório** — é referência herdada de um projeto-pai
+(aparece citada em vários comentários do código, inclusive no docstring de
+`web/src/catalogo.ts`, mas um `find` no chassi não acha o arquivo em lugar
+nenhum). Não perca tempo procurando: aqui a autoridade de fato é o comentário
+de cada `.astro` mais o resumo em `web/src/catalogo.ts`, no array `CATALOGO`
+— mesma numeração, mesmo estado, mesma regra resumida que aquele arquivo
+ausente prometeria ter. Um `.astro` sem entrada no catálogo não é bloco — mas
+"sem entrada no catálogo" cobre duas coisas bem diferentes, e a primeira
+decisão é qual das duas é a sua.
 
-**Chrome não é bloco.** Sumário, paginação, toast, overlay, barra de
-progresso — o que serve a página, não a arquitetura de UM artigo — leva `id`
-tipo `"N1"`..`"N5"`, estado `navegacao`, e nunca entra no campo `blocos` de um
-site. Se o que você vai criar é chrome, siga o mesmo procedimento abaixo, só
-pulando o passo do mock de artigo (chrome usa dado próprio, não `mock/artigo.ts`).
+## Bloco de catálogo, ou chrome de site?
 
-## Os doze erros que já aconteceram aqui
+**Entra no catálogo** (e por isso na bancada) o que uma ARQUITETURA escolhe
+montar — decisão por artigo, ou por página de navegação, com instância
+própria: Toast leva título e texto por chamada, Overlay leva um gatilho,
+Paginação leva total e página atual. `BlocoId`, em `catalogo.ts`, tem três
+faixas:
+
+- **`1`..`28`, bloco de artigo.** Site declara em `blocos`. O número é
+  histórico, não a ordem de leitura nem a faixa em si — o bloco 19 lê entre
+  10 e 11 — e o `estado` é sempre explícito, nunca deduzido do número.
+- **`"N1"`..`"N5"`, chrome de NAVEGAÇÃO.** Serve a página, não a arquitetura
+  de UM artigo, mas ainda tem instância própria e ainda aparece na bancada.
+  **As cinco vagas já estão ocupadas hoje**: Paginação, Card de artigo, Toast
+  de aviso, Overlay de tela cheia, Barra de progresso. Ver "Cheio, e agora?"
+  abaixo antes de pensar numa sexta.
+- **`"A1"`..`"A3"`, átomo.** O que a prosa usa sem escolher. **Também cheio**
+  hoje (Prosa e seus átomos, Listas, Botões) — você quase nunca cria um
+  átomo novo.
+
+**Nunca entra no catálogo** o que é decisão única do site inteiro: liga ou
+desliga uma vez, como cabeçalho ou rodapé, nunca algo que um artigo escolhe
+montar — e por isso nunca aparece na bancada nem no campo `blocos`. É
+**chrome de site**: mora direto em `web/src/components/` (não em
+`components/blocos/`), ganha campo próprio e tipado em `Site` (não a lista
+`blocos`), e monta em `web/src/layouts/Base.astro` atrás do gate `{site &&
+<X site={site} />}` — o mesmo gate que já existe para nada montar na
+bancada, porque `Base` só recebe `site` fora dela. Os quatro que existem
+hoje: `Cabecalho.astro`, `Rodape.astro`, `Consentimento.astro` e
+`BarraAviso.astro`. Nenhum tem `id` em `catalogo.ts`, e é assim que deve
+continuar.
+
+Critério, resumido: **tem instância própria, artigo a artigo (ou página a
+página), e faz sentido lado a lado na bancada? Catálogo.** **É uma decisão
+única do site, sempre igual em toda página? Chrome de site, fora do
+catálogo.**
+
+### Cheio, e agora?
+
+Não invente `"N6"` nem `"A4"` só porque o slot mais parecido está ocupado —
+`BlocoId` é um union de literais fixo, e abrir uma vaga é mudar o tipo, uma
+decisão grande demais pra tomar sozinho no meio de escrever um componente.
+Releia o critério acima primeiro: na prática, quase todo candidato a "N6" é
+chrome de site disfarçado — o caso real foi `BarraAviso.astro`: o primeiro
+instinto foi encaixá-la em N porque "N já significa chrome", e o lugar certo
+era fora do catálogo, ao lado de `Cabecalho`/`Rodape`/`Consentimento`. Se
+depois de aplicar o critério ainda sobrar um caso genuíno de navegação com
+instância própria, pare e leve a decisão de abrir uma vaga nova para o dono,
+não decida sozinho.
+
+## Os treze erros que já aconteceram aqui
 
 Cada um tem commit ou comentário no código. Leia antes de escrever a primeira
 linha — é mais barato ler isto do que repetir o defeito.
@@ -138,23 +188,75 @@ linha — é mais barato ler isto do que repetir o defeito.
     (`getComputedStyle` no elemento, via DevTools ou um teste que sobe
     página) ou explique, por escrito, por que a combinação HTML+CSS resolve.
 
+13. **O teste discriminante pega o erro de quem o escreveu, não só o do
+    vizinho.** Ao escrever a validação de `avisoBarra` em
+    `web/src/sites/validacao.ts` (commit `250601f`), o `if (site.avisoBarra)
+    {...}` novo foi posto DEPOIS do `if (!site.tokens) continue;` já
+    existente — qualquer site sem `tokens` pulava a checagem inteira, e os
+    dois testes de recusa (texto vazio, link pela metade) passavam **verdes
+    sem checar nada**. Rodar a suíte de verdade, em vez de assumir que
+    passava, pegou o bug na hora, antes do commit. É o mesmo erro 11, mas
+    provado ao vivo, no próprio código de quem seguia a doutrina — não só no
+    exemplo didático do dedupe de token. A régua não muda: escreva a
+    checagem, rode contra os dois lados (aceita e recusa), e só então confie
+    que ela discrimina.
+
 ## O procedimento
 
-1. **Bloco de artigo ou chrome?** Se a peça é escolhida por artigo e entra na
-   arquitetura de UM texto, é bloco (id numérico). Se serve a página inteira
-   — navegação, feedback de ação, progresso — é chrome (`id` `"N1"`..`"N5"`,
-   `estado: "navegacao"`). Um átomo (`"A1"`..`"A3"`) é o que a prosa usa sem
-   escolher: você quase nunca cria um átomo novo, os três já cobrem prosa,
-   listas e botões.
+0. **Antes de criar: essa forma já existe?** Antes de abrir o catálogo ou um
+   `.astro`, leia `web/src/catalogo.ts` inteiro e liste
+   `web/src/components/blocos/`. O que você procura não é o mesmo nome — é a
+   mesma **forma**: mesma marcação, mesmos slots, mesmo desenho. O critério é
+   este: **o catálogo separa por regra; o componente compartilha por forma.**
+   Regra nova sempre ganha entrada nova no catálogo, isso não está em questão;
+   o que está em questão é se ela também precisa de um `.astro` do zero. Os
+   dois lados já existem neste repositório, e a diferença entre eles é o
+   teste:
 
-2. **Entrada no catálogo.** A doutrina nasce em
-   `.claude/skills/artigo/referencias/arquitetura-pagina.md`, com a regra por
-   extenso. Só depois o resumo entra em `web/src/catalogo.ts`, no array
-   `CATALOGO`: `id`, `nome`, `estado` (explícito — nunca deduza de faixa
-   numérica, ver o comentário do campo `estado` no arquivo) e `regra`
-   resumida. Se o bloco precisa de infraestrutura que este repositório não
-   tem, o estado é `previsto`, com o comentário dizendo qual dependência
-   falta (erro 3).
+   - **Compartilha (blocos 4 e 5).** `TabelaPanorama.astro` e
+     `TabelaContraste.astro` são duas entradas de catálogo com doutrina
+     diferente — panorama derruba a coluna inteira quando falta célula,
+     contraste exige as duas colunas apuradas na mesma base — e mesmo assim
+     os dois arquivos são idênticos byte a byte: mesma `interface Props`,
+     ambos só delegando para `_Tabela.astro`. A regra vive no comentário do
+     frontmatter e na entrada do catálogo; a forma vive num arquivo só.
+   - **Não compartilha (blocos 6 e 7).** `CitacaoDestacada.astro` e
+     `CitacaoFonte.astro` parecem primos tão próximos quanto os de cima, e
+     foram deliberadamente mantidos separados: o 7 tem `nome`, `papel` e
+     `conflito` — este último obrigatório, porque "a neutralidade não se
+     presume" —, o 6 tem só `texto` e um teto de duas por artigo. O
+     comentário do 6 fecha a questão em uma linha: "as regras não se
+     misturam".
+
+   O desempate, na dúvida: se as duas regras têm travas diferentes (um
+   `erro(...)` no frontmatter, como em `Figura.astro`), são dois componentes.
+   Se a única diferença é qual texto o dono passa em qual prop, é um
+   componente e dois invólucros finos — e o passo 3 vira escrever nove
+   linhas, não um bloco inteiro.
+
+1. **Catálogo ou chrome de site?** Aplique o critério da seção "Bloco de
+   catálogo, ou chrome de site?" no topo desta skill. Três faixas dentro do
+   catálogo (`1`..`28` bloco de artigo; `"N1"`..`"N5"` navegação; `"A1"`..`"A3"`
+   átomo — as duas últimas hoje cheias, ver "Cheio, e agora?"), e uma família
+   inteira fora dele: chrome de site (`Cabecalho`, `Rodape`, `Consentimento`,
+   `BarraAviso`, direto em `web/src/components/`, sem entrada em
+   `catalogo.ts`). Escolhendo **chrome de site**, pule os passos 5 (bancada —
+   ele nunca aparece lá, porque `Base` só recebe `site` fora dela), 6 (mock —
+   lê o campo próprio de `Site`, não `mock/artigo.ts`), 7 e 8 (não há
+   `blocos` de site nem slot de artigo pra montar) e vá direto do passo 3
+   para "Como saber que terminou". Escolhendo **chrome de navegação** (`N`),
+   o procedimento é o mesmo do bloco de artigo, só pulando o passo 6 (mock —
+   usa dado próprio) e o passo 8 (não é slot de artigo).
+
+2. **Entrada no catálogo.** A regra por extenso mora no comentário do próprio
+   `.astro` (o docstring de `catalogo.ts` aponta para
+   `.claude/skills/artigo/referencias/arquitetura-pagina.md` como autoridade
+   — esse arquivo não existe neste repositório, ver o segundo parágrafo desta
+   skill). O resumo entra em `web/src/catalogo.ts`, no array `CATALOGO`:
+   `id`, `nome`, `estado` (explícito — nunca deduza de faixa numérica, ver o
+   comentário do campo `estado` no arquivo) e `regra` resumida. Se o bloco
+   precisa de infraestrutura que este repositório não tem, o estado é
+   `previsto`, com o comentário dizendo qual dependência falta (erro 3).
    Verificação: `cd web && npm run check` ainda passa (o tipo `BlocoId` cresce
    sozinho a partir do literal novo, mas confira que nada mais no arquivo
    quebrou o tipo).
@@ -171,6 +273,33 @@ linha — é mais barato ler isto do que repetir o defeito.
    Se o bloco ganha `<script>`, o comentário do frontmatter diz o que quebra
    sem JS e por que o resto sobrevive (erro 6).
 
+   Se o que você está escrevendo é chrome que o leitor **fecha** (aviso,
+   banner, promoção), três técnicas já têm precedente aqui e valem juntas —
+   a mesma combinação usada em `Checklist.astro`, `Consentimento.astro` e,
+   de ponta a ponta, em `BarraAviso.astro`/`web/src/avisoBarra.ts`:
+   - **Fechar sem JavaScript.** `<input type="checkbox">` oculto só
+     visualmente (não `display:none`/`hidden` — continua alcançável por Tab,
+     aciona por Espaço) associado a um `<label>` que faz as vezes de botão de
+     fechar, mais CSS puro (`:checked ~ .o-que-fecha { display: none }`).
+     Quem tem JS desligado fecha do mesmo jeito; o script, se existir, só
+     acrescenta memória entre páginas.
+   - **`position: sticky`, nunca `fixed` + espaçador.** Um elemento fixo no
+     topo que empurra o resto precisa reservar espaço à parte — `fixed` tira
+     do fluxo normal e exige medir a altura por fora (e reagir se ela mudar,
+     como texto quebrando em duas linhas no celular). `sticky` no próprio
+     elemento continua no fluxo: reserva e devolve o espaço sozinho, em
+     qualquer altura, sem cálculo nenhum.
+   - **Guarde o conteúdo dispensado, nunca um booleano.** Mesma doutrina de
+     `web/src/consentimento.ts` ("guarda-se a frase, e não um booleano
+     solto: a frase muda com o tempo, e o que a pessoa aceitou foi a frase
+     daquele dia"), aplicada aqui ao fechar em vez de ao aceitar: guarde o
+     TEXTO fechado no `localStorage` (`avisoBarra.ts` é o modelo, com
+     `foiFechada(armazenado, textoAtual)` puro e testável sem DOM), nunca só
+     a presença de uma chave. Texto novo é aviso novo — quem fechou o texto
+     de ontem volta a ver o de hoje. Guardar só um booleano (`fechou: true`)
+     é a versão que parece funcionar e falha exatamente no dia em que o
+     conteúdo muda.
+
 4. **Tokens, só se faltarem.** Rode o componente num estilo antes de assumir
    que falta token — os cinco estilos (`linho`, `concreto`, `vidro`,
    `circuito`, `ceu`) juntos são a referência de quais `--b-*` já existem.
@@ -180,20 +309,22 @@ linha — é mais barato ler isto do que repetir o defeito.
    `web/src/styles/estilos/<nome>.css`, dentro do `[data-estilo="<nome>"]`
    correspondente — nunca um seletor mirando dentro do bloco.
 
-5. **Espécime e bancada.** Bloco simples usa o próprio componente direto num
-   `<Palco>`; bloco sem instância de artigo (átomo, ou algo com muitos
-   estados como botão) ganha um `_NomeDemo.astro` — o padrão é
-   `_BotoesDemo.astro` (repouso, hover congelado, foco congelado,
-   desabilitado — erro 8) ou `_ListasDemo.astro` (as variações lado a lado).
-   Em `web/src/pages/bancada.astro`: importe o componente, acrescente
-   `<Palco id={N} {...palco}>...</Palco>` na lista dentro de `<main
-   class="blocos">`, na posição que respeita a ordem de leitura do catálogo
-   (não a ordem de import). Se o bloco tem papéis diferentes (como Figura:
+5. **Espécime e bancada.** (Chrome de site — `Cabecalho`/`Rodape`/
+   `Consentimento`/`BarraAviso` — não passa por este passo: ele nunca entra
+   na bancada.) Bloco simples usa o próprio componente direto num `<Palco>`;
+   bloco sem instância de artigo (átomo, ou algo com muitos estados como
+   botão) ganha um `_NomeDemo.astro` — o padrão é `_BotoesDemo.astro`
+   (repouso, hover congelado, foco congelado, desabilitado — erro 8) ou
+   `_ListasDemo.astro` (as variações lado a lado). Em
+   `web/src/pages/bancada.astro`: importe o componente, acrescente `<Palco
+   id={N} {...palco}>...</Palco>` na lista dentro de `<main class="blocos">`,
+   na posição que respeita a ordem de leitura do catálogo (não a ordem de
+   import). Se o bloco tem papéis diferentes (como Figura:
    prova/diagrama/spot) ou estados diferentes (como Aviso: atenção/nota),
    mostre todos no mesmo palco — é o único lugar onde dá para comparar de um
    olhar.
    Verificação do passo (erro 2): depois de rodar `npm run bancada`, contar
-   quantos `data-suportado="sim"` existem no HTML gerado e bater com
+   quantas seções `class="bloco"` existem no HTML gerado e bater com
    `CATALOGO.length` (todo bloco ativo/previsto/derivado/átomo deveria contar,
    já que `SITE_DEMO.blocos` é o catálogo inteiro) — ver "como saber que
    terminou" abaixo para o comando exato.
@@ -232,12 +363,22 @@ npm run build          # sem NENHUMA variável de ambiente — bloco previsto
 
 Mais as verificações específicas de bloco novo:
 
-- **A contagem da bancada bate.** Depois de `npm run bancada`:
+- **A contagem da bancada bate.** (Não se aplica a chrome de site — ele nunca
+  entra na bancada.) `Palco.astro` não emite mais `data-suportado`: o
+  atributo foi removido no commit `65efbee`, junto com código morto de um
+  mecanismo de suporte por estilo que não existe mais — um `grep` por ele
+  hoje dá zero sempre, para qualquer bloco, certo ou errado. O marcador vivo
+  é a própria seção do bloco, `class="bloco"`. Depois de `npm run bancada`:
   ```
-  grep -o 'data-suportado="sim"' ../bancada.html | wc -l
+  grep -o 'class="bloco"' ../bancada.html | wc -l
   ```
-  compare com o total de entradas em `CATALOGO` (`web/src/catalogo.ts`). Se
-  faltar um, o bloco novo não entrou no `<Palco>` de `bancada.astro`, ou
+  compare com o total de entradas em `CATALOGO` (`web/src/catalogo.ts` — hoje
+  36). **Use `grep -o ... | wc -l`, nunca `grep -c`**: o HTML da bancada sai
+  em poucas linhas bem longas, então `grep -c` conta *linhas* com pelo menos
+  uma ocorrência, não ocorrências — testado contra o HTML de verdade, `grep
+  -c 'class="bloco"'` deu `3` (três linhas que contêm a classe) contra os
+  `36` blocos reais que `grep -o | wc -l` encontrou. Se a contagem certa não
+  bater, o bloco novo não entrou no `<Palco>` de `bancada.astro`, ou
   `SITE_DEMO.blocos` voltou a divergir do catálogo (erro 2).
 
 - **Nenhum `action` aponta para endpoint inexistente no HTML gerado.** Se o
@@ -250,9 +391,17 @@ Mais as verificações específicas de bloco novo:
   ```
 
 - **Se o bloco depende de cascata (`[hidden]`, `@layer`, ordem de camada),
-  meça no navegador — `getComputedStyle` no elemento — em vez de só `grep`
-  no HTML (erro 1 e erro 12). Um `grep` que acha `hidden` na marcação não diz
-  se o elemento está realmente oculto na tela.
+  meça no navegador de verdade — não só leia o CSS.** A skill `agent-browser`
+  (disponível nesta sessão) sobe um Chromium de verdade e prova três coisas
+  que `grep` no HTML não prova: `getComputedStyle` do elemento (erro 1 e
+  erro 12 — um `grep` que acha `hidden` na marcação não diz se o elemento
+  está realmente oculto na tela), estado que só existe depois de um script
+  rodar (clique, evento, `localStorage`), e o caminho **sem JavaScript**. Para
+  provar o caminho sem JS de forma defensável, não desligue JS na mão: bloqueie
+  o `<script>` por rota de rede (`agent-browser network route "*" --abort
+  --resource-type script`) e repita a interação — se o comportamento continua
+  idêntico com zero script executado, a melhoria progressiva está provada,
+  não só declarada no comentário.
 
 - **Se você escreveu um teste novo, quebre a implementação de propósito e
   veja o teste falhar antes de aceitar que ele prova algo** (erro 11).
@@ -261,6 +410,10 @@ Mais as verificações específicas de bloco novo:
 
 - Criar um `.astro` em `components/blocos/` sem entrada correspondente em
   `catalogo.ts` — isso não é bloco, é componente órfão que ninguém encontra.
+- Criar um `.astro` do zero para um bloco cuja forma já existe em
+  `components/blocos/` — regra nova é entrada nova no catálogo, não
+  necessariamente arquivo novo (passo 0: os blocos 4 e 5 dividem
+  `_Tabela.astro`).
 - Declarar `estado: "ativo"` para um bloco cuja dependência (endpoint, conta,
   serviço) não existe neste repositório.
 - Escrever cor, fonte ou medida literal dentro do `<style>` de um bloco — se
@@ -273,3 +426,8 @@ Mais as verificações específicas de bloco novo:
   seletor do bloco, não no contrato.
 - Aceitar um teste como prova sem antes vê-lo falhar contra uma implementação
   quebrada de propósito.
+- Inventar `"N6"` ou `"A4"` por reflexo só porque a faixa mais parecida está
+  cheia — releia primeiro o critério de bloco de catálogo vs. chrome de site.
+- Guardar um booleano (`fechou: true`, `jaViu: true`) para lembrar que o
+  leitor dispensou algo que pode mudar de conteúdo — guarde o que foi
+  dispensado, ou o aviso seguinte nasce escondido por engano.
