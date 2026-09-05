@@ -26,31 +26,63 @@ termos, direitos autorais).
 Prometer o que não tem é a pior coisa que este README podia fazer, então está
 dito sem rodeio.
 
-## Como clonar
+## Como clonar a primeira vez
+
+Roda uma vez, e nunca mais. No fim destes seis passos você tem um repositório
+privado seu, com um site que builda, publica e continua recebendo correção do
+upstream.
+
+**1. Clone, e troque os remotes de lugar.**
 
 ```bash
 git clone https://github.com/ffmenezes/chassi.git meu-blog
 cd meu-blog
-git remote rename origin upstream
+git remote rename origin upstream          # a origem vira "upstream"
 git remote add origin <repo-privado-do-participante>
+git push -u origin main
+```
+
+O `upstream` é o que faz `./scripts/atualizar` existir. Apagou o remote,
+acabou a atualização.
+
+**2. Instale.**
+
+```bash
 ./scripts/instalar
 ```
 
-Por que **clone**, e não "Use this template" nem fork:
+Roda uma vez, logo depois do clone. Existe por um motivo só: git guarda
+symlink como modo `120000`, e num checkout nativo de Windows sem
+`core.symlinks=true` o clone entrega um **arquivo de texto** com o caminho
+dentro, em silêncio. Você não vê erro — só não tem skill nenhuma. O script
+detecta e conserta copiando, e depois instala as dependências do `web/`.
 
-- **Fork de repositório público não vira privado.** O seu blog carrega
-  conteúdo, pautas, métricas e a base do site — a maioria não quer isso
-  público e listado como fork de `ffmenezes/chassi`.
-- **"Use this template" cria história não relacionada.** `git log
-  HEAD..upstream/main` — que é como você vê o que mudou lá em cima — deixa de
-  funcionar sem ancestral comum.
+**3. Crie o seu site — os dois lados.**
 
-O clone com histórico entrega repositório privado **e** "o que mudou desde que
-eu clonei" de graça, porque o remote `upstream` continua enxergando a origem.
+```bash
+cp web/src/sites/exemplo.ts web/src/sites/<seu-slug>.ts   # a máquina
+cp -r sites/_modelo sites/<seu-slug>                      # a doutrina
+```
 
-## Duas vitrines antes de escrever
+O `.ts` é o que a build lê: slug, nome, domínio, estilo, quais blocos o site
+monta, as portas, e os até 6 desvios de token. A pasta `sites/<seu-slug>/` é o
+que **você** lê antes de escrever — território, leitor, tom, autor, provas.
+Nada dela entra na build; o slug é o mesmo dos dois lados de propósito, e é
+você que mantém os dois iguais.
 
-Suba o servidor local:
+**4. Apague o modelo.**
+
+```bash
+rm web/src/sites/exemplo.ts
+```
+
+`exemplo.ts` é o único arquivo do upstream que você tem permissão de apagar —
+e precisa apagar, senão você publica dois sites, um deles chamado "Blog de
+Exemplo". A pasta `sites/_modelo/` é o contrário: **não apague e não
+responda** nada dentro dela. Ela continua ali para o seu segundo site, e é de
+lá que você puxa melhorias dos stubs.
+
+**5. Veja no ar, e escolha o estilo.**
 
 ```bash
 cd web && npm run dev
@@ -64,8 +96,136 @@ cd web && npm run dev
   Responde "como fica o mesmo texto em cada um dos cinco estilos, para eu
   escolher o meu".
 
-Sem essas duas rotas abertas, você tem 30 componentes e 5 estilos que
-ninguém te contou que existem.
+Sem essas duas rotas abertas, você tem 30 componentes e 5 estilos que ninguém
+te contou que existem. Escolhido o estilo, ele vai no campo `estilo` do seu
+`web/src/sites/<seu-slug>.ts`, e o **porquê** vai no seu
+`sites/<seu-slug>/base/DESIGN.md`.
+
+**6. Escreva as três páginas que são suas.**
+
+`web/src/pages/{index,sobre,contato}.astro` nascem em branco, com um roteiro
+de perguntas embutido. A partir do clone elas são suas, para sempre — o
+upstream nunca mais escreve nelas. Depois:
+
+```bash
+cd web && npm test && npm run build
+```
+
+### Por que clone, e não "Use this template" nem fork
+
+- **Fork de repositório público não vira privado.** O seu blog carrega
+  conteúdo, pautas, métricas e a base do site — a maioria não quer isso
+  público e listado como fork de `ffmenezes/chassi`.
+- **"Use this template" cria história não relacionada.** `git log
+  HEAD..upstream/main` — que é como você vê o que mudou lá em cima — deixa de
+  funcionar sem ancestral comum.
+
+O clone com histórico entrega repositório privado **e** "o que mudou desde que
+eu clonei" de graça, porque o remote `upstream` continua enxergando a origem.
+
+### Se você usa uma IA para isso
+
+No Claude Code, os passos 3 a 6 cabem num prompt só. Ajuste as três primeiras
+linhas e mande:
+
+```text
+Leia o AGENTS.md e o web/src/sites/exemplo.ts deste repositório.
+Meu blog é sobre: <assunto, em uma frase>.
+Slug: <slug>. Nome: <nome do site>. Domínio: <dominio.com.br>.
+
+1. Crie web/src/sites/<slug>.ts a partir do exemplo.ts. Escolha um dos cinco
+   estilos e me diga por que esse antes de escrever. Depois apague o
+   exemplo.ts.
+2. Copie sites/_modelo para sites/<slug>/ e me entreviste, um arquivo por
+   vez, na ordem do README de lá: base/TERRITORIO.md, base/LEITOR.md,
+   base/META.md. Escreva as respostas nos arquivos e apague as perguntas já
+   respondidas. Não responda nada dentro de sites/_modelo/.
+3. Preencha web/src/pages/{index,sobre,contato}.astro seguindo o roteiro que
+   já está dentro delas, com o que eu responder no passo 2.
+4. Não edite bloco, layout, estilo, function nem página jurídica. Se algo
+   parecer exigir isso, me diga em vez de fazer.
+
+No fim, rode `cd web && npm test && npm run build` e me mostre o resultado.
+```
+
+A quarta instrução é a que importa: é ela que mantém o seu repositório
+recebendo correção nossa para sempre.
+
+## Como atualizar
+
+O chassi recebe correção de bloco, estilo novo, adaptador novo e página nova
+ao longo do curso. Puxar isso é rotina de cinco minutos:
+
+```bash
+./scripts/atualizar
+```
+
+**Não é `git merge`.** É `git checkout upstream/main -- <arquivo>`, arquivo
+por arquivo — o que não exige ancestral comum e não produz conflito, em troca
+de sobrescrever em silêncio se você deixar. Por isso o script nunca aplica
+nada sozinho: ele imprime os commits novos, três listas, e você decide.
+
+- **NOVOS** — arquivos que ainda não existem aqui. Puxar é sempre seguro.
+- **SEGUROS** — mudaram lá, você nunca tocou. Puxar não perde nada.
+- **CONFLITO** — mudaram lá **e** você mexeu aqui. Não puxe sem ver os dois
+  lados:
+
+```bash
+git diff <base> HEAD -- <arquivo>            # o que VOCÊ fez
+git diff <base> upstream/main -- <arquivo>   # o que o UPSTREAM fez
+```
+
+Para aplicar só o que não tem risco, e depois conferir:
+
+```bash
+./scripts/atualizar --aplicar-seguros    # mexe apenas em NOVOS e SEGUROS
+cd web && npm test && npm run build
+```
+
+A promessa: **arquivo que você tocou nunca é sobrescrito sem você ver os dois
+lados.**
+
+### O que o script nunca oferece
+
+Estes caminhos são seus, e o script os ignora por inteiro — nem aparecem nas
+três listas: `sites/**`, `web/src/meu/**`, o seu `web/src/sites/<slug>.ts`, e
+as três páginas de identidade `web/src/pages/{index,sobre,contato}.astro`.
+
+Isso inclui `sites/_modelo/`, que é do upstream mas mora dentro da sua
+fronteira. Quando os stubs melhorarem lá em cima, a puxada é à mão:
+
+```bash
+git checkout upstream/main -- sites/_modelo
+```
+
+Seguro justamente porque você nunca edita `_modelo` — você copia.
+
+### Se você usa uma IA para isso
+
+No Claude Code, a skill `.agents/skills/atualizar-template/` já conduz a
+conversa inteira. Basta:
+
+```text
+atualizar o template
+```
+
+Em qualquer outra ferramenta, o prompt equivalente:
+
+```text
+Rode ./scripts/atualizar neste repositório e conduza a atualização comigo.
+
+- NOVOS e SEGUROS: diga quantos são, resuma em uma frase o que mudou (use as
+  mensagens de commit) e ofereça `./scripts/atualizar --aplicar-seguros`. Não
+  pergunte arquivo por arquivo aqui — é ruído.
+- CONFLITO: um de cada vez. Mostre os dois diffs (o que eu fiz e o que o
+  upstream fez), diga o que se perde em cada escolha, recomende, e só então
+  pergunte.
+- Nunca rode `git merge upstream/main`.
+
+Depois de aplicar: `cd web && npm test && npm run build`. Se quebrar, conserte
+ou reverta antes de commitar. Commit único, com a lista do que foi puxado no
+corpo da mensagem.
+```
 
 ## A fronteira
 
@@ -92,28 +252,6 @@ correções para sempre, sem conflitar com nada que você tenha feito.
 > de até 6 tokens em `web/src/sites/<slug>.ts`. É essa regra que faz a
 > atualização nunca conflitar com você — no minuto em que você editar um bloco
 > `.astro`, aquele arquivo para de receber correção nossa, para sempre.
-
-## Como atualizar
-
-```bash
-./scripts/atualizar
-```
-
-Não é `git merge`. É `git checkout upstream/main -- <arquivo>`, arquivo por
-arquivo — o que não exige ancestral comum e não produz conflito, em troca de
-sobrescrever em silêncio se você deixar. Por isso o script nunca aplica nada
-sozinho: ele imprime três listas e você decide.
-
-- **NOVOS** — arquivos que ainda não existem aqui. Puxar é sempre seguro.
-- **SEGUROS** — mudaram lá, você nunca tocou. Puxar não perde nada.
-- **CONFLITO** — mudaram lá **e** você mexeu aqui. Não puxe sem ver os dois
-  lados: `git diff <base> HEAD -- <arquivo>` (o que você fez) contra `git diff
-  <base> upstream/main -- <arquivo>` (o que o upstream fez).
-
-A promessa: **arquivo que você tocou nunca é sobrescrito sem você ver os dois
-lados.** `./scripts/atualizar --aplicar-seguros` só mexe no que está nas
-listas NOVOS e SEGUROS. Se você tiver o Claude Code, a skill
-`.agents/skills/atualizar-template/` conduz essa conversa por você.
 
 ## As portas
 
