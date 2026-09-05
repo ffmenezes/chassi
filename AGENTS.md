@@ -39,6 +39,8 @@ web/src/sites/<slug>.ts                ← o site do participante (só este)
 web/src/sites/index.ts                 ← varre e valida. Nunca editado à mão.
 web/src/sites/exemplo.ts               ← o modelo. Único arquivo do upstream que se apaga
 web/src/api/contrato.ts                ← a porta de transporte: caminhos + tipos
+web/src/url.ts                         ← URL absoluta a partir do domínio do site. Só formatação
+web/src/social/                        ← o card social: fonte, quebra de linha, SVG e tags de <head>
 web/src/{components,layouts,styles,mock,pages}/
 web/src/meu/                           ← estilo próprio, blocos próprios. Upstream nunca escreve
 web/functions/{api,_lib}/              ← Pages Functions: adaptador fino + lógica pura em _lib
@@ -75,6 +77,11 @@ componente conhece cor, fonte ou medida literal.
   estilo novo se escondendo dentro de outro.
 - **`TETO_DE_DESVIO = 6`** — mais de 6 tokens sobrescritos por site não é
   desvio, é estilo novo usando o de baixo como atalho.
+- **`dominio` do site** — vazio, com esquema (`https://`), com barra final ou
+  com espaço. Só o host (`exemplo.com.br`): é dele que saem `canonical`,
+  `og:url` e `og:image`, e link relativo é card que não abre.
+- **Card social** — título vazio. Card em branco circula igual a card cheio, e
+  é pior que card nenhum.
 - **Figura (bloco 19)** — `alt` vazio, `alt` igual à legenda, prova ou
   diagrama sem legenda ou sem fonte e data, raster sem `width`/`height`, SVG
   inline junto com `src`.
