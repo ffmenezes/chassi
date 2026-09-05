@@ -1,0 +1,104 @@
+---
+/**
+ * A3 — espécime de botão, para a bancada.
+ *
+ * Não é bloco: nenhum artigo instancia isto, mas sete componentes do chassi
+ * usam `.b-btn`/`.b-btn--forte` (OfertaIsca, Download, CardRedeSocial,
+ * Comentarios, Avaliacao, Overlay, e as páginas institucionais), e a bancada
+ * nunca mostrou como o botão se comporta — nos cinco estilos, nos dois
+ * pesos, nos quatro estados. Este arquivo fecha esse furo.
+ *
+ * Repouso e desabilitado são o HTML de sempre (`disabled` é atributo real).
+ * Hover e foco, por natureza, só existem enquanto o mouse ou o Tab estão em
+ * cima do elemento — inertes numa página que ninguém está tocando agora. As
+ * duas classes `.demo-hover`/`.demo-foco` abaixo CONGELAM essas pseudo-classes
+ * para o espécime ficar legível de relance, e copiam byte a byte as regras
+ * reais: `.b-btn:hover`/`.b-btn--forte:hover` de `styles/atomos.css` e o
+ * `:focus-visible` de `styles/base.css`. Isso é uma duplicação deliberada — o
+ * preço é que, se uma das duas mudar lá, este arquivo fica desatualizado até
+ * alguém notar — e só a bancada paga esse preço, porque ela é a única leitora.
+ * Os dois botões de repouso continuam de verdade interativos: passar o mouse
+ * ou apertar Tab neles mostra o estado genuíno, não o congelado.
+ */
+---
+
+<div class="demo">
+  <p class="b-rotulo">Peso normal — a maioria das ações da tela</p>
+  <div class="grade">
+    <div class="celula">
+      <button class="b-btn" type="button">Baixar checklist em PDF</button>
+      <span class="etq">repouso</span>
+    </div>
+    <div class="celula">
+      <button class="b-btn demo-hover" type="button" tabindex="-1">Baixar checklist em PDF</button>
+      <span class="etq">hover (congelado)</span>
+    </div>
+    <div class="celula">
+      <button class="b-btn demo-foco" type="button" tabindex="-1">Baixar checklist em PDF</button>
+      <span class="etq">foco (congelado)</span>
+    </div>
+    <div class="celula">
+      <button class="b-btn" type="button" disabled>Baixar checklist em PDF</button>
+      <span class="etq">desabilitado</span>
+    </div>
+  </div>
+
+  <p class="b-rotulo">Peso forte — no máximo um por tela, a ação que a tela existe para pedir</p>
+  <div class="grade">
+    <div class="celula">
+      <button class="b-btn b-btn--forte" type="button">Confirmar assinatura</button>
+      <span class="etq">repouso</span>
+    </div>
+    <div class="celula">
+      <button class="b-btn b-btn--forte demo-hover" type="button" tabindex="-1">Confirmar assinatura</button>
+      <span class="etq">hover (congelado)</span>
+    </div>
+    <div class="celula">
+      <button class="b-btn b-btn--forte demo-foco" type="button" tabindex="-1">Confirmar assinatura</button>
+      <span class="etq">foco (congelado)</span>
+    </div>
+    <div class="celula">
+      <button class="b-btn b-btn--forte" type="button" disabled>Confirmar assinatura</button>
+      <span class="etq">desabilitado</span>
+    </div>
+  </div>
+
+  <p class="b-rotulo">Botão que navega é link, não &lt;button&gt;</p>
+  <a class="b-btn" href="#a3">Ver o guia completo de instalação</a>
+</div>
+
+<style>
+  .demo { max-width: var(--b-medida); display: flex; flex-direction: column; gap: 4px; }
+  .demo .b-rotulo { margin-top: 14px; }
+  .demo .b-rotulo:first-child { margin-top: 0; }
+
+  .grade {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 22px;
+  }
+  .celula {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+  }
+  .etq {
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    color: var(--b-tinta-2);
+  }
+
+  /* congela .b-btn:hover / .b-btn--forte:hover de atomos.css — comentário no
+     frontmatter explica por que a duplicação é deliberada aqui. */
+  .demo-hover { box-shadow: var(--b-sombra-hover); transform: var(--b-lift); }
+  .demo-hover.b-btn--forte { background: var(--b-acento-forte); }
+
+  /* congela o :focus-visible de base.css — na variante de dentro de
+     [data-estilo] (`outline-color: var(--b-acento-tinta)`), porque é lá que
+     todo botão real vive, Palco incluído. tabindex="-1" nos dois botões
+     congelados (hover e foco) tira os dois do fluxo de Tab: quem navega por
+     teclado só deve encontrar, e conseguir acionar, o botão de repouso — que
+     é o único de verdade nesta grade. */
+  .demo-foco { outline: 2px solid var(--b-acento-tinta); outline-offset: 2px; border-radius: 3px; }
+</style>

@@ -17,7 +17,7 @@ export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
   | "N1" | "N2" | "N3" | "N4" | "N5"
-  | "A1" | "A2";
+  | "A1" | "A2" | "A3";
 
 export type Estado =
   /** HTML que qualquer build entrega hoje. */
@@ -97,6 +97,7 @@ export const CATALOGO: readonly Bloco[] = [
   { id: "N5", estado: "navegacao", nome: "Barra de progresso", regra: "Mede o artigo, não o documento. E não dispara nada: gatilho de rolagem é o que o N4 proíbe." },
   { id: "A1", estado: "atomo", nome: "Prosa e seus átomos", regra: "Forte é o que não se pode perder; código inline é o literal que se digita; tecla é kbd; sigla se expande por escrito; número não se separa da unidade." },
   { id: "A2", estado: "atomo", nome: "Listas", regra: "Ordenada só onde a ordem existe. Conclusão não mora em lista, e glossário é <dl>. Dois níveis no máximo." },
+  { id: "A3", estado: "atomo", nome: "Botões", regra: "Rótulo descreve a ação, nunca \"clique aqui\". Um botão forte por tela. Botão que navega é link, não <button>." },
 ] as const;
 
 export const estadoDe = (id: BlocoId): Estado => blocoPorId(id).estado;

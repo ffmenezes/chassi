@@ -30,6 +30,7 @@ import Codigo from "../components/blocos/Codigo.astro";
 import Aviso from "../components/blocos/Aviso.astro";
 import AtomosDemo from "../components/blocos/_AtomosDemo.astro";
 import ListasDemo from "../components/blocos/_ListasDemo.astro";
+import BotoesDemo from "../components/blocos/_BotoesDemo.astro";
 import Enquete from "../components/blocos/Enquete.astro";
 import Avaliacao from "../components/blocos/Avaliacao.astro";
 import Carrossel from "../components/blocos/Carrossel.astro";
@@ -210,6 +211,7 @@ const previstos = {
             glossario={m.atomos.glossario}
           />
         </Palco>
+        <Palco id="A3" {...palco}><BotoesDemo /></Palco>
         <Palco id={11} {...palco}><Enquete {...m.enquete} /></Palco>
         <Palco id={12} {...palco}><Avaliacao /></Palco>
         <Palco id={13} {...palco}>

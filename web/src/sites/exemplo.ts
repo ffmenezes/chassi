@@ -15,7 +15,7 @@ import type { Site, BlocoId } from "./tipos";
 
 /** Os ativos: HTML que qualquer build entrega hoje. Os átomos vêm junto porque
  *  não se escolhe usá-los — a prosa usa. */
-const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, "A1", "A2"];
+const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, "A1", "A2", "A3"];
 
 const site: Site = {
   slug: "exemplo",
