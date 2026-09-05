@@ -1,31 +1,162 @@
 ---
-/** Bloco 12 — Avaliação (previsto).
+/** Bloco 12 — Avaliação.
  * A pergunta é "isso respondeu sua dúvida?" e não "você gostou?", porque o
  * valor está inteiro na fase 9. O "não" abre campo livre, e o campo livre é
  * a saída mais valiosa do bloco. NUNCA emite AggregateRating: nota do próprio
- * conteúdo, coletada por nós, é markup autosservido. */
-interface Props { pergunta?: string; ajuda?: string }
+ * conteúdo, coletada por nós, é markup autosservido.
+ *
+ * Os dois botões eram clicáveis sem handler — bloco interativo sem interação
+ * é decoração, e é essa decoração que o script no fim deste arquivo
+ * substitui: "Sim" agradece e guarda a resposta; "Não" abre o campo livre
+ * que a doutrina acima descreve, e ele hoje não existia. Sem JS os botões
+ * continuam ali, só que inertes — não há fallback nativo para "abrir um
+ * campo", do mesmo jeito que não há para o overlay (N4); é a mesma classe de
+ * interação, e a mesma resposta.
+ *
+ * Mesma honestidade da Enquete: a resposta fica guardada neste navegador, e
+ * o texto diz exatamente isso — nunca "resposta registrada", palavra que
+ * pertenceria a uma apuração que ainda não existe.
+ *
+ * Também declara o contrato em `api/contrato.ts` (`CAMINHOS.avaliacao`), por
+ * trás de uma guarda: só tenta mandar a resposta adiante quando a página
+ * conhece `site` e `slug` — nas vitrines (bancada, exemplo), nada sai daqui
+ * além do `localStorage`. A porta de dados está inerte (adaptador `nenhum`);
+ * quando ela acordar, é publicar a Function no caminho certo — este
+ * componente já está pronto e não muda.
+ */
+import { CAMINHOS, urlDaApi } from "../../api/contrato";
+
+interface Props {
+  pergunta?: string;
+  ajuda?: string;
+  /** Identifica esta avaliação quando a página tem mais de uma. */
+  id?: string;
+  /** Do post que hospeda o bloco. Sem os dois, o envio ao backend não é
+   *  tentado — só o `localStorage` funciona (é o caso da bancada e do
+   *  exemplo). */
+  site?: string;
+  slug?: string;
+}
 const {
   pergunta = "Isso respondeu sua dúvida?",
   ajuda = "Respondendo “não”, abre um campo para você dizer o que faltou.",
+  id,
+  site,
+  slug,
 } = Astro.props;
+const idAvaliacao = id ?? "unica";
+const endpoint = urlDaApi(CAMINHOS.avaliacao);
 ---
-<div class="b-card avaliacao">
-  <div>
-    <b>{pergunta}</b>
-    <div class="ajuda">{ajuda}</div>
+<div
+  class="b-card avaliacao"
+  data-avaliacao={idAvaliacao}
+  data-endpoint={endpoint}
+  data-site={site}
+  data-slug={slug}
+>
+  <div class="pergunta-bloco" data-pergunta-bloco>
+    <div class="txt">
+      <b>{pergunta}</b>
+      <div class="ajuda">{ajuda}</div>
+    </div>
+    <div class="botoes">
+      <button class="b-btn" type="button" data-resposta="sim">Sim</button>
+      <button class="b-btn" type="button" data-resposta="nao">Não</button>
+    </div>
   </div>
-  <div class="botoes">
-    <button class="b-btn" type="button">Sim</button>
-    <button class="b-btn" type="button">Não</button>
+
+  <div class="campo-livre" data-campo-livre hidden>
+    <label class="rotulo b-rotulo" for="av-texto">O que faltou?</label>
+    <textarea id="av-texto" data-texto rows="3" maxlength="2000" placeholder="No seu caso, o que ficou sem resposta?"></textarea>
+    <button class="b-btn b-btn--forte" type="button" data-enviar-texto>Enviar</button>
   </div>
+
+  <p class="obrigado" data-obrigado aria-live="polite" hidden>
+    Resposta guardada neste navegador. Ainda não há apuração.
+  </p>
 </div>
 <style>
-  .avaliacao {
-    padding: 18px 22px; display: flex; flex-wrap: wrap; gap: 14px;
+  .avaliacao { padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; }
+  .pergunta-bloco {
+    display: flex; flex-wrap: wrap; gap: 14px;
     align-items: center; justify-content: space-between;
   }
-  b { color: var(--b-tinta); }
+  .txt b { color: var(--b-tinta); }
   .ajuda { color: var(--b-tinta-2); font-size: 13.5px; margin-top: 3px; }
   .botoes { display: flex; gap: 9px; }
+  .campo-livre { display: flex; flex-direction: column; gap: 9px; }
+  .rotulo { margin: 0; }
+  .campo-livre textarea {
+    width: 100%; padding: 11px 13px; font-size: 14.5px; line-height: 1.55;
+    border: var(--b-borda); border-radius: var(--b-radius);
+    background: var(--b-fundo); color: var(--b-tinta); resize: vertical;
+    font-family: inherit;
+  }
+  .campo-livre button { align-self: flex-start; }
+  .obrigado { margin: 0; color: var(--b-tinta-2); font-size: 13.5px; }
 </style>
+
+<script>
+  /* Melhoria progressiva: não existe fallback nativo para "abrir um campo ao
+     clicar" — os botões já eram `type="button"`, então sem JS eles ficam
+     exatamente como estavam antes deste script: presentes, inertes. É a
+     mesma classe de interação do overlay (N4), e a mesma resposta. */
+  for (const bloco of document.querySelectorAll<HTMLElement>(".avaliacao[data-avaliacao]")) {
+    const chave = "avaliacao:" + location.pathname + ":" + bloco.dataset.avaliacao;
+    const perguntaBloco = bloco.querySelector<HTMLElement>("[data-pergunta-bloco]")!;
+    const campoLivre = bloco.querySelector<HTMLElement>("[data-campo-livre]")!;
+    const texto = bloco.querySelector<HTMLTextAreaElement>("[data-texto]")!;
+    const obrigado = bloco.querySelector<HTMLElement>("[data-obrigado]")!;
+
+    function concluir() {
+      perguntaBloco.hidden = true;
+      campoLivre.hidden = true;
+      obrigado.hidden = false;
+    }
+
+    function enviar(resposta: "sim" | "nao", comentario?: string) {
+      try {
+        localStorage.setItem(chave, JSON.stringify({ resposta, comentario }));
+      } catch {}
+      concluir();
+
+      /* Guarda: sem `site`/`slug` não tenta nada além do que já aconteceu
+         acima. Com os dois, é melhor esforço — a interface já concluiu
+         antes de qualquer requisição sair, então falha de rede ou 404 (a
+         Function ainda não existe) não muda nada na tela. */
+      const site = bloco.dataset.site;
+      const slug = bloco.dataset.slug;
+      const endpoint = bloco.dataset.endpoint;
+      if (site && slug && endpoint) {
+        fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          keepalive: true,
+          body: JSON.stringify({ site, slug, resposta, comentario }),
+        }).catch(() => {});
+      }
+    }
+
+    /* Se esta pessoa já respondeu neste navegador, não pergunta de novo. */
+    try {
+      const salvo = localStorage.getItem(chave);
+      if (salvo) concluir();
+    } catch {}
+
+    perguntaBloco.addEventListener("click", (ev) => {
+      const botao = (ev.target as HTMLElement).closest<HTMLButtonElement>("[data-resposta]");
+      if (!botao) return;
+      if (botao.dataset.resposta === "sim") {
+        enviar("sim");
+      } else {
+        perguntaBloco.hidden = true;
+        campoLivre.hidden = false;
+        texto.focus();
+      }
+    });
+
+    bloco.querySelector("[data-enviar-texto]")?.addEventListener("click", () => {
+      enviar("nao", texto.value.trim() || undefined);
+    });
+  }
+</script>

@@ -1,13 +1,51 @@
 ---
-/** Bloco 11 — Enquete (previsto).
+/** Bloco 11 — Enquete.
  * Pergunta e opções no HTML inicial; só o contador pode ser JS.
  * Voto não fica atrás de e-mail. O `piso` de respostas se define ANTES de
  * abrir a enquete: definir depois de ver o número é escolher o piso que faz
- * o argumento fechar. */
-interface Props { pergunta: string; opcoes: string[]; piso: number; nome?: string }
-const { pergunta, opcoes, piso, nome = "enquete" } = Astro.props;
+ * o argumento fechar.
+ *
+ * O radio nasce nativo e funciona sem JS — só não lembra o voto entre uma
+ * visita e outra sem ele. O script no fim deste arquivo guarda a escolha em
+ * `localStorage` e marca de novo ao recarregar; bloco interativo sem
+ * interação é decoração, e escolher sem que nada aconteça era exatamente
+ * essa decoração.
+ *
+ * A honestidade do texto importa tanto quanto a do piso: "voto guardado
+ * neste navegador" é o que de fato acontece hoje. "Voto registrado" seria
+ * mentira enquanto não existir quem registre — e é por isso que o aviso
+ * abaixo nunca usa essa palavra.
+ *
+ * Também declara o contrato em `api/contrato.ts` (`CAMINHOS.enquete`), por
+ * trás de uma guarda: só tenta mandar o voto adiante quando a página conhece
+ * `site` e `slug` — nas vitrines (bancada, exemplo), nada sai daqui além do
+ * `localStorage`. A porta de dados está inerte (adaptador `nenhum`); quando
+ * ela acordar, é publicar a Function no caminho certo — este componente já
+ * está pronto e não muda.
+ */
+import { CAMINHOS, urlDaApi } from "../../api/contrato";
+
+interface Props {
+  pergunta: string;
+  opcoes: string[];
+  piso: number;
+  nome?: string;
+  /** Do post que hospeda o bloco. Sem os dois, o envio ao backend não é
+   *  tentado — só o `localStorage` funciona (é o caso da bancada e do
+   *  exemplo). */
+  site?: string;
+  slug?: string;
+}
+const { pergunta, opcoes, piso, nome = "enquete", site, slug } = Astro.props;
+const endpoint = urlDaApi(CAMINHOS.enquete);
 ---
-<form class="b-card enquete">
+<form
+  class="b-card enquete"
+  data-enquete={nome}
+  data-endpoint={endpoint}
+  data-site={site}
+  data-slug={slug}
+>
   <p class="b-rotulo">Enquete</p>
   <p class="pergunta"><b>{pergunta}</b></p>
   <div class="opcoes">
@@ -20,6 +58,9 @@ const { pergunta, opcoes, piso, nome = "enquete" } = Astro.props;
   </div>
   <p class="n">
     Resultado publicado só acima de {piso} respostas. Piso definido antes de abrir a enquete.
+  </p>
+  <p class="n status" data-status aria-live="polite" hidden>
+    Voto guardado neste navegador. Ainda não há apuração.
   </p>
 </form>
 <style>
@@ -34,4 +75,61 @@ const { pergunta, opcoes, piso, nome = "enquete" } = Astro.props;
   label:hover { border-color: var(--b-acento); }
   input { accent-color: var(--b-acento); }
   .n { margin: 12px 0 0; font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2); }
+  .status { margin-top: 6px; }
 </style>
+
+<script>
+  /* Melhoria progressiva: sem JS, os radios continuam funcionando — a
+     pessoa vota, só que a escolha não sobrevive a um F5 e o aviso de
+     "guardado neste navegador" nunca aparece (com razão: sem JS, nada foi
+     guardado além do que o próprio navegador guarda em campo de formulário
+     comum, ou seja, nada entre visitas). */
+  for (const form of document.querySelectorAll<HTMLFormElement>(".enquete[data-enquete]")) {
+    const chave = "enquete:" + location.pathname + ":" + form.dataset.enquete;
+    const status = form.querySelector<HTMLElement>("[data-status]")!;
+    const radios = [...form.querySelectorAll<HTMLInputElement>('input[type="radio"]')];
+
+    let salvo = "";
+    try {
+      salvo = localStorage.getItem(chave) ?? "";
+    } catch {}
+    if (salvo) {
+      const escolhido = radios.find((r) => r.value === salvo);
+      if (escolhido) {
+        escolhido.checked = true;
+        status.hidden = false;
+      }
+    }
+
+    form.addEventListener("change", (ev) => {
+      const alvo = ev.target as HTMLInputElement;
+      if (alvo.type !== "radio") return;
+
+      try {
+        localStorage.setItem(chave, alvo.value);
+      } catch {}
+      status.hidden = false;
+
+      /* Guarda: sem `site`/`slug` não tenta nada além do que já aconteceu
+         acima. Com os dois, é melhor esforço — a interface já mostrou o
+         voto guardado antes de qualquer requisição sair, então falha de
+         rede ou 404 (a Function ainda não existe) não muda nada na tela. */
+      const site = form.dataset.site;
+      const slug = form.dataset.slug;
+      const endpoint = form.dataset.endpoint;
+      if (site && slug && endpoint) {
+        fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          keepalive: true,
+          body: JSON.stringify({
+            site,
+            slug,
+            enquete: form.dataset.enquete,
+            opcao: Number(alvo.value),
+          }),
+        }).catch(() => {});
+      }
+    });
+  }
+</script>

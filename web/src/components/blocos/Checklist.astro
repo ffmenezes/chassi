@@ -1,19 +1,54 @@
 ---
 /** Bloco 8 — Checklist.
  * Recapitula, nunca introduz: todo item tem uma seção que o sustenta.
- * A caixa fica `disabled` de propósito enquanto não houver estado guardado —
- * caixa que esquece o clique ao recarregar é promessa quebrada. */
+ *
+ * A caixa era `disabled` de propósito enquanto não houvesse estado guardado
+ * — caixa que esquece o clique ao recarregar é promessa quebrada. Agora ela
+ * guarda em `localStorage` deste navegador e recarrega marcada: a promessa
+ * se cumpre, e a caixa nasce nativa, funcionando sem JS (só não lembra sem
+ * ele). Bloco interativo sem interação é decoração, e é essa decoração que
+ * o script no fim deste arquivo substitui por comportamento real.
+ *
+ * Também declara o contrato em `api/contrato.ts` (`CAMINHOS.checklist`), por
+ * trás de uma guarda: só tenta mandar o clique adiante quando a página
+ * conhece `site` e `slug` — nas duas vitrines (bancada e exemplo), que não
+ * têm nenhum dos dois, nada sai daqui além do `localStorage`. A porta de
+ * dados está inerte (adaptador `nenhum`); quando ela acordar, é publicar a
+ * Function no caminho certo — este componente já está pronto e não muda.
+ */
+import { CAMINHOS, urlDaApi } from "../../api/contrato";
+
 export interface ItemCheck { forte: string; resto: string }
-interface Props { rotulo?: string; itens: ItemCheck[]; teto?: number }
-const { rotulo, itens, teto = 7 } = Astro.props;
+interface Props {
+  rotulo?: string;
+  itens: ItemCheck[];
+  teto?: number;
+  /** Identifica este checklist quando a página tem mais de um. Sem ele, o
+   *  rótulo faz esse papel; sem rótulo, todo checklist da página é "único". */
+  id?: string;
+  /** Do post que hospeda o bloco. Sem os dois, o envio ao backend não é
+   *  tentado — só o `localStorage` funciona (é o caso da bancada e do
+   *  exemplo). */
+  site?: string;
+  slug?: string;
+}
+const { rotulo, itens, teto = 7, id, site, slug } = Astro.props;
 const lista = itens.slice(0, teto);
+const idChecklist = id ?? rotulo ?? "unico";
+const endpoint = urlDaApi(CAMINHOS.checklist);
 ---
-<div class="checklist">
+<div
+  class="checklist"
+  data-checklist={idChecklist}
+  data-endpoint={endpoint}
+  data-site={site}
+  data-slug={slug}
+>
   {rotulo && <p class="b-rotulo">{rotulo}</p>}
   <ul>
-    {lista.map((i) => (
+    {lista.map((i, idx) => (
       <li>
-        <input type="checkbox" disabled />
+        <input type="checkbox" data-idx={idx} />
         <span><b>{i.forte}</b> {i.resto}</span>
       </li>
     ))}
@@ -25,3 +60,60 @@ const lista = itens.slice(0, teto);
   b { color: var(--b-tinta); }
   input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--b-acento); }
 </style>
+
+<script>
+  /* Melhoria progressiva: sem JS, cada caixa é um checkbox comum e marca
+     normalmente — só não sobrevive a um F5. O que o JS acrescenta é só a
+     lembrança, guardada por página e por checklist (`location.pathname` +
+     `data-checklist`), nunca por site inteiro, para o mesmo checklist em
+     dois posts não se misturar. */
+  for (const caixa of document.querySelectorAll<HTMLElement>(".checklist[data-checklist]")) {
+    const chave = "checklist:" + location.pathname + ":" + caixa.dataset.checklist;
+    const itens = [...caixa.querySelectorAll<HTMLInputElement>("input[type=checkbox]")];
+
+    let marcados: number[] = [];
+    try {
+      marcados = JSON.parse(localStorage.getItem(chave) ?? "[]");
+    } catch {}
+    for (const item of itens) {
+      const idx = Number(item.dataset.idx);
+      if (marcados.includes(idx)) item.checked = true;
+    }
+
+    caixa.addEventListener("change", (ev) => {
+      const alvo = ev.target as HTMLInputElement;
+      if (alvo.type !== "checkbox") return;
+      const idx = Number(alvo.dataset.idx);
+
+      const atuais = new Set(marcados);
+      if (alvo.checked) atuais.add(idx); else atuais.delete(idx);
+      marcados = [...atuais];
+      try {
+        localStorage.setItem(chave, JSON.stringify(marcados));
+      } catch {}
+
+      /* Guarda: sem `site`/`slug` (bancada, exemplo) não tenta nada além do
+         localStorage acima, que já é a fonte da verdade. Com os dois, é
+         melhor esforço — falha de rede ou 404 (a Function ainda não existe)
+         não muda nada na tela, porque a tela já refletia o clique antes de
+         qualquer requisição sair. */
+      const site = caixa.dataset.site;
+      const slug = caixa.dataset.slug;
+      const endpoint = caixa.dataset.endpoint;
+      if (site && slug && endpoint) {
+        fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          keepalive: true,
+          body: JSON.stringify({
+            site,
+            slug,
+            checklist: caixa.dataset.checklist,
+            item: idx,
+            marcado: alvo.checked,
+          }),
+        }).catch(() => {});
+      }
+    });
+  }
+</script>
