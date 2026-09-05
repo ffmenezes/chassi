@@ -10,21 +10,26 @@ ordem abaixo.
 > saber a resposta de um domínio, vá direto ao arquivo dono dele, nunca a este
 > índice.
 
-## Nada aqui é lido pela build
+## O que a build lê daqui, e o que não
 
 `sites/<slug>/` é o que **você** consulta antes de escrever — e o que uma
-ferramenta de conteúdo consultaria no seu lugar. A build não abre um arquivo
-sequer desta pasta: o que a máquina lê é `web/src/sites/<slug>.ts`, e só ele.
+ferramenta de conteúdo consultaria no seu lugar. O que a máquina lê para
+montar o site é `web/src/sites/<slug>.ts`, e só ele.
 
-A consequência prática: errar um arquivo daqui não quebra a build. Quebra o
-site — devagar, em forma de texto bem escrito para ninguém. O erro que a
-build pega é o do outro lado (estilo inexistente, mais de 6 tokens
-desviados); o erro que só o leitor pega é o daqui.
+A build abre **um** arquivo desta pasta, e um só:
+`posts/<slug-da-peça>/comentarios.json`, que o bloco 18 assa no HTML — o
+caminho está fixo em `web/src/comentarios.ts`, e JSON inválido ali derruba a
+build. As regras estão em [`posts/README.md`](posts/README.md).
+
+Todo o resto — `base/`, `estado/`, `pautas/`, `pesquisa/` — é insumo humano.
+A consequência prática: errar um desses não quebra a build. Quebra o site —
+devagar, em forma de texto bem escrito para ninguém. O erro que a build pega
+é o do outro lado (estilo inexistente, mais de 6 tokens desviados); o erro
+que só o leitor pega é o daqui.
 
 O slug desta pasta e o do `web/src/sites/<slug>.ts` são o mesmo de propósito,
 para dar para ir de um lado ao outro sem índice. Nenhuma validação cruza os
-dois — justamente porque a build não abre esta pasta —, então é você que
-mantém os dois iguais.
+dois, então é você que mantém os dois iguais.
 
 ## Como começar
 
@@ -160,14 +165,21 @@ sites/<seu-site>/
   README.md   esta cópia do índice
   base/       o que o artigo consulta antes de escrever. Muda devagar.
   estado/     o registro da operação. Muda a cada publicação.
-  pautas/     candidatas e a pauta de cada peça, antes de virar texto
-  pesquisa/   apuração solta — link, print, número com data e fonte
+  pautas/     a decisão antes do texto — candidatas e a pauta de cada peça
+  pesquisa/   o material bruto: link, print, número com data e fonte
   posts/      um diretório por peça, com o mesmo slug do CLUSTER.md
 ```
 
-`pautas/`, `pesquisa/` e `posts/` nascem com um `.gitkeep` só para o git
-carregar a pasta vazia. Apague o `.gitkeep` quando a pasta tiver conteúdo de
-verdade.
+`base/` e `estado/` se explicam arquivo a arquivo: cada um abre dizendo o que
+mora e o que não mora nele. As outras três nascem vazias, e por isso cada uma
+tem o seu próprio README, com o formato e um exemplo:
+
+- [`pautas/README.md`](pautas/README.md) — candidata × pauta fechada, e o que
+  uma pauta precisa ter para virar texto.
+- [`pesquisa/README.md`](pesquisa/README.md) — a regra de fonte e data na
+  hora, e o campo que separa apuração de achismo.
+- [`posts/README.md`](posts/README.md) — o `comentarios.json`: caminho,
+  formato, e o que quebra a build.
 
 ## Este diretório e o `scripts/atualizar`
 

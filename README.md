@@ -66,9 +66,11 @@ cp -r sites/_modelo sites/<seu-slug>                      # a doutrina
 
 O `.ts` é o que a build lê: slug, nome, domínio, estilo, quais blocos o site
 monta, as portas, e os até 6 desvios de token. A pasta `sites/<seu-slug>/` é o
-que **você** lê antes de escrever — território, leitor, tom, autor, provas.
-Nada dela entra na build; o slug é o mesmo dos dois lados de propósito, e é
-você que mantém os dois iguais.
+que **você** lê antes de escrever — território, leitor, tom, autor, provas —
+e cada subpasta dela abre com um README dizendo o que mora ali, com exemplo.
+Da pasta inteira, a build abre um arquivo só: os comentários já aprovados de
+cada peça. O slug é o mesmo dos dois lados de propósito, e é você que mantém
+os dois iguais.
 
 **4. Apague o modelo.**
 
