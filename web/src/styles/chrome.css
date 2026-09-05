@@ -160,8 +160,40 @@ body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 
 .indice-caixa a:hover { background: var(--c-bench); color: var(--c-ink); }
 .indice-caixa a .n { font-family: var(--c-mono); font-size: 11px; color: var(--c-dim); min-width: 20px; }
 
+/* ---------- corte de grupo ----------
+   A página passou a ser cortada pelos mesmos GRUPOS que o índice usa (ver
+   `src/bancada.ts`): antes eram 37 palcos em fila única, sem nada dizendo onde
+   termina o que está no ar e começa o que espera infra.
+
+   O vão ENTRE grupos é maior que o vão entre blocos, e é só isso que separa —
+   nenhuma caixa, nenhuma cor de fundo: o corte tem que ler como respiro, não
+   como mais uma moldura em volta de molduras. */
+.blocos { display: flex; flex-direction: column; gap: calc(var(--c-sp) * 8); min-width: 0; }
+.grupo { display: flex; flex-direction: column; gap: calc(var(--c-sp) * 4); }
+.grupo-cab {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: calc(var(--c-sp) * 1.5);
+  padding-bottom: calc(var(--c-sp) * 1.5);
+  border-bottom: 1px solid var(--c-rule);
+  scroll-margin-top: 78px;
+}
+.grupo-titulo {
+  font-family: var(--c-mono); font-size: 12px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--c-ink); margin: 0;
+}
+.grupo-conta {
+  font-family: var(--c-mono); font-size: 11px; color: var(--c-dim);
+  font-variant-numeric: tabular-nums;
+}
+/* a nota do grupo é o que dispensa adivinhar o chip: ela diz, por extenso, o
+   que "previsto" e "derivado" significam neste repositório */
+.grupo-nota {
+  flex-basis: 100%; margin: 0;
+  color: var(--c-ink-2); font-size: 13px; line-height: 1.55; max-width: 82ch;
+}
+
 /* ---------- seção de bloco ---------- */
-.blocos { display: flex; flex-direction: column; gap: calc(var(--c-sp) * 4); min-width: 0; }
 .bloco { scroll-margin-top: 78px; }
 .bloco[hidden] { display: none; }
 .bloco-cab { display: flex; flex-wrap: wrap; gap: calc(var(--c-sp) * 1.5); align-items: baseline; margin-bottom: calc(var(--c-sp) * 1.5); }
@@ -184,6 +216,42 @@ body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 
 .chip[data-estado="navegacao"] { border: 1px solid var(--c-rule); color: var(--c-ink-2); }
 /* átomo: forma própria, porque ele não é escolhido — a prosa usa e pronto */
 .chip[data-estado="atomo"] { border: 1px solid var(--c-mark); color: var(--c-mark); }
+/* ---------- o elo do bloco ----------
+   Visível parado, e não revelado no hover: hover não existe no celular, e a
+   regra é a mesma do bloco 27. Ele nasce `<a href="#b21">` de verdade — sem
+   script continua levando ao bloco, e copiar é o upgrade. */
+/* `.bloco-cab` no seletor NÃO é enfeite de organização: sem ele o elo perde a
+   cor. `body.bancada a` (linha ~62) tem especificidade (0,1,2) e vence
+   `.bloco-elo` sozinho, que tem (0,1,0) — o sintoma era o elo já nascer na cor
+   de hover, com a de repouso nunca chegando. Medido no navegador com
+   getComputedStyle, não deduzido do arquivo. `.bloco-cab .bloco-elo` dá
+   (0,2,0) e vence, do mesmo jeito que `.indice-caixa a` já vencia ali em cima. */
+.bloco-cab .bloco-elo {
+  position: relative;
+  font-family: var(--c-mono); font-size: 13px; font-weight: 700; line-height: 1;
+  color: var(--c-dim); text-decoration: none;
+  padding: 3px 6px; border-radius: 5px;
+  transition: color .15s, background .15s;
+}
+.bloco-cab .bloco-elo:hover,
+.bloco-cab .bloco-elo:focus-visible,
+.bloco-cab .bloco-elo[data-copiado] { color: var(--c-mark); background: var(--c-mark-soft); }
+
+/* Reforço visual do que o `aria-label` já diz — por isso `aria-hidden` no
+   markup, senão o leitor de tela ouve o mesmo rótulo duas vezes. */
+.bloco-elo-dica {
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px; border-radius: 4px;
+  background: var(--c-ink); color: var(--c-paper);
+  font-family: var(--c-mono); font-size: 11px; font-weight: 600; line-height: 1;
+  letter-spacing: 0; text-transform: none; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .1s;
+}
+.bloco-elo:hover .bloco-elo-dica,
+.bloco-elo:focus-visible .bloco-elo-dica,
+.bloco-elo[data-copiado] .bloco-elo-dica { opacity: 1; }
+
 .palco { border: 1px solid var(--c-rule); border-radius: 12px; overflow: hidden; }
 .palco > [data-estilo] { padding: clamp(20px, 4vw, 40px); }
 

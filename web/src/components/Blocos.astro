@@ -1,0 +1,92 @@
+---
+/**
+ * O corpo da bancada: todo bloco do catálogo, agrupado, na ordem do catálogo.
+ *
+ * O QUE ESTE COMPONENTE RESOLVE. Até aqui a bancada era uma pilha de
+ * `<Palco id={N}>` escrita à mão dentro da página, e ela tinha três defeitos
+ * que só cresciam com o catálogo:
+ *
+ *   1. A ORDEM da página era digitada, e a do índice ao lado era calculada a
+ *      partir de `GRUPOS`. Duas ordens à mão divergem — foi exatamente o que
+ *      aconteceu com os blocos 23 e 24, que sumiram da bancada sem sumir do
+ *      catálogo (commit `162ad1f`).
+ *   2. A página não tinha CORTE nenhum: 37 palcos em fila única, sem nada
+ *      dizendo onde termina o que está no ar e começa o que espera infra. O
+ *      índice agrupava; a página, não.
+ *   3. Bloco novo no catálogo SEM espécime aqui não dava erro. Dava um número
+ *      menor na contagem, que é o tipo de defeito que ninguém vê.
+ *
+ * Os três somem pelo mesmo mecanismo: quem manda na ordem é `CATALOGO` e
+ * `GRUPOS`, e o espécime chega por SLOT NOMEADO (`slot="b19"`, `slot="bN3"`).
+ * A página vira uma lista plana de espécimes, em qualquer ordem — a ordem
+ * deixou de ser assunto dela. E bloco sem espécime não renderiza vazio: quebra
+ * a build, com o nome do slot que falta.
+ *
+ * O nome do slot é `b` + o id em minúsculas, o mesmo formato da âncora:
+ * `b1`, `b19`, `bn3`, `ba2`. Um só formato para as duas coisas, porque dois
+ * formatos divergem.
+ */
+import Palco from "./Palco.astro";
+import { CATALOGO, GRUPOS } from "../catalogo";
+import { idsDoGrupo, conferirCobertura } from "../bancada";
+import type { Estilo, Modo } from "../sites";
+
+interface Props {
+  estilo: Estilo;
+  modo: Modo;
+}
+const { estilo, modo } = Astro.props;
+const palco = { estilo, modo };
+
+/* Estado do catálogo sem grupo em GRUPOS sumiria da página e do índice sem
+   erro nenhum. Ver o porquê inteiro em `src/bancada.ts`. */
+conferirCobertura(CATALOGO, GRUPOS);
+
+const nomeDoSlot = (id: (typeof CATALOGO)[number]["id"]) =>
+  `b${String(id).toLowerCase()}`;
+
+/* A trava do defeito 3. Roda antes de renderizar qualquer coisa, e a mensagem
+   diz o slot exato que falta — não "algum bloco está faltando". */
+const semEspecime = CATALOGO.filter((b) => !Astro.slots.has(nomeDoSlot(b.id)));
+if (semEspecime.length) {
+  throw new Error(
+    `[bancada] ${semEspecime.length} bloco(s) do catálogo sem espécime: ` +
+      semEspecime.map((b) => `${b.id} (${b.nome}) precisa de slot="${nomeDoSlot(b.id)}"`).join("; ") +
+      `. Bloco no catálogo tem de aparecer na bancada — sem isso a contagem ` +
+      `"X de Y" mente sobre quantos blocos o chassi tem, que é o defeito do ` +
+      `commit 162ad1f. Acrescente o espécime em bancada.astro, em qualquer ` +
+      `posição: a ordem sai do catálogo, não da ordem em que você escrever.`
+  );
+}
+
+/* `Astro.slots.render` devolve o HTML já renderizado do espécime. É o que
+   permite a página declarar os espécimes numa lista plana enquanto a ordem de
+   saída vem daqui. Resolvido de uma vez, num mapa, para não pagar um `await`
+   dentro do template. */
+const especimes = new Map<string, string>();
+for (const b of CATALOGO) {
+  especimes.set(nomeDoSlot(b.id), await Astro.slots.render(nomeDoSlot(b.id)));
+}
+---
+
+<main class="blocos">
+  {GRUPOS.map((g) => {
+    const ids = idsDoGrupo(CATALOGO, g);
+    const ancora = `g-${g.rotulo.toLowerCase().normalize("NFD").replace(/[^a-z]/g, "")}`;
+    return (
+      <section class="grupo" aria-labelledby={ancora}>
+        <header class="grupo-cab" id={ancora}>
+          <h2 class="grupo-titulo">{g.rotulo}</h2>
+          <span class="grupo-conta">{ids.length} {ids.length === 1 ? "bloco" : "blocos"}</span>
+          <p class="grupo-nota">{g.nota}</p>
+        </header>
+
+        {ids.map((id) => (
+          <Palco id={id} {...palco}>
+            <Fragment set:html={especimes.get(`b${String(id).toLowerCase()}`)} />
+          </Palco>
+        ))}
+      </section>
+    );
+  })}
+</main>

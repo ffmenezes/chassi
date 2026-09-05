@@ -8,7 +8,7 @@
  * estava bem definido.
  */
 import Base from "../layouts/Base.astro";
-import Palco from "../components/Palco.astro";
+import Blocos from "../components/Blocos.astro";
 import { CATALOGO, GRUPOS, estadoDe, numeroDe } from "../catalogo";
 import { ESTILOS } from "../sites";
 import type { Estilo } from "../sites";
@@ -146,20 +146,30 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
         </div>
       </nav>
 
-      <main class="blocos">
-        <Palco id={1} {...palco}><Abertura {...m.abertura} /></Palco>
-        <Palco id={2} {...palco}><CaixaConclusoes itens={m.conclusoes} /></Palco>
-        <Palco id={3} {...palco}><Sumario itens={m.sumario} /></Palco>
-        <Palco id={4} {...palco}><TabelaPanorama {...m.panorama} /></Palco>
-        <Palco id={5} {...palco}><TabelaContraste {...m.contraste} /></Palco>
-        <Palco id={6} {...palco}><CitacaoDestacada texto={m.destaque} /></Palco>
-        <Palco id={7} {...palco}><CitacaoFonte {...m.citacao} /></Palco>
-        <Palco id={8} {...palco}>
+      {/* OS ESPÉCIMES, e só eles.
+          A ordem desta lista não importa mais para a página: quem ordena e
+          agrupa é `Blocos.astro`, a partir de `CATALOGO` e `GRUPOS`. Ela está
+          na ordem de leitura do catálogo por cortesia com quem edita o
+          arquivo, não porque alguma coisa dependa disso.
+
+          Bloco novo no catálogo sem `slot` aqui QUEBRA A BUILD, com o nome do
+          slot que falta — é o conserto definitivo do defeito de 162ad1f, em
+          que os blocos 23 e 24 sumiram da bancada sem sumir do catálogo e sem
+          erro nenhum. */}
+      <Blocos {...palco}>
+        <Fragment slot="b1"><Abertura {...m.abertura} /></Fragment>
+        <Fragment slot="b2"><CaixaConclusoes itens={m.conclusoes} /></Fragment>
+        <Fragment slot="b3"><Sumario itens={m.sumario} /></Fragment>
+        <Fragment slot="b4"><TabelaPanorama {...m.panorama} /></Fragment>
+        <Fragment slot="b5"><TabelaContraste {...m.contraste} /></Fragment>
+        <Fragment slot="b6"><CitacaoDestacada texto={m.destaque} /></Fragment>
+        <Fragment slot="b7"><CitacaoFonte {...m.citacao} /></Fragment>
+        <Fragment slot="b8">
           <Checklist rotulo="Antes de trocar qualquer equipamento" itens={m.checklist} />
-        </Palco>
-        <Palco id={9} {...palco}><Faq itens={m.faq} /></Palco>
-        <Palco id={10} {...palco}><Fechamento paragrafos={m.fechamento} /></Palco>
-        <Palco id={19} {...palco}>
+        </Fragment>
+        <Fragment slot="b9"><Faq itens={m.faq} /></Fragment>
+        <Fragment slot="b10"><Fechamento paragrafos={m.fechamento} /></Fragment>
+        <Fragment slot="b19">
           {/* os três papéis: o diagrama é código, a prova espera arquivo, a spot
               não tem fonte porque não prova nada */}
           <div style="display:flex;flex-direction:column;gap:26px">
@@ -169,48 +179,39 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
             <Figura {...m.figuras.prova} />
             <Figura {...m.figuras.spot} />
           </div>
-        </Palco>
-        <Palco id={20} {...palco}>
+        </Fragment>
+        <Fragment slot="b20">
           <div style="display:flex;flex-direction:column;gap:22px">
             {m.codigos.map((c) => <Codigo {...c} />)}
           </div>
-        </Palco>
-        <Palco id={21} {...palco}>
+        </Fragment>
+        <Fragment slot="b21">
           <div style="display:flex;flex-direction:column;gap:14px">
             {m.avisos.map((a) => <Aviso {...a} />)}
           </div>
-        </Palco>
-        <Palco id={22} {...palco}>
+        </Fragment>
+        <Fragment slot="b22">
           {/* as duas variantes juntas, que é o ponto: o mesmo dado no topo e no
               fim, e o palco é o único lugar onde dá para conferir de um olhar */}
           <div style="display:flex;flex-direction:column;gap:18px">
             <Autor autor={m.autor} variante="circle" />
             <Autor autor={m.autor} variante="card" />
           </div>
-        </Palco>
-        <Palco id={23} {...palco}><Calculadora {...m.calculadora} /></Palco>
-        <Palco id={24} {...palco}><OfertaIsca {...m.ofertaIsca} /></Palco>
-        <Palco id={25} {...palco}><Newsletter site="bancada" /></Palco>
-        <Palco id="A1" {...palco}><AtomosDemo pico={m.atomos.pico} /></Palco>
-        <Palco id="A2" {...palco}>
-          <ListasDemo
-            passos={m.atomos.passos}
-            conjunto={m.atomos.conjunto}
-            glossario={m.atomos.glossario}
-          />
-        </Palco>
-        <Palco id="A3" {...palco}><BotoesDemo /></Palco>
-        <Palco id={11} {...palco}><Enquete {...m.enquete} /></Palco>
-        <Palco id={12} {...palco}><Avaliacao /></Palco>
-        <Palco id={13} {...palco}>
+        </Fragment>
+        <Fragment slot="b23"><Calculadora {...m.calculadora} /></Fragment>
+        <Fragment slot="b24"><OfertaIsca {...m.ofertaIsca} /></Fragment>
+        <Fragment slot="b25"><Newsletter site="bancada" /></Fragment>
+        <Fragment slot="b11"><Enquete {...m.enquete} /></Fragment>
+        <Fragment slot="b12"><Avaliacao /></Fragment>
+        <Fragment slot="b13">
           <Carrossel rotulo="Como medir o pico, passo a passo" slides={m.carrossel} />
-        </Palco>
-        <Palco id={14} {...palco}><CardRedeSocial {...m.social} /></Palco>
-        <Palco id={15} {...palco}><Audio duracao={m.derivados.audio.duracao} /></Palco>
-        <Palco id={16} {...palco}><Download {...m.derivados.mapa} muro /></Palco>
-        <Palco id={17} {...palco}><Download {...m.derivados.pdf} muro /></Palco>
-        <Palco id={18} {...palco}><Comentarios itens={m.comentarios.slice(0, 2)} /></Palco>
-        <Palco id={26} {...palco}>
+        </Fragment>
+        <Fragment slot="b14"><CardRedeSocial {...m.social} /></Fragment>
+        <Fragment slot="b15"><Audio duracao={m.derivados.audio.duracao} /></Fragment>
+        <Fragment slot="b16"><Download {...m.derivados.mapa} muro /></Fragment>
+        <Fragment slot="b17"><Download {...m.derivados.pdf} muro /></Fragment>
+        <Fragment slot="b18"><Comentarios itens={m.comentarios.slice(0, 2)} /></Fragment>
+        <Fragment slot="b26">
           {/* os dois estados lado a lado, forçados por `forcarNativo`: a
               bancada é o inventário, e um navegador só nunca é o desktop e o
               celular ao mesmo tempo. Sem os dois juntos, quem decide se quer
@@ -225,21 +226,16 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
               <Compartilhar {...m.compartilhar} forcarNativo={false} />
             </div>
           </div>
-        </Palco>
-        <Palco id={27} {...palco}><Passos itens={m.passos} /></Palco>
-        <Palco id={28} {...palco}><Verificacao itens={m.verificacao} /></Palco>
-        <Palco id={29} {...palco}>
-          {/* os dois tipos de slide no mesmo deck, que é o único jeito de
-              conferir de um olhar que o de texto e o de imagem têm a mesma
-              altura, os mesmos controles e a mesma posição escrita */}
-        </Palco>
-        <Palco id="N1" {...palco}>
+        </Fragment>
+        <Fragment slot="b27"><Passos itens={m.passos} /></Fragment>
+        <Fragment slot="b28"><Verificacao itens={m.verificacao} /></Fragment>
+        <Fragment slot="bn1">
           <Paginacao total={9} atual={2} href={(p) => `#p${p}`} />
-        </Palco>
-        <Palco id="N2" {...palco}>
+        </Fragment>
+        <Fragment slot="bn2">
           <GradeArtigos rotulo="Continue por aqui" artigos={m.irmas} />
-        </Palco>
-        <Palco id="N3" {...palco}>
+        </Fragment>
+        <Fragment slot="bn3">
           {/* `demo` é só daqui: rende o botão que dispara cada toast, para
               dar para ver entrada, permanência (sucesso some sozinho) e saída
               (erro fecha pelo X) sem simular um formulário inteiro. Em
@@ -247,8 +243,8 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
           <div style="display:flex;flex-direction:column;gap:11px">
             {m.toasts.map((t) => <Toast {...t} demo />)}
           </div>
-        </Palco>
-        <Palco id="N4" {...palco}>
+        </Fragment>
+        <Fragment slot="bn4">
           <p class="b-p b-p--dim" style="font-size:14px">
             O overlay não tem gatilho de entrada, tempo, rolagem ou saída do mouse.
             Ele abre por clique num controle que anuncia o destino, e fecha por três
@@ -258,8 +254,8 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
             Receber o PDF
           </button>
           <Overlay id="overlay-pdf" {...m.overlay} pedeEmail />
-        </Palco>
-        <Palco id="N5" {...palco}>
+        </Fragment>
+        <Fragment slot="bn5">
           <div class="demo-progresso" aria-hidden="true">
             <span class="fio"><span class="fio-preenche"></span></span>
             <span class="linha"></span><span class="linha"></span><span class="linha"></span>
@@ -268,8 +264,17 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
             No artigo ela fica fixa no topo e mede o <b>&lt;article&gt;</b>, não o documento.
             Veja funcionando em <a href="/exemplo/linho/" style="color:var(--b-acento-tinta)">um artigo inteiro</a>.
           </p>
-        </Palco>
-      </main>
+        </Fragment>
+        <Fragment slot="ba1"><AtomosDemo pico={m.atomos.pico} /></Fragment>
+        <Fragment slot="ba2">
+          <ListasDemo
+            passos={m.atomos.passos}
+            conjunto={m.atomos.conjunto}
+            glossario={m.atomos.glossario}
+          />
+        </Fragment>
+        <Fragment slot="ba3"><BotoesDemo /></Fragment>
+      </Blocos>
     </div>
   </div>
 

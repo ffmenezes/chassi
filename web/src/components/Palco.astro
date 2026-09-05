@@ -1,10 +1,22 @@
 ---
 /**
- * A moldura de um bloco na bancada: cabeçalho com número, nome, estado e a
- * regra resumida, mais o palco onde o espécime é renderizado.
+ * A moldura de um bloco na bancada: cabeçalho com número, nome, estado, o elo
+ * do bloco e a regra resumida, mais o palco onde o espécime é renderizado.
  *
  * O `data-estilo`/`data-modo` ficam aqui e em nenhum lugar dentro do bloco.
  * É o que garante que o componente não sabe em que estilo está.
+ *
+ * O ELO. Cada bloco tem `id` desde sempre — é para ele que o índice aponta —,
+ * mas não havia como PEGAR esse link estando na página: quem quisesse mandar
+ * "olha o bloco 21" tinha de voltar ao índice e copiar de lá. O elo nasce no
+ * HTML como `<a href="#b21">` de verdade, pela mesma razão do elo de título
+ * (ver `Titulo.astro`): sem script ele ainda leva ao bloco, e copiar é o
+ * upgrade, não o mecanismo. `ligarCopia` é o mesmo ouvinte delegado que os
+ * títulos e o bloco de código já usam — ele se liga uma vez por página, então
+ * repetir este componente 37 vezes não repete nada.
+ *
+ * Ele é visível parado, não revelado no hover: hover não existe no celular
+ * nem para o crawler, e a regra é a mesma do bloco 27.
  */
 import { blocoPorId, estadoDe, numeroDe, ROTULO_ESTADO } from "../catalogo";
 import type { BlocoId } from "../catalogo";
@@ -22,6 +34,16 @@ const ancora = `b${String(id).toLowerCase()}`;
     <span class="bloco-n">{numeroDe(id)}</span>
     <h2 class="bloco-nome">{bloco.nome}</h2>
     <span class="chip" data-estado={estado}>{ROTULO_ESTADO[estado]}</span>
+    <a
+      class="bloco-elo"
+      href={`#${ancora}`}
+      data-copia
+      data-copia-depois="Copiado"
+      aria-label={`Copiar link para o bloco ${numeroDe(id)} — ${bloco.nome}`}
+    >
+      <span aria-hidden="true">#</span>
+      <span class="bloco-elo-dica" data-copia-rotulo aria-hidden="true">Copiar link</span>
+    </a>
     <p class="bloco-regra">{bloco.regra}</p>
   </div>
 
@@ -31,3 +53,12 @@ const ancora = `b${String(id).toLowerCase()}`;
     </div>
   </div>
 </section>
+
+<script>
+  /* O mesmo ouvinte delegado dos elos de título e do bloco de código. Sem ele
+     o elo continua sendo um link que leva ao bloco — o que se perde é só a
+     cópia para a área de transferência. `ligarCopia` tem guarda interna, então
+     os 37 palcos da página ligam um ouvinte só. */
+  import { ligarCopia } from "../copiarLink";
+  ligarCopia();
+</script>

@@ -85,8 +85,18 @@ export const CATALOGO: readonly Bloco[] = [
   { id: 25, estado: "previsto", nome: "Newsletter", regra: "Um por página. Promessa do que chega e a saída na mesma tela, vindas de src/consentimento.ts. Sem contagem de assinantes, sem escassez, e a caixa de consentimento nunca nasce marcada." },
   { id: 11, estado: "previsto", nome: "Enquete", regra: "Pergunta e opções no HTML inicial. Voto não fica atrás de e-mail. Resultado só vira fato com n, data e amostra rotulada." },
   { id: 12, estado: "previsto", nome: "Avaliação", regra: "“Isso respondeu sua dúvida?”, e o não abre campo livre. Nunca emite AggregateRating." },
-  { id: 13, estado: "previsto", nome: "Carrossel", regra: "Rolagem em CSS, todos os slides no HTML inicial. Cada legenda funciona sozinha. Só para sequência visual." },
-  { id: 14, estado: "previsto", nome: "Card de rede social", regra: "O embed é fonte, e o texto citado vive no nosso HTML fora do iframe. O card de perfil não conta seguidores." },
+  // 13 e 14 são ATIVOS pela mesma régua do 23 contra o 24, escrita acima:
+  // bloco ativo é bloco cuja dependência está no ar NESTE repositório. Os dois
+  // ficaram anos marcados como previstos por herança da extração, e nenhum dos
+  // dois espera infra nenhuma — o sintoma era a bancada anunciar "previsto" em
+  // cima de um espécime que renderiza inteiro ali do lado. O carrossel é
+  // rolagem em CSS com arraste de mouse como enriquecimento; some o JS e ele
+  // continua rolando por dedo, roda e teclado.
+  { id: 13, estado: "ativo", nome: "Carrossel", regra: "Rolagem em CSS, todos os slides no HTML inicial. Cada legenda funciona sozinha. Só para sequência visual. É PRATELEIRA — vários à vista de uma vez, sem avançar nem retroceder; o deck de um por vez é o 29." },
+  // O card de rede social não carrega iframe nem SDK: é exatamente a doutrina
+  // do bloco — o texto citado vive no NOSSO HTML, fora do embed — que o deixa
+  // sem dependência externa. Marcação estática, entregue por qualquer build.
+  { id: 14, estado: "ativo", nome: "Card de rede social", regra: "O embed é fonte, e o texto citado vive no nosso HTML fora do iframe. O card de perfil não conta seguidores." },
   { id: 15, estado: "derivado", nome: "Escute em áudio", regra: "Locução da prosa, sem autoplay, sem transcrição embaixo. Voz sintética se declara, e este bloco nunca tem muro." },
   { id: 16, estado: "derivado", nome: "Baixe o mapa mental", regra: "Gerado dos headings e do esqueleto. Número não entra em nó de mapa, porque nó não tem lugar para a ressalva." },
   { id: 17, estado: "derivado", nome: "Baixe em PDF", regra: "O artigo inteiro, com fontes e disclosure. O muro de e-mail fica aqui, nunca no artigo, e o botão fica no fim." },
@@ -118,11 +128,54 @@ export const ROTULO_ESTADO: Record<Estado, string> = {
   atomo: "átomo",
 };
 
-export const GRUPOS: readonly { rotulo: string; estados: Estado[] }[] = [
-  { rotulo: "No ar", estados: ["ativo"] },
-  { rotulo: "Átomos", estados: ["atomo"] },
-  { rotulo: "Previstos", estados: ["previsto", "derivado"] },
-  { rotulo: "Navegação", estados: ["navegacao"] },
+/**
+ * O corte da bancada: um grupo por família de estado, e é ele que ordena TANTO
+ * o índice QUANTO a página (ver `src/bancada.ts`). Antes eram duas ordens
+ * mantidas à mão, e duas ordens à mão divergem — foi o que aconteceu com os
+ * blocos 23 e 24 no commit `162ad1f`.
+ *
+ * Todo `Estado` do catálogo tem que cair em exatamente um grupo, e
+ * `conferirCobertura` quebra a build se não cair: estado sem grupo não some
+ * com erro, some em silêncio.
+ */
+export interface Grupo {
+  rotulo: string;
+  estados: Estado[];
+  /** Uma linha dizendo o que o grupo é — a página a imprime no corte, para
+   *  que "previsto" e "derivado" não precisem ser adivinhados pelo chip. */
+  nota: string;
+}
+
+export const GRUPOS: readonly Grupo[] = [
+  {
+    rotulo: "No ar",
+    estados: ["ativo"],
+    nota: "HTML que qualquer build entrega hoje, sem uma variável de ambiente configurada.",
+  },
+  {
+    rotulo: "Átomos",
+    estados: ["atomo"],
+    nota: "O que a prosa usa sem escolher. Não entram na lista de blocos de um site: eles simplesmente existem.",
+  },
+  // "Previstos" cobria `derivado` junto, e isso fazia o índice da bancada
+  // anunciar como esperando infra três blocos que já renderizam hoje (15, 16,
+  // 17). Derivado não é previsto: é o que reembala o artigo publicado, e a
+  // diferença tem grupo próprio.
+  {
+    rotulo: "Previstos",
+    estados: ["previsto"],
+    nota: "O componente existe e renderiza aqui; o que falta é a infra que ele consome — o endpoint está nomeado no comentário de cada um, em catalogo.ts. Até lá cada um nasce inerte e visível, nunca um formulário que engole o dado em silêncio.",
+  },
+  {
+    rotulo: "Derivados",
+    estados: ["derivado"],
+    nota: "Reembalam o artigo já publicado — áudio, mapa mental, PDF. Regeneram na fase 9 ou saem do ar. Não são previstos: não esperam infra nenhuma.",
+  },
+  {
+    rotulo: "Navegação",
+    estados: ["navegacao"],
+    nota: "Chrome de página, não de artigo: servem a página inteira e nunca entram no campo ARQUITETURA de um artigo.",
+  },
 ];
 
 export const blocoPorId = (id: BlocoId): Bloco => {
