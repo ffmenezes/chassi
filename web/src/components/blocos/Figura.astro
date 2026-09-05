@@ -20,7 +20,8 @@ export interface Props {
   /** Obrigatório. `alt=""` não existe no acervo: imagem decorativa é proibida. */
   alt: string;
   /** Caminho dentro do acervo (`src/imagens/`), não caminho livre. Ausente,
-   *  sai o marcador — que é estado de prévia. */
+   *  sai o marcador — que é estado de prévia. Só raster: SVG não entra por
+   *  aqui, entra inline pelo slot (é desenho, e desenho é código). */
   src?: string;
   /** Opcionais: o acervo responde pelas reais. Declarados, viram checagem —
    *  divergir do metadado do arquivo quebra a build (é o CLS que evitavam). */
@@ -80,7 +81,10 @@ if (temDesenho && src) {
 
 /* Figura sem `src` continua saindo como marcador: prévia é estado legítimo,
    e o autor ainda vai produzir a imagem. O que não é legítimo é `src`
-   apontando para o que não existe — isso vira imagem quebrada na página. */
+   apontando para o que não existe — isso vira imagem quebrada na página.
+   Daqui para baixo quem decide o ramo é `imagem`, não `src`: null é marcador,
+   não-null é <img>. Trava estrutural em vez de `imagem!` — a mesma escolha que
+   `slides.ts` faz na união de slide. */
 const imagem: FiguraOtimizada | null = src ? await otimizar(src, largura, altura) : null;
 
 const ROTULO: Record<PapelFigura, string> = {
@@ -93,13 +97,13 @@ const ROTULO: Record<PapelFigura, string> = {
 <figure class="figura" data-papel={papel}>
   {temDesenho && <div class="desenho"><slot /></div>}
 
-  {!temDesenho && src && (
+  {!temDesenho && imagem && (
     <img
-      src={imagem!.src}
-      srcset={imagem!.srcset}
-      sizes={imagem!.sizes}
-      width={imagem!.largura}
-      height={imagem!.altura}
+      src={imagem.src}
+      srcset={imagem.srcset}
+      sizes={imagem.sizes}
+      width={imagem.largura}
+      height={imagem.altura}
       alt={alt}
       loading={prioridade ? "eager" : "lazy"}
       fetchpriority={prioridade ? "high" : undefined}
@@ -110,7 +114,7 @@ const ROTULO: Record<PapelFigura, string> = {
   {/* Estado de prévia: o arquivo ainda não existe, e o marcador diz o que falta.
       Nunca vai ao ar — no post publicado ou existe a imagem, ou não existe a
       figura. O alt continua exercido aqui de propósito: é onde ele é revisado. */}
-  {!temDesenho && !src && (
+  {!temDesenho && !imagem && (
     <div class="marcador" role="img" aria-label={alt}>
       <span class="marcador-rot">{ROTULO[papel]} pendente</span>
       <span class="marcador-txt">{pendencia ?? alt}</span>
