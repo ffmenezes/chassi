@@ -10,6 +10,7 @@ export const CAMINHOS = {
   enquete: "/api/enquete",
   avaliacao: "/api/avaliacao",
   checklist: "/api/checklist",
+  newsletter: "/api/newsletter",
 } as const;
 
 const BASE = import.meta.env.PUBLIC_API_BASE ?? "";
@@ -69,4 +70,24 @@ export interface PedidoDeChecklist {
   /** Índice do item na lista publicada. */
   item: number;
   marcado: boolean;
+}
+
+/**
+ * Bloco 25 — uma assinatura de newsletter.
+ *
+ * `functions/api/newsletter.ts` ainda não existe neste repositório (só há
+ * `functions/api/contato.ts`); o componente já fala com `CAMINHOS.newsletter`
+ * mesmo assim, em prévia, para o dia em que a Function chegar não exigir
+ * tocar em `Newsletter.astro`.
+ */
+export interface PedidoDeNewsletter {
+  site: string;
+  email: string;
+  /** A frase aceita, não um booleano — mesmo motivo documentado em
+   *  `consentimento.ts`: a frase muda com o tempo, e o que a pessoa aceitou
+   *  foi a frase daquele dia. Precisa ser exatamente `CONSENTIMENTO_NEWSLETTER`
+   *  no momento do envio, nunca reescrita aqui. */
+  consentimento: string;
+  /** Token do Turnstile. Vazio quando a verificação está inerte. */
+  token: string;
 }

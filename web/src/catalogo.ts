@@ -15,7 +15,7 @@
 /** Blocos de artigo levam número; navegação leva `N`, e átomo leva `A`. */
 export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
-  | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24
+  | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
   | "N1" | "N2" | "N3" | "N4" | "N5"
   | "A1" | "A2";
 
@@ -74,6 +74,14 @@ export const CATALOGO: readonly Bloco[] = [
   // nasce.
   { id: 23, estado: "ativo", nome: "Calculadora", regra: "A conta que o corpo já fez por extenso, com as variáveis abertas. Todo campo diz de onde veio o valor de partida, a fórmula é a mesma do texto, e ela não pede e-mail, não esconde resultado e não projeta faturamento." },
   { id: 24, estado: "previsto", nome: "Oferta de isca", regra: "No fechamento, uma por artigo. Promessa literal com número, o que chega e como sair na mesma tela. Sem contagem de downloads, sem escassez, e o arquivo não carrega nada que a página não tenha." },
+  // 25 é PREVISTO pela mesma régua do 24: falta o endpoint. `functions/api/
+  // newsletter.ts` não existe neste repositório — só há `functions/api/
+  // contato.ts`. Os dois vizinhos não cobrem a captura de e-mail para os
+  // próximos artigos: a Oferta de isca (24) troca e-mail por arquivo, com
+  // consentimento próprio; Comentários (18) só chega a quem comenta, com a
+  // caixa embutida no formulário dele. Este é o bloco que falta para quem
+  // só quer assinar.
+  { id: 25, estado: "previsto", nome: "Newsletter", regra: "Um por página. Promessa do que chega e a saída na mesma tela, vindas de src/consentimento.ts. Sem contagem de assinantes, sem escassez, e a caixa de consentimento nunca nasce marcada." },
   { id: 11, estado: "previsto", nome: "Enquete", regra: "Pergunta e opções no HTML inicial. Voto não fica atrás de e-mail. Resultado só vira fato com n, data e amostra rotulada." },
   { id: 12, estado: "previsto", nome: "Avaliação", regra: "“Isso respondeu sua dúvida?”, e o não abre campo livre. Nunca emite AggregateRating." },
   { id: 13, estado: "previsto", nome: "Carrossel", regra: "Rolagem em CSS, todos os slides no HTML inicial. Cada legenda funciona sozinha. Só para sequência visual." },

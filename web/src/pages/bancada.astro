@@ -44,6 +44,7 @@ import Comentarios from "../components/blocos/Comentarios.astro";
 import Autor from "../components/blocos/Autor.astro";
 import Calculadora from "../components/blocos/Calculadora.astro";
 import OfertaIsca from "../components/blocos/OfertaIsca.astro";
+import Newsletter from "../components/blocos/Newsletter.astro";
 
 import * as m from "../mock/artigo";
 
@@ -200,6 +201,7 @@ const previstos = {
         </Palco>
         <Palco id={23} {...palco}><Calculadora {...m.calculadora} /></Palco>
         <Palco id={24} {...palco}><OfertaIsca {...m.ofertaIsca} /></Palco>
+        <Palco id={25} {...palco}><Newsletter site="bancada" /></Palco>
         <Palco id="A1" {...palco}><AtomosDemo pico={m.atomos.pico} /></Palco>
         <Palco id="A2" {...palco}>
           <ListasDemo

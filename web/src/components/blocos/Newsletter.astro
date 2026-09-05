@@ -1,0 +1,215 @@
+---
+/** Bloco 25 — Newsletter.
+ *
+ * A ausência que faltava no catálogo: nenhum bloco pedia e-mail para os
+ * próximos artigos por si só. Os dois vizinhos não cobrem — a Oferta de
+ * isca (24) troca e-mail por arquivo, com consentimento próprio; Comentários
+ * (18) só chega a quem comenta, com a caixa embutida no formulário dele.
+ * Este é o bloco de quem só quer assinar.
+ *
+ * Um por página, e o componente não impede isso sozinho — a trava real é a
+ * arquitetura do esqueleto, mesma honestidade que `OfertaIsca.astro` já
+ * admite sobre "fica no fechamento". O que ele garante:
+ *
+ *  - a promessa do que chega (`CONSENTIMENTO_NEWSLETTER`) e a saída
+ *    (`PROMESSA_DO_EMAIL`) na mesma tela, vindas de `src/consentimento.ts` —
+ *    a mesma frase que `Comentarios.astro` já usa na caixa embutida dele,
+ *    nunca reescrita aqui.
+ *  - sem contagem de assinantes: não existe prop para isso.
+ *  - sem escassez: a build quebra se `titulo`/`ancora` usarem palavra de
+ *    urgência (mesma trava de `OfertaIsca.astro`).
+ *  - caixa de consentimento nunca pré-marcada — não existe prop `marcado`, e
+ *    o valor do próprio checkbox é a frase aceita, não um booleano, para
+ *    quando o backend existir já receber o que precisa provar consentimento.
+ *
+ * `estado: "previsto"` no catálogo: falta `functions/api/newsletter.ts`, que
+ * este repositório ainda não tem (só há `functions/api/contato.ts`). Até lá
+ * — mesmo padrão de `Comentarios.astro` e `OfertaIsca.astro` — o formulário
+ * nasce em prévia: sem `action`, campo desabilitado, e uma linha visível
+ * dizendo por quê. Nunca um formulário que parece funcionar e engole o
+ * e-mail em silêncio.
+ *
+ * Validação no cliente + Toast (script no fim do arquivo): mesmo mecanismo
+ * do `FormularioContato.astro` e de `Comentarios.astro`. E-mail vazio ou
+ * malformado, ou consentimento desmarcado, dispara toast de erro e não
+ * envia — NUNCA substitui a validação do servidor, que ainda nem existe
+ * aqui. Sucesso não ganha toast: em prévia o botão nem está habilitado, e no
+ * dia em que o endpoint existir, a confirmação visível é a navegação nativa
+ * do POST — fingir "inscrito!" antes de o servidor confirmar seria a mesma
+ * mentira que `functions/_lib/contato.ts` já recusa a contar.
+ */
+import { CAMINHOS, urlDaApi } from "../../api/contrato";
+import { CONSENTIMENTO_NEWSLETTER, PROMESSA_DO_EMAIL } from "../../consentimento";
+import Toast from "./Toast.astro";
+
+interface Props {
+  /** Slug do site, para o remetente sair do domínio certo. */
+  site: string;
+  titulo?: string;
+  /** O texto do botão diz o que ele entrega. "Enviar" não diz nada. */
+  ancora?: string;
+}
+const {
+  site,
+  titulo = "Receba os próximos artigos",
+  ancora = "Quero receber",
+} = Astro.props;
+
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
+
+/* `/api/newsletter` ainda não existe neste repositório — chega junto com a
+   Function que atende este contrato. Até lá, sem esta variável configurada
+   o formulário sai **inerte**: mesmo padrão que `OfertaIsca.astro` usa para
+   dependência ausente — sem `action`, campo desabilitado, e uma linha
+   visível dizendo por quê. Um formulário que sempre cai em 404 é pior que
+   nenhum formulário. */
+const habilitada = import.meta.env.PUBLIC_NEWSLETTER_HABILITADA === "true";
+const previa = !habilitada || !sitekey;
+
+const erro = (m: string) => {
+  throw new Error(`[bloco 25] ${m}`);
+};
+if (/\b(?:últim|vagas?|agora|corre|expira|somente hoje|por tempo)\b/i.test(`${titulo} ${ancora}`)) {
+  erro(`escassez no texto da newsletter. O convite continua igual amanhã.`);
+}
+
+const endpoint = urlDaApi(CAMINHOS.newsletter);
+---
+<aside class="b-card newsletter" data-form-newsletter-raiz>
+  <p class="b-rotulo">Newsletter</p>
+  <h3 class="titulo">{titulo}</h3>
+
+  <form method="post" action={previa ? undefined : endpoint} data-form-newsletter>
+    {!previa && (
+      <>
+        <input type="hidden" name="site" value={site} />
+        {/* campo-armadilha, invisível para gente e irresistível para robô */}
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="armadilha" aria-hidden="true" />
+      </>
+    )}
+
+    <div class="linha">
+      <label for="news-email">Seu e-mail</label>
+      <input
+        id="news-email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        maxlength="254"
+        placeholder="voce@exemplo.com.br"
+        disabled={previa}
+        aria-describedby="news-email-nota"
+      />
+      <span class="nota" id="news-email-nota">{PROMESSA_DO_EMAIL}</span>
+    </div>
+
+    {/* Desmarcada, e é assim que fica: caixa pré-marcada não é consentimento
+        na LGPD. O `value` é a própria frase, não "on" — é o que viaja no POST
+        como prova do que a pessoa aceitou. Mesmo texto que a caixa embutida
+        de `Comentarios.astro` já usa. */}
+    <label class="opcao">
+      <input type="checkbox" name="consentimento" value={CONSENTIMENTO_NEWSLETTER} required disabled={previa} />
+      <span>{CONSENTIMENTO_NEWSLETTER}</span>
+    </label>
+
+    {!previa && sitekey && <div class="cf-turnstile" data-sitekey={sitekey}></div>}
+
+    <div class="acoes">
+      <button class="b-btn b-btn--forte" type="submit" disabled={previa}>{ancora}</button>
+      {previa && (
+        <span class="nota">
+          Prévia: este bloco ainda não tem <code>/api/newsletter</code> neste
+          repositório, então o formulário não envia.
+        </span>
+      )}
+    </div>
+  </form>
+
+  <Toast id="news-toast-erro" tipo="erro" titulo="Não deu para inscrever" texto="Confira o e-mail e o consentimento." hidden />
+
+  {!previa && (
+    <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+  )}
+</aside>
+
+<style>
+  .newsletter { padding: 20px 22px; max-width: var(--b-medida); }
+  .titulo {
+    font-family: var(--b-fonte-titulo);
+    font-weight: var(--b-peso-titulo);
+    letter-spacing: var(--b-titulo-track);
+    font-size: 19px;
+    color: var(--b-tinta);
+    margin: 0 0 14px;
+  }
+
+  .armadilha { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+  .linha { display: flex; flex-direction: column; gap: 5px; max-width: 30em; }
+  label { font-size: 13.5px; color: var(--b-corpo); }
+  input[type="email"] {
+    padding: 10px 12px;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    background: var(--b-fundo);
+    color: var(--b-tinta);
+    width: 100%;
+  }
+  input[type="email"]:hover { border-color: var(--b-acento); }
+  input[type="email"]:disabled { opacity: .6; cursor: not-allowed; }
+  .nota { font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2); }
+
+  .opcao { display: flex; gap: 9px; align-items: flex-start; font-size: 13.5px; color: var(--b-corpo); line-height: 1.5; margin: 14px 0; }
+  .opcao input { margin-top: 3px; flex: none; accent-color: var(--b-acento); }
+  .opcao input:disabled { opacity: .6; cursor: not-allowed; }
+
+  .cf-turnstile { margin-bottom: 14px; }
+  .acoes { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 2px; }
+</style>
+
+<script>
+  /* Melhoria progressiva: sem JS, `required` no e-mail e no consentimento já
+     barram envio incompleto com a bolha nativa do navegador — é o piso. Com
+     JS, `noValidate` desliga essa bolha e o mesmo Toast dos outros dois
+     formulários (FormularioContato, Comentários) assume o aviso. Bloco
+     interativo sem interação é decoração: um formulário que só descobre o
+     próprio erro numa resposta de servidor em texto puro é essa decoração,
+     mais lenta — e este aqui, em prévia, nem chega a existir servidor
+     nenhum para descobrir coisa alguma. */
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  const form = document.querySelector<HTMLFormElement>("[data-form-newsletter]");
+  const toastErro = document.getElementById("news-toast-erro");
+  if (form) form.noValidate = true;
+
+  function mostrarErro(texto: string) {
+    if (!toastErro) return;
+    const msg = toastErro.querySelector<HTMLElement>(".txt");
+    if (msg) msg.textContent = texto;
+    toastErro.hidden = false;
+  }
+
+  form?.addEventListener("submit", (ev) => {
+    const email = form.querySelector<HTMLInputElement>('input[name="email"]')!;
+    const consentimento = form.querySelector<HTMLInputElement>('input[name="consentimento"]')!;
+
+    if (!email.value.trim()) {
+      ev.preventDefault();
+      mostrarErro("Preencha o e-mail.");
+      return;
+    }
+    /* Mesmo regex de `functions/_lib/contato.ts` — a Function de newsletter
+       ainda não existe, mas quando existir vai validar de novo com a mesma
+       regra, porque cliente nunca é a última palavra. */
+    if (!EMAIL.test(email.value.trim())) {
+      ev.preventDefault();
+      mostrarErro("E-mail inválido.");
+      return;
+    }
+    if (!consentimento.checked) {
+      ev.preventDefault();
+      mostrarErro("Marque que você quer receber os próximos artigos.");
+    }
+  });
+</script>
