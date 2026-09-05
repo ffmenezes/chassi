@@ -22,6 +22,7 @@ import type { Comentario } from "../components/blocos/Comentarios.astro";
 import type { Props as CamposCalculadora } from "../components/blocos/Calculadora.astro";
 import type { Props as CamposOfertaIsca } from "../components/blocos/OfertaIsca.astro";
 import type { Props as CamposCompartilhar } from "../components/blocos/Compartilhar.astro";
+import type { Passo } from "../components/blocos/Passos.astro";
 import type { Autor } from "../autor";
 
 export const abertura = {
@@ -465,3 +466,29 @@ export const compartilhar: CamposCompartilhar = {
   url: "https://exemplo.com.br/por-que-sua-internet-cai-no-pico/",
   texto: "Por que sua internet cai só na hora do pico — e como medir isso em casa",
 };
+
+/** Bloco 27 — Passos com detalhe. O resumo é o que sobra sem hover nem foco;
+ *  o detalhe é o que aparece com os dois, e o que fica sempre visível no
+ *  celular. */
+export const passos: Passo[] = [
+  {
+    resumo: "Baixe um monitor de rede simples.",
+    detalhe:
+      "Qualquer app que mostre Mbps em tempo real serve — o objetivo é ver o pico, não a média que o provedor mostra na fatura.",
+  },
+  {
+    resumo: "Ligue tudo que costuma rodar junto.",
+    detalhe:
+      "Chamada de vídeo, backup na nuvem, streaming em 4K e jogo online ao mesmo tempo: é essa combinação que gera o pico, nunca um aparelho sozinho.",
+  },
+  {
+    resumo: "Anote o número mais alto em 10 minutos.",
+    detalhe:
+      "Não a média do período — o valor mais alto que o monitor mostrou. É esse número que precisa caber dentro do link contratado.",
+  },
+  {
+    resumo: "Compare com o Mbps da fatura.",
+    detalhe:
+      "Pico acima do contratado é queda garantida na próxima vez que a mesma combinação de aparelhos rodar junto — não depende de defeito no roteador.",
+  },
+];

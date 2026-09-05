@@ -16,7 +16,7 @@
 export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
-  | 26
+  | 26 | 27
   | "N1" | "N2" | "N3" | "N4" | "N5"
   | "A1" | "A2" | "A3";
 
@@ -94,6 +94,8 @@ export const CATALOGO: readonly Bloco[] = [
   // 26 é ATIVO: nenhum endpoint por trás, só navigator.share() e
   // navigator.clipboard, os dois já funcionando com a infra de hoje.
   { id: 26, estado: "ativo", nome: "Compartilhar", regra: "navigator.share() no celular onde existir; senão, destinos explícitos com WhatsApp primeiro. Copiar link reusa copiarLink.ts. Zero script de terceiro: cada destino é URL montada, nunca SDK de rede social. Sem JS, todo destino continua um link que funciona." },
+  // 27 é ATIVO: HTML e CSS puros, sem um script sequer.
+  { id: 27, estado: "ativo", nome: "Passos com detalhe", regra: "O detalhe mora sempre no HTML, nunca injetado por JS. Revela no hover e no foco em tela larga; sempre visível em tela estreita — celular não tem hover, crawler não roda JS. Cada passo é alcançável só de teclado." },
   { id: "N1", estado: "navegacao", nome: "Paginação", regra: "URL própria por página, canônica apontando para ela mesma, sem noindex, e link é <a href>." },
   { id: "N2", estado: "navegacao", nome: "Card de artigo", regra: "Título de feed, description do meta.md, dateModified visível. O que está no grid não conta como link tecido." },
   { id: "N3", estado: "navegacao", nome: "Toast de aviso", regra: "Resposta a uma ação do leitor, nada mais. Toast com número não existe. Erro se diz por inteiro e não some sozinho." },

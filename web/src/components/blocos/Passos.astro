@@ -1,0 +1,108 @@
+---
+/** Bloco 27 — Passos, com detalhe.
+ *
+ * Sequência de passos — fluxo, linha do tempo, procedimento. Cada passo tem
+ * um resumo curto, sempre visível, e um detalhe: a explicação completa do
+ * porquê ou do como, para quem quiser mais do que o resumo.
+ *
+ * A decisão de desenho que define este bloco: o detalhe fica SEMPRE no HTML,
+ * nunca injetado por JS. Em tela larga ele é revelado no hover E no foco; em
+ * tela estreita ele fica SEMPRE visível. Dois motivos, e os dois são
+ * restrição escrita, não gosto:
+ *
+ *   1. Celular não tem hover. Detalhe que só aparece ao passar o mouse não
+ *      existe para quem lê no toque — por isso a media query abaixo aposenta
+ *      o hover/foco no ponto de corte e deixa tudo visível o tempo todo.
+ *   2. Crawler de IA não executa JavaScript (`infra.md`). Detalhe que só
+ *      chegasse por `<script>` não existiria para quem indexa.
+ *
+ * Por isso este bloco não carrega NENHUM script: a revelação em tela larga é
+ * só CSS (`:hover`, `:focus`, `:focus-within`), e o texto do detalhe já está
+ * no HTML de qualquer forma — opacidade e altura recolhida são cosmética para
+ * quem enxerga, nunca supressão de conteúdo para quem lê a árvore de
+ * acessibilidade ou o HTML cru.
+ *
+ * Foco por teclado é obrigatório, não bônus: cada `<li>` leva `tabindex="0"`
+ * para ser alcançável só de Tab, sem depender de um elemento interativo
+ * dentro dele — é o que faz o foco revelar o detalhe sem exigir clique nem
+ * script nenhum.
+ */
+export interface Passo {
+  resumo: string;
+  detalhe: string;
+}
+interface Props {
+  rotulo?: string;
+  itens: Passo[];
+}
+const { rotulo, itens } = Astro.props;
+---
+
+<div class="passos-envolve">
+  {rotulo && <p class="b-rotulo">{rotulo}</p>}
+  <ol class="passos">
+    {itens.map((p, i) => (
+      <li class="passo" tabindex="0">
+        <span class="numero" aria-hidden="true">{i + 1}</span>
+        <div class="conteudo">
+          <p class="resumo">{p.resumo}</p>
+          <p class="detalhe">{p.detalhe}</p>
+        </div>
+      </li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  .passos-envolve { max-width: var(--b-medida); }
+
+  .passos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+
+  .passo {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: var(--b-radius);
+  }
+  .passo:focus-visible { outline: 2px solid var(--b-acento-tinta); outline-offset: 2px; }
+
+  .numero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--b-acento-fraco);
+    color: var(--b-acento-tinta);
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .resumo { margin: 0; color: var(--b-tinta); font-weight: 600; line-height: 1.5; }
+  .detalhe { margin: 6px 0 0; color: var(--b-corpo); font-size: 14px; line-height: 1.6; }
+
+  /* Só em tela larga o detalhe recolhe e some visualmente até hover/foco.
+     `max-height` + `opacity`, nunca `display`/`visibility`/`aria-hidden`: o
+     parágrafo continua no HTML e na árvore de acessibilidade o tempo todo,
+     lido por quem usa leitor de tela independente do estado do hover. */
+  @media (min-width: 720px) {
+    .detalhe {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      margin-top: 0;
+      transition: max-height .2s ease, opacity .2s ease, margin-top .2s ease;
+    }
+    .passo:hover .detalhe,
+    .passo:focus .detalhe,
+    .passo:focus-within .detalhe {
+      max-height: 16em;
+      opacity: 1;
+      margin-top: 6px;
+    }
+  }
+</style>
