@@ -6,12 +6,12 @@
  * /exemplo/linho e /exemplo/concreto é o tema, e dá para julgar a diferença
  * sem que o conteúdo mude junto. Quem mapeia site → tema é `src/sites/index.ts`.
  *
- * Quem monta a página são os mesmos componentes da bancada. Nada aqui é cópia:
+ * Quem monta a página são os mesmos componentes do inventário. Nada aqui é cópia:
  * se um bloco muda, muda nos dois lugares.
  *
  * O texto é LOREM IPSUM, de `mock/lorem.ts`, e isso é decisão e não preguiça:
  * conteúdo verossímil prende o olho no assunto, e aqui o que está em julgamento
- * é tipografia, ritmo e densidade. O conteúdo com cara de real fica na bancada,
+ * é tipografia, ritmo e densidade. O conteúdo com cara de real fica no inventário,
  * onde ele tem outro trabalho — provar que cada slot da doutrina cabe.
  *
  * Em troca, cada elemento se identifica. A <Etiqueta> envolve o elemento e diz,
@@ -135,7 +135,7 @@ const sec = Object.fromEntries(m.secoes.map((x) => [x.id, x]));
         <input type="checkbox" id="ver-regua" checked />
         Réguas
       </label>
-      <a class="previa-link" href="/bancada/">ver a bancada &rarr;</a>
+      <a class="previa-link" href="/inventario/">ver o inventário &rarr;</a>
     </div>
   </div>
 

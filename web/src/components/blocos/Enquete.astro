@@ -24,7 +24,7 @@
  *
  * Também declara o contrato em `api/contrato.ts` (`CAMINHOS.enquete`), por
  * trás de uma guarda: só tenta mandar o voto adiante quando a página conhece
- * `site` e `slug` — nas vitrines (bancada, exemplo), nada sai daqui além do
+ * `site` e `slug` — nas vitrines (inventário, exemplo), nada sai daqui além do
  * `localStorage`. A porta de dados está inerte (adaptador `nenhum`); quando
  * ela acordar, é publicar a Function no caminho certo — este componente já
  * está pronto e não muda.
@@ -33,7 +33,7 @@
  * troca não é "mostrar um botão a mais", é "não guardar nada". Ligado, o
  * radio continua respondendo a clique normalmente, só que sem tocar
  * `localStorage`: nada é lido na entrada nem escrito na saída, e cada
- * recarga da bancada volta ao estado inicial (nenhuma opção marcada) — que é
+ * recarga do inventário volta ao estado inicial (nenhuma opção marcada) — que é
  * exatamente o estado que se precisa ver para julgar o bloco. Ausente (o
  * caso de qualquer artigo real), nada muda.
  */
@@ -45,12 +45,12 @@ interface Props {
   piso: number;
   nome?: string;
   /** Do post que hospeda o bloco. Sem os dois, o envio ao backend não é
-   *  tentado — só o `localStorage` funciona (é o caso da bancada e do
+   *  tentado — só o `localStorage` funciona (é o caso do inventário e do
    *  exemplo). */
   site?: string;
   slug?: string;
   /** Modo vitrine: o bloco funciona, mas não lê nem escreve `localStorage`.
-   *  Só a bancada liga isto. */
+   *  Só o inventário liga isto. */
   especime?: boolean;
 }
 const { pergunta, opcoes, piso, nome = "enquete", site, slug, especime = false } = Astro.props;

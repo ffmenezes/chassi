@@ -52,9 +52,9 @@ ninguém.
    hex num verificador de contraste — o número importa, não a ferramenta.
 
 6. **O arquivo `.ts` declara três campos**, como em `linho.ts`: `nome` (o
-   que aparece na bancada e no seletor de tema), `acento` (a cor que
+   que aparece no inventário e no seletor de tema), `acento` (a cor que
    resume o estilo num ponto só) e `origem` — de onde vieram os tokens.
-   `origem` existe para a bancada e para a honestidade: escrever "criado
+   `origem` existe para o inventário e para a honestidade: escrever "criado
    do zero" quando a paleta veio de outro lugar é exatamente o que essa
    linha existe para impedir.
 

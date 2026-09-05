@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { conferirCategorias, conferirCobertura, idsDoGrupo, ordemDaBancada } from "./bancada";
+import { conferirCategorias, conferirCobertura, idsDoGrupo, ordemDoInventario } from "./inventario";
 import { CATALOGO, GRUPOS } from "./catalogo";
 import type { Bloco, Categoria, Grupo } from "./catalogo";
 
@@ -17,8 +17,8 @@ const b = (id: Bloco["id"], categoria: Categoria): Bloco => ({
 describe("idsDoGrupo", () => {
   it("preserva a ordem do catálogo, que é a de leitura e não a numérica", () => {
     /* O 19 lê entre o 10 e o 11, e o catálogo o declara ali. Uma versão que
-       ordenasse por número devolveria 1, 10, 19 — e a bancada passaria a
-       contradizer a doutrina que ela existe para mostrar. */
+       ordenasse por número devolveria 1, 10, 19 — e o inventário passaria a
+       contradizer a doutrina que ele existe para mostrar. */
     const catalogo = [b(19, "dados"), b(1, "dados"), b(10, "dados")];
     const grupo: Grupo = { rotulo: "Dados e prova", categorias: ["dados"], nota: "" };
     expect(idsDoGrupo(catalogo, grupo)).toEqual([19, 1, 10]);
@@ -51,7 +51,7 @@ describe("idsDoGrupo", () => {
   });
 });
 
-describe("ordemDaBancada", () => {
+describe("ordemDoInventario", () => {
   it("emenda os grupos na ordem em que GRUPOS os declara", () => {
     const catalogo = [b(1, "estrutura"), b(2, "conversao"), b("A1", "texto"), b(3, "estrutura")];
     const grupos: Grupo[] = [
@@ -59,7 +59,7 @@ describe("ordemDaBancada", () => {
       { rotulo: "Texto e citação", categorias: ["texto"], nota: "" },
       { rotulo: "Capturar e converter", categorias: ["conversao"], nota: "" },
     ];
-    expect(ordemDaBancada(catalogo, grupos)).toEqual([1, 3, "A1", 2]);
+    expect(ordemDoInventario(catalogo, grupos)).toEqual([1, 3, "A1", 2]);
   });
 });
 
@@ -126,11 +126,11 @@ describe("o catálogo real", () => {
     expect(() => conferirCobertura(CATALOGO, GRUPOS)).not.toThrow();
   });
 
-  it("a bancada mostra todo bloco do catálogo, uma vez só", () => {
+  it("o inventário mostra todo bloco do catálogo, uma vez só", () => {
     /* A contagem que o commit 162ad1f consertou, agora como teste em vez de
        conferência manual do HTML: se um bloco cair fora de todo grupo, ou
        aparecer em dois, o número deixa de bater. */
-    const ordem = ordemDaBancada(CATALOGO, GRUPOS);
+    const ordem = ordemDoInventario(CATALOGO, GRUPOS);
     expect(ordem).toHaveLength(CATALOGO.length);
     expect(new Set(ordem).size).toBe(CATALOGO.length);
   });
@@ -148,6 +148,6 @@ describe("o catálogo real", () => {
     const doIndice = GRUPOS.flatMap((g) =>
       CATALOGO.filter((x) => g.categorias.includes(x.categoria)).map((x) => x.id)
     );
-    expect(ordemDaBancada(CATALOGO, GRUPOS)).toEqual(doIndice);
+    expect(ordemDoInventario(CATALOGO, GRUPOS)).toEqual(doIndice);
   });
 });

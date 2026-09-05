@@ -20,7 +20,7 @@ export type TagSocial =
   | { tag: "meta"; atributo: "property" | "name"; nome: string; conteudo: string };
 
 export interface PaginaSocial {
-  /** Ausente na bancada e na vitrine de estilo: espécime não é site. */
+  /** Ausente no inventário e na vitrine de estilo: espécime não é site. */
   site?: Site;
   /** `Astro.url.pathname`, já com a barra final que o build de diretório dá. */
   caminho: string;
@@ -44,8 +44,9 @@ export function tagsSociais(pagina: PaginaSocial): TagSocial[] {
   /*
    * O gate, inteiro, em um lugar só.
    *
-   * Sem `site` não há domínio, e sem domínio não existe URL absoluta: bancada
-   * e vitrine de estilo são a vitrine do chassi, não um site que se anuncia.
+   * Sem `site` não há domínio, e sem domínio não existe URL absoluta:
+   * inventário e vitrine de estilo são a vitrine do chassi, não um site que
+   * se anuncia.
    * Em página `noindex` também não sai nada — página de serviço
    * (`contato-recebido`, `404`) não se anuncia, e um `canonical` nela apontaria
    * para uma URL que ninguém deveria compartilhar.

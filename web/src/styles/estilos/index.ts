@@ -8,7 +8,7 @@
 export interface MetaEstilo {
   nome: string;
   acento: string;
-  /** De onde vieram os tokens. Serve à bancada e à honestidade. */
+  /** De onde vieram os tokens. Serve ao inventário e à honestidade. */
   origem: string;
 }
 

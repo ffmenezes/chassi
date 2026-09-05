@@ -1,6 +1,6 @@
 ---
 /**
- * A bancada: todo bloco do catálogo, com dados fictícios, em todo estilo.
+ * O inventário: todo bloco do catálogo, com dados fictícios, em todo estilo.
  *
  * O markup de cada bloco é o mesmo em qualquer estilo — os componentes são
  * literalmente os mesmos que um site usa. Só os tokens mudam. Se um estilo
@@ -54,8 +54,8 @@ import Quiz from "../components/blocos/Quiz.astro";
 
 import * as m from "../mock/artigo";
 
-/* A bancada monta o catálogo inteiro, em todo estilo — ela é o inventário,
- * não um site. Estilo é forma e cor (raio, borda, sombra, fonte, tinta); ele
+/* O inventário monta o catálogo inteiro, em todo estilo — ele não é um
+ * site. Estilo é forma e cor (raio, borda, sombra, fonte, tinta); ele
  * não tem opinião sobre se um bloco existe. Quem decide isso é o site, na
  * lista `blocos` do arquivo em `src/sites/<slug>.ts`. `Palco` não carrega
  * mais a noção de bloco "fora de estilo" (removida em 65efbee): aqui ele só
@@ -67,13 +67,13 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
 ---
 
 <Base
-  titulo="Bancada de Blocos"
+  titulo="Inventário de Blocos"
   descricao="Todo bloco do catálogo, com dados fictícios, em cinco estilos e dois modos."
 >
   <header class="topo">
     <div class="wrap topo-in">
       <p class="sobrancelha">design system · holding de sites de nicho</p>
-      <h1 class="titulo">Bancada de Blocos</h1>
+      <h1 class="titulo">Inventário de Blocos</h1>
       <p class="lede">
         Cada bloco do catálogo, com dados fictícios, em cinco estilos e dois modos.
         Os componentes aqui são <b>os mesmos</b> que um site usa: muda só o token, e o
@@ -156,7 +156,7 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
 
           Bloco novo no catálogo sem `slot` aqui QUEBRA A BUILD, com o nome do
           slot que falta — é o conserto definitivo do defeito de 162ad1f, em
-          que os blocos 23 e 24 sumiram da bancada sem sumir do catálogo e sem
+          que os blocos 23 e 24 sumiram do inventário sem sumir do catálogo e sem
           erro nenhum. */}
       <Blocos {...palco}>
         <Fragment slot="b1"><Abertura {...m.abertura} /></Fragment>
@@ -202,7 +202,7 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
         </Fragment>
         <Fragment slot="b23"><Calculadora {...m.calculadora} /></Fragment>
         <Fragment slot="b24"><OfertaIsca {...m.ofertaIsca} /></Fragment>
-        <Fragment slot="b25"><Newsletter site="bancada" /></Fragment>
+        <Fragment slot="b25"><Newsletter site="inventario" /></Fragment>
         <Fragment slot="b11"><Enquete {...m.enquete} especime /></Fragment>
         <Fragment slot="b12"><Avaliacao especime /></Fragment>
         <Fragment slot="b13">
@@ -214,10 +214,10 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
         <Fragment slot="b17"><Download {...m.derivados.pdf} muro /></Fragment>
         <Fragment slot="b18"><Comentarios itens={m.comentarios.slice(0, 2)} /></Fragment>
         <Fragment slot="b26">
-          {/* os dois estados lado a lado, forçados por `forcarNativo`: a
-              bancada é o inventário, e um navegador só nunca é o desktop e o
-              celular ao mesmo tempo. Sem os dois juntos, quem decide se quer
-              o bloco vê só metade do que ele faz. */}
+          {/* os dois estados lado a lado, forçados por `forcarNativo`: um
+              navegador só nunca é o desktop e o celular ao mesmo tempo. Sem
+              os dois juntos, quem decide se quer o bloco vê só metade do que
+              ele faz. */}
           <div style="display:flex;flex-direction:column;gap:26px">
             <div>
               <p class="b-rotulo">Com menu nativo do sistema — celular, a maioria dos navegadores</p>
@@ -352,11 +352,11 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
 </style>
 
 <script is:inline>
-  document.body.classList.add("bancada");
+  document.body.classList.add("inventario");
 
-  /* A bancada é o catálogo inteiro em qualquer estilo — não existe bloco
+  /* O inventário é o catálogo inteiro em qualquer estilo — não existe bloco
    * "fora" de um estilo, então este script só troca token (estilo/modo).
-   * Quem decide se um bloco existe é o site, não a bancada. */
+   * Quem decide se um bloco existe é o site, não o inventário. */
   const raiz = document.documentElement;
   const palcos = [...document.querySelectorAll(".palco > [data-estilo]")];
   const btnEstilo = [...document.querySelectorAll("[data-estilo-btn]")];

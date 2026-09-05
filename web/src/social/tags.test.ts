@@ -49,7 +49,7 @@ describe("tagsSociais", () => {
     expect(tagsSociais(pagina({ noindex: true }))).toEqual([]);
   });
 
-  it("pagina sem site nao anuncia nada: bancada e vitrine sao do chassi", () => {
+  it("pagina sem site nao anuncia nada: inventario e vitrine sao do chassi", () => {
     expect(tagsSociais(pagina({ site: undefined }))).toEqual([]);
   });
 

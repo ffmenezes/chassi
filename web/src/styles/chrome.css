@@ -1,5 +1,5 @@
 /* ============================================================
-   CHROME DA BANCADA
+   CHROME DO INVENTÁRIO
    ------------------------------------------------------------
    Só a moldura: índice, rótulos, controles. Neutro de propósito,
    porque os estilos são os espécimes e a moldura não pode
@@ -51,7 +51,7 @@
   --c-mark-soft: #191f33;
 }
 
-body.bancada {
+body.inventario {
   background: var(--c-bench);
   color: var(--c-ink);
   font-family: var(--c-ui);
@@ -59,8 +59,8 @@ body.bancada {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
-body.bancada a { color: var(--c-mark); }
-body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 2px; }
+body.inventario a { color: var(--c-mark); }
+body.inventario :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 2px; }
 
 .wrap { max-width: var(--c-shell); margin: 0 auto; padding: 0 calc(var(--c-sp) * 3); }
 
@@ -131,7 +131,7 @@ body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 
 @media (min-width: 1060px) { .colunas { grid-template-columns: 216px 1fr; } }
 
 /* índice inline no celular, trilho fixo no desktop:
-   a bancada obedece à regra do bloco 3 que ela documenta */
+   o inventário obedece à regra do bloco 3 que ele documenta */
 .indice-inline { display: block; margin-bottom: calc(var(--c-sp) * 3); }
 .indice-trilho { display: none; }
 @media (min-width: 1060px) {
@@ -162,7 +162,7 @@ body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 
 
 /* ---------- corte de grupo ----------
    A página passou a ser cortada pelos mesmos GRUPOS que o índice usa (ver
-   `src/bancada.ts`): antes eram 37 palcos em fila única, sem nada dizendo onde
+   `src/inventario.ts`): antes eram 37 palcos em fila única, sem nada dizendo onde
    termina o que está no ar e começa o que espera infra.
 
    O vão ENTRE grupos é maior que o vão entre blocos, e é só isso que separa —
@@ -221,7 +221,7 @@ body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 
    regra é a mesma do bloco 27. Ele nasce `<a href="#b21">` de verdade — sem
    script continua levando ao bloco, e copiar é o upgrade. */
 /* `.bloco-cab` no seletor NÃO é enfeite de organização: sem ele o elo perde a
-   cor. `body.bancada a` (linha ~62) tem especificidade (0,1,2) e vence
+   cor. `body.inventario a` (linha ~62) tem especificidade (0,1,2) e vence
    `.bloco-elo` sozinho, que tem (0,1,0) — o sintoma era o elo já nascer na cor
    de hover, com a de repouso nunca chegando. Medido no navegador com
    getComputedStyle, não deduzido do arquivo. `.bloco-cab .bloco-elo` dá

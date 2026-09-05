@@ -1,15 +1,15 @@
 /**
  * Achata uma página do build num único HTML self-contained.
  *
- * Existe só para publicar a bancada como artifact, que exige um arquivo sem
+ * Existe só para publicar o inventário como artifact, que exige um arquivo sem
  * nenhuma requisição externa. Não faz parte do build dos sites.
  *
- *   node scripts/inline.mjs bancada > ../design-system/bancada.html
+ *   node scripts/inline.mjs inventario > ../design-system/inventario.html
  */
 import { readFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 
-const pagina = process.argv[2] ?? "bancada";
+const pagina = process.argv[2] ?? "inventario";
 const dist = new URL("../dist/", import.meta.url).pathname;
 const arquivo = join(dist, pagina, "index.html");
 

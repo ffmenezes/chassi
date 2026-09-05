@@ -1,14 +1,14 @@
 ---
 /**
- * O corpo da bancada: todo bloco do catálogo, agrupado, na ordem do catálogo.
+ * O corpo do inventário: todo bloco do catálogo, agrupado, na ordem do catálogo.
  *
- * O QUE ESTE COMPONENTE RESOLVE. Até aqui a bancada era uma pilha de
+ * O QUE ESTE COMPONENTE RESOLVE. Até aqui o inventário era uma pilha de
  * `<Palco id={N}>` escrita à mão dentro da página, e ela tinha três defeitos
  * que só cresciam com o catálogo:
  *
  *   1. A ORDEM da página era digitada, e a do índice ao lado era calculada a
  *      partir de `GRUPOS`. Duas ordens à mão divergem — foi exatamente o que
- *      aconteceu com os blocos 23 e 24, que sumiram da bancada sem sumir do
+ *      aconteceu com os blocos 23 e 24, que sumiram do inventário sem sumir do
  *      catálogo (commit `162ad1f`).
  *   2. A página não tinha CORTE nenhum: 37 palcos em fila única, sem nada
  *      dizendo onde termina o que está no ar e começa o que espera infra. O
@@ -28,7 +28,7 @@
  */
 import Palco from "./Palco.astro";
 import { CATALOGO, GRUPOS } from "../catalogo";
-import { idsDoGrupo, conferirCobertura, conferirCategorias } from "../bancada";
+import { idsDoGrupo, conferirCobertura, conferirCategorias } from "../inventario";
 import type { Estilo, Modo } from "../sites";
 
 interface Props {
@@ -41,7 +41,7 @@ const palco = { estilo, modo };
 /* Duas travas, nesta ordem: primeiro que todo bloco TEM categoria (senão a
    segunda trava não teria o que checar e o bloco sumiria em silêncio),
    depois que toda categoria do catálogo cai em algum grupo de GRUPOS. Ver o
-   porquê inteiro em `src/bancada.ts`. */
+   porquê inteiro em `src/inventario.ts`. */
 conferirCategorias(CATALOGO);
 conferirCobertura(CATALOGO, GRUPOS);
 
@@ -53,11 +53,11 @@ const nomeDoSlot = (id: (typeof CATALOGO)[number]["id"]) =>
 const semEspecime = CATALOGO.filter((b) => !Astro.slots.has(nomeDoSlot(b.id)));
 if (semEspecime.length) {
   throw new Error(
-    `[bancada] ${semEspecime.length} bloco(s) do catálogo sem espécime: ` +
+    `[inventario] ${semEspecime.length} bloco(s) do catálogo sem espécime: ` +
       semEspecime.map((b) => `${b.id} (${b.nome}) precisa de slot="${nomeDoSlot(b.id)}"`).join("; ") +
-      `. Bloco no catálogo tem de aparecer na bancada — sem isso a contagem ` +
+      `. Bloco no catálogo tem de aparecer no inventário — sem isso a contagem ` +
       `"X de Y" mente sobre quantos blocos o chassi tem, que é o defeito do ` +
-      `commit 162ad1f. Acrescente o espécime em bancada.astro, em qualquer ` +
+      `commit 162ad1f. Acrescente o espécime em inventario.astro, em qualquer ` +
       `posição: a ordem sai do catálogo, não da ordem em que você escrever.`
   );
 }

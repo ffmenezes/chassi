@@ -17,7 +17,7 @@
  *
  * Também declara o contrato em `api/contrato.ts` (`CAMINHOS.checklist`), por
  * trás de uma guarda: só tenta mandar o clique adiante quando a página
- * conhece `site` e `slug` — nas duas vitrines (bancada e exemplo), que não
+ * conhece `site` e `slug` — nas duas vitrines (inventário e exemplo), que não
  * têm nenhum dos dois, nada sai daqui além do `localStorage`. A porta de
  * dados está inerte (adaptador `nenhum`); quando ela acordar, é publicar a
  * Function no caminho certo — este componente já está pronto e não muda.
@@ -26,7 +26,7 @@
  * troca não é "mostrar um botão a mais", é "não guardar nada". Ligado, cada
  * caixa continua marcando e desmarcando normalmente, só que sem tocar
  * `localStorage`: nada é lido na entrada nem escrito na saída, e cada
- * recarga da bancada volta ao estado inicial (nada marcado) — que é
+ * recarga do inventário volta ao estado inicial (nada marcado) — que é
  * exatamente o estado que se precisa ver para julgar o bloco. Ausente (o
  * caso de qualquer artigo real), nada muda.
  */
@@ -41,12 +41,12 @@ interface Props {
    *  rótulo faz esse papel; sem rótulo, todo checklist da página é "único". */
   id?: string;
   /** Do post que hospeda o bloco. Sem os dois, o envio ao backend não é
-   *  tentado — só o `localStorage` funciona (é o caso da bancada e do
+   *  tentado — só o `localStorage` funciona (é o caso do inventário e do
    *  exemplo). */
   site?: string;
   slug?: string;
   /** Modo vitrine: o bloco funciona, mas não lê nem escreve `localStorage`.
-   *  Só a bancada liga isto. */
+   *  Só o inventário liga isto. */
   especime?: boolean;
 }
 const { rotulo, itens, teto = 7, id, site, slug, especime = false } = Astro.props;
@@ -147,7 +147,7 @@ const endpoint = urlDaApi(CAMINHOS.checklist);
         } catch {}
       }
 
-      /* Guarda: sem `site`/`slug` (bancada, exemplo) não tenta nada além do
+      /* Guarda: sem `site`/`slug` (inventário, exemplo) não tenta nada além do
          localStorage acima, que já é a fonte da verdade. Com os dois, é
          melhor esforço — falha de rede ou 404 (a Function ainda não existe)
          não muda nada na tela, porque a tela já refletia o clique antes de

@@ -10,7 +10,7 @@
  * agir precisa continuar lendo — por isso o botão de fechar abaixo, e por
  * isso só o sucesso ganha temporizador.
  *
- * Até aqui o componente só nascia visível: bom para espécime de bancada,
+ * Até aqui o componente só nascia visível: bom para espécime de inventário,
  * inútil para quem precisa mostrá-lo em resposta a uma ação real. Agora ele
  * nasce oculto quando `hidden` é passado (é o que `FormularioContato.astro`
  * e `Comentarios.astro` fazem: o toast já existe no HTML, silencioso, até a
@@ -18,7 +18,7 @@
  * assim que aparece, porque `role`/`aria-live` já vivem no elemento antes
  * de ele ficar visível.
  *
- * `demo` é só para a bancada: liga um botão que dispara o próprio toast, com
+ * `demo` é só para o inventário: liga um botão que dispara o próprio toast, com
  * `id`/desligado por padrão. Comente é a peça: com `demo` desligado (o caso
  * de qualquer artigo real), este componente é exatamente o que sempre foi —
  * sem botão extra e sem esse script de demonstração no bundle daquela
@@ -33,7 +33,7 @@ interface Props {
   /** Nasce escondido, para um script tirar o `hidden` em resposta a uma
    *  ação. Sem isto, o toast é o espécime estático de sempre. */
   hidden?: boolean;
-  /** Só a bancada liga isto: rende um botão que dispara este mesmo toast,
+  /** Só o inventário liga isto: rende um botão que dispara este mesmo toast,
    *  para dar para ver entrada, permanência e saída sem simular um formulário. */
   demo?: boolean;
 }
@@ -95,7 +95,7 @@ const idToast = id ?? "toast-" + paraSlug(titulo);
      fechar manualmente é sempre por este X, e sumir sozinho é só do sucesso.
      Bloco interativo sem interação é decoração: um toast que só sabe ficar
      visível, sem nunca fechar sozinho nem por clique, era exatamente essa
-     decoração parada na bancada. */
+     decoração parada no inventário. */
   document.addEventListener("click", (ev) => {
     const alvo = ev.target as HTMLElement;
 

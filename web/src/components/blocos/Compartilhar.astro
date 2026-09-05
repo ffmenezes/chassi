@@ -42,10 +42,10 @@ export interface Props {
   url: string;
   /** Frase curta que acompanha o link — o título do artigo, ou um gancho de uma linha. */
   texto: string;
-  /** Só a bancada usa isto: força o estado do botão nativo sem depender da
+  /** Só o inventário usa isto: força o estado do botão nativo sem depender da
    *  capacidade real do navegador que abriu a página. Existe porque o
-   *  espécime na bancada é o inventário — o lugar onde o dono decide se quer
-   *  o bloco — e ali um único navegador só mostra metade da verdade: quem
+   *  inventário é o lugar onde o dono decide se quer o bloco — e ali um único
+   *  navegador só mostra metade da verdade: quem
    *  abre no desktop nunca vê o estado "com nativo", quem abre no celular
    *  nunca vê o estado "sem nativo" sozinho. `true` força visível, `false`
    *  força oculto. Ausente — o único caminho em produção, e o padrão — o
@@ -80,8 +80,8 @@ const DESTINOS = [
   <p class="b-rotulo">Compartilhar</p>
 
   {/* Primeiro no HTML, escondido por padrão: em produção (`forcarNativo`
-      ausente) só aparece quando o script confirma `navigator.share`. Na
-      bancada, `forcarNativo` decide o `hidden` aqui mesmo, sem depender do
+      ausente) só aparece quando o script confirma `navigator.share`. No
+      inventário, `forcarNativo` decide o `hidden` aqui mesmo, sem depender do
       navegador que abriu a página. É o botão que entrega o menu nativo do
       sistema — SOMA à lista abaixo, nunca a substitui (ver o porquê no topo
       do arquivo). */}
@@ -198,7 +198,7 @@ const DESTINOS = [
     const nativo = raiz.querySelector<HTMLButtonElement>("[data-compartilhar-nativo]");
     if (!nativo) continue;
 
-    /* `data-forcar-nativo` só existe na bancada: quando presente, o `hidden`
+    /* `data-forcar-nativo` só existe no inventário: quando presente, o `hidden`
        já foi decidido no servidor (ver o Props do componente) e este script
        não deve sobrepor a escolha com a capacidade real do navegador que
        está rodando o espécime. */

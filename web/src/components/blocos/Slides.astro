@@ -156,7 +156,7 @@ conferirSlides(slides);
 
 <style>
   /* OS NOMES DE CLASSE AQUI NÃO SÃO LIVRES, e a razão foi medida no
-     navegador, não deduzida. `chrome.css` — a folha da bancada — declara
+     navegador, não deduzida. `chrome.css` — a folha do inventário — declara
      `.titulo`, `.ponto` e `.controles` GLOBAIS, sem camada. O escopo do Astro
      protege as propriedades que ESTE arquivo declara (a classe escopada tem
      especificidade maior), mas não as que ele não declara: elas vazam. Com
@@ -165,7 +165,7 @@ conferirSlides(slides);
      `width: 9px; height: 9px` mais um anel `inset` do seletor de estilo
      esmagando o alvo de toque dos atalhos.
 
-     O sintoma é o pior possível: o bloco fica errado SÓ na bancada, que é
+     O sintoma é o pior possível: o bloco fica errado SÓ no inventário, que é
      justamente onde ele é julgado, e certo no artigo. Por isso os nomes daqui
      são `titulo-slide`, `atalho` e `passar` — e um bloco novo confere os
      nomes dele contra `chrome.css` antes de escrever o CSS. */

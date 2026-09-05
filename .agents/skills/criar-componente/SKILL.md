@@ -1,6 +1,6 @@
 ---
 name: criar-componente
-description: Use quando o dono quiser um bloco novo no catálogo do chassi ou um componente de chrome novo — "cria um bloco para X", "falta um bloco de Y no catálogo", "quero um componente novo para o artigo". Conduz do catálogo ao componente, aos tokens que faltarem, ao espécime na bancada e ao mock, e reúne os erros reais que já quebraram bloco aqui para não repeti-los.
+description: Use quando o dono quiser um bloco novo no catálogo do chassi ou um componente de chrome novo — "cria um bloco para X", "falta um bloco de Y no catálogo", "quero um componente novo para o artigo". Conduz do catálogo ao componente, aos tokens que faltarem, ao espécime no inventário e ao mock, e reúne os erros reais que já quebraram bloco aqui para não repeti-los.
 ---
 
 # Criar um bloco novo
@@ -19,7 +19,7 @@ decisão é qual das duas é a sua.
 
 ## Bloco de catálogo, ou chrome de site?
 
-**Entra no catálogo** (e por isso na bancada) o que uma ARQUITETURA escolhe
+**Entra no catálogo** (e por isso no inventário) o que uma ARQUITETURA escolhe
 montar — decisão por artigo, ou por página de navegação, com instância
 própria: Toast leva título e texto por chamada, Overlay leva um gatilho,
 Paginação leva total e página atual. `BlocoId`, em `catalogo.ts`, tem três
@@ -29,7 +29,7 @@ faixas:
   histórico, não a ordem de leitura nem a faixa em si — o bloco 19 lê entre
   10 e 11 — e o `estado` é sempre explícito, nunca deduzido do número.
 - **`"N1"`..`"N5"`, chrome de NAVEGAÇÃO.** Serve a página, não a arquitetura
-  de UM artigo, mas ainda tem instância própria e ainda aparece na bancada.
+  de UM artigo, mas ainda tem instância própria e ainda aparece no inventário.
   **As cinco vagas já estão ocupadas hoje**: Paginação, Card de artigo, Toast
   de aviso, Overlay de tela cheia, Barra de progresso. Ver "Cheio, e agora?"
   abaixo antes de pensar numa sexta.
@@ -39,18 +39,18 @@ faixas:
 
 **Nunca entra no catálogo** o que é decisão única do site inteiro: liga ou
 desliga uma vez, como cabeçalho ou rodapé, nunca algo que um artigo escolhe
-montar — e por isso nunca aparece na bancada nem no campo `blocos`. É
+montar — e por isso nunca aparece no inventário nem no campo `blocos`. É
 **chrome de site**: mora direto em `web/src/components/` (não em
 `components/blocos/`), ganha campo próprio e tipado em `Site` (não a lista
 `blocos`), e monta em `web/src/layouts/Base.astro` atrás do gate `{site &&
 <X site={site} />}` — o mesmo gate que já existe para nada montar na
-bancada, porque `Base` só recebe `site` fora dela. Os quatro que existem
+inventário, porque `Base` só recebe `site` fora dele. Os quatro que existem
 hoje: `Cabecalho.astro`, `Rodape.astro`, `Consentimento.astro` e
 `BarraAviso.astro`. Nenhum tem `id` em `catalogo.ts`, e é assim que deve
 continuar.
 
 Critério, resumido: **tem instância própria, artigo a artigo (ou página a
-página), e faz sentido lado a lado na bancada? Catálogo.** **É uma decisão
+página), e faz sentido lado a lado no inventário? Catálogo.** **É uma decisão
 única do site, sempre igual em toda página? Chrome de site, fora do
 catálogo.**
 
@@ -82,13 +82,13 @@ linha — é mais barato ler isto do que repetir o defeito.
    componente. Se seu bloco usa `hidden`, ele já está coberto; não escreva
    `display: none` alternativo na sua classe.
 
-2. **Bloco no catálogo tem de aparecer na bancada.** `SITE_DEMO.blocos` e a
-   lista de `<Palco>` em `bancada.astro` já divergiram do catálogo: faltavam
-   os blocos 23 e 24, e eles **não apareciam nem como ausentes**, porque a
-   bancada itera sobre a lista do site, não sobre o catálogo (commit
+2. **Bloco no catálogo tem de aparecer no inventário.** `SITE_DEMO.blocos` e a
+   lista de `<Palco>` em `inventario.astro` já divergiram do catálogo: faltavam
+   os blocos 23 e 24, e eles **não apareciam nem como ausentes**, porque o
+   inventário itera sobre a lista do site, não sobre o catálogo (commit
    `162ad1f`). Por isso `SITE_DEMO.blocos` hoje é `CATALOGO.map(b => b.id)` —
    nunca lista digitada. A parte que ainda é manual é a chamada de `<Palco
-   id={N}>` em `bancada.astro`: seu bloco novo entra ali, ou a contagem
+   id={N}>` em `inventario.astro`: seu bloco novo entra ali, ou a contagem
    "X de Y blocos" mente sobre quantos blocos o chassi tem.
 
 3. **O catálogo não pode mentir.** `estado: "ativo"` significa "a dependência
@@ -240,8 +240,8 @@ linha — é mais barato ler isto do que repetir o defeito.
    átomo — as duas últimas hoje cheias, ver "Cheio, e agora?"), e uma família
    inteira fora dele: chrome de site (`Cabecalho`, `Rodape`, `Consentimento`,
    `BarraAviso`, direto em `web/src/components/`, sem entrada em
-   `catalogo.ts`). Escolhendo **chrome de site**, pule os passos 5 (bancada —
-   ele nunca aparece lá, porque `Base` só recebe `site` fora dela), 6 (mock —
+   `catalogo.ts`). Escolhendo **chrome de site**, pule os passos 5 (inventário —
+   ele nunca aparece lá, porque `Base` só recebe `site` fora dele), 6 (mock —
    lê o campo próprio de `Site`, não `mock/artigo.ts`), 7 e 8 (não há
    `blocos` de site nem slot de artigo pra montar) e vá direto do passo 3
    para "Como saber que terminou". Escolhendo **chrome de navegação** (`N`),
@@ -309,21 +309,21 @@ linha — é mais barato ler isto do que repetir o defeito.
    `web/src/styles/estilos/<nome>.css`, dentro do `[data-estilo="<nome>"]`
    correspondente — nunca um seletor mirando dentro do bloco.
 
-5. **Espécime e bancada.** (Chrome de site — `Cabecalho`/`Rodape`/
+5. **Espécime e inventário.** (Chrome de site — `Cabecalho`/`Rodape`/
    `Consentimento`/`BarraAviso` — não passa por este passo: ele nunca entra
-   na bancada.) Bloco simples usa o próprio componente direto num `<Palco>`;
+   no inventário.) Bloco simples usa o próprio componente direto num `<Palco>`;
    bloco sem instância de artigo (átomo, ou algo com muitos estados como
    botão) ganha um `_NomeDemo.astro` — o padrão é `_BotoesDemo.astro`
    (repouso, hover congelado, foco congelado, desabilitado — erro 8) ou
    `_ListasDemo.astro` (as variações lado a lado). Em
-   `web/src/pages/bancada.astro`: importe o componente, acrescente `<Palco
+   `web/src/pages/inventario.astro`: importe o componente, acrescente `<Palco
    id={N} {...palco}>...</Palco>` na lista dentro de `<main class="blocos">`,
    na posição que respeita a ordem de leitura do catálogo (não a ordem de
    import). Se o bloco tem papéis diferentes (como Figura:
    prova/diagrama/spot) ou estados diferentes (como Aviso: atenção/nota),
    mostre todos no mesmo palco — é o único lugar onde dá para comparar de um
    olhar.
-   Verificação do passo (erro 2): depois de rodar `npm run bancada`, contar
+   Verificação do passo (erro 2): depois de rodar `npm run inventario`, contar
    quantas seções `class="bloco"` existem no HTML gerado e bater com
    `CATALOGO.length` (todo bloco ativo/previsto/derivado/átomo deveria contar,
    já que `SITE_DEMO.blocos` é o catálogo inteiro) — ver "como saber que
@@ -334,8 +334,8 @@ linha — é mais barato ler isto do que repetir o defeito.
    integridade (fonte, ressalva, lacuna declarada), o mock exercita a trava:
    é o que prova que ela existe, não só que existiria.
 
-7. **Lista de blocos de um site, se aplicável.** Um site real (não a
-   bancada) só monta o bloco se ele entrar no array `blocos` de
+7. **Lista de blocos de um site, se aplicável.** Um site real (não o
+   inventário) só monta o bloco se ele entrar no array `blocos` de
    `web/src/sites/<slug>.ts` — nunca em `web/src/sites/index.ts`, que só varre
    e valida. Isso é decisão do dono de cada site, então esta skill não decide
    por ele; ela só garante que o bloco existe para ser escolhido.
@@ -346,7 +346,7 @@ linha — é mais barato ler isto do que repetir o defeito.
    Bloco novo que deveria aparecer num artigo de exemplo pede um `case` novo
    no `s.tipo === "..."` daquele arquivo E um slot novo em algum artigo de
    `mock/artigos.ts` — sem os dois, o componente existe mas nunca aparece
-   fora da bancada. Pule este passo para chrome (N1-N5), que não é slot de
+   fora do inventário. Pule este passo para chrome (N1-N5), que não é slot de
    artigo.
 
 ## Como saber que terminou
@@ -363,22 +363,22 @@ npm run build          # sem NENHUMA variável de ambiente — bloco previsto
 
 Mais as verificações específicas de bloco novo:
 
-- **A contagem da bancada bate.** (Não se aplica a chrome de site — ele nunca
-  entra na bancada.) `Palco.astro` não emite mais `data-suportado`: o
+- **A contagem do inventário bate.** (Não se aplica a chrome de site — ele nunca
+  entra no inventário.) `Palco.astro` não emite mais `data-suportado`: o
   atributo foi removido no commit `65efbee`, junto com código morto de um
   mecanismo de suporte por estilo que não existe mais — um `grep` por ele
   hoje dá zero sempre, para qualquer bloco, certo ou errado. O marcador vivo
-  é a própria seção do bloco, `class="bloco"`. Depois de `npm run bancada`:
+  é a própria seção do bloco, `class="bloco"`. Depois de `npm run inventario`:
   ```
-  grep -o 'class="bloco"' ../bancada.html | wc -l
+  grep -o 'class="bloco"' ../inventario.html | wc -l
   ```
   compare com o total de entradas em `CATALOGO` (`web/src/catalogo.ts` — hoje
-  36). **Use `grep -o ... | wc -l`, nunca `grep -c`**: o HTML da bancada sai
+  36). **Use `grep -o ... | wc -l`, nunca `grep -c`**: o HTML do inventário sai
   em poucas linhas bem longas, então `grep -c` conta *linhas* com pelo menos
   uma ocorrência, não ocorrências — testado contra o HTML de verdade, `grep
   -c 'class="bloco"'` deu `3` (três linhas que contêm a classe) contra os
   `36` blocos reais que `grep -o | wc -l` encontrou. Se a contagem certa não
-  bater, o bloco novo não entrou no `<Palco>` de `bancada.astro`, ou
+  bater, o bloco novo não entrou no `<Palco>` de `inventario.astro`, ou
   `SITE_DEMO.blocos` voltou a divergir do catálogo (erro 2).
 
 - **Nenhum `action` aponta para endpoint inexistente no HTML gerado.** Se o
@@ -386,7 +386,7 @@ Mais as verificações específicas de bloco novo:
   não sobra `action="/api/..."` nenhum apontando para uma Function que não
   existe em `web/functions/api/` (erro 5):
   ```
-  grep -o 'action="[^"]*"' ../bancada.html
+  grep -o 'action="[^"]*"' ../inventario.html
   ls web/functions/api/
   ```
 

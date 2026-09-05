@@ -15,7 +15,7 @@
     "test": "vitest run",
     "check:functions": "tsc -p functions --noEmit",
     "tunel": "cloudflared tunnel --url http://localhost:4321 --no-autoupdate",
-    "bancada": "astro build && node scripts/inline.mjs bancada > ../bancada.html"
+    "inventario": "astro build && node scripts/inline.mjs inventario > ../inventario.html"
   },
   "dependencies": {
     "astro": "^7.2.2",

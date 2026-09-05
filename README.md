@@ -90,7 +90,7 @@ lá que você puxa melhorias dos stubs.
 cd web && npm run dev
 ```
 
-- **http://localhost:4321/bancada/** — os 30 blocos de artigo, etiquetados
+- **http://localhost:4321/inventario/** — os 30 blocos de artigo, etiquetados
   com número de catálogo, nome e a regra de cada um. Responde "quais blocos
   existem e qual a regra de cada um".
 - **http://localhost:4321/exemplo/\<estilo\>/** — o mesmo artigo, em lorem

@@ -4,7 +4,7 @@
  * Por que este arquivo existe, separado de `mock/artigo.ts`: os dois mocks têm
  * trabalhos opostos e estavam sendo feitos pelo mesmo.
  *
- *   mock/artigo.ts   a BANCADA. Conteúdo verossímil, para provar que cada slot
+ *   mock/artigo.ts   o INVENTÁRIO. Conteúdo verossímil, para provar que cada slot
  *                    da doutrina cabe: a ressalva ao lado do número, a lacuna
  *                    declarada, o conflito de interesse ao lado do nome.
  *   mock/lorem.ts    o ARTIGO DE EXEMPLO. Texto sem sentido de propósito, para

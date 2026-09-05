@@ -102,7 +102,7 @@ export interface Site {
   /**
    * O emoji do favicon. Ausente, NENHUMA tag de icone sai — em vez de
    * carimbar a marca do template na aba do leitor de outra pessoa. O tijolo
-   * do chassi vale so onde nao ha site: bancada e vitrine de estilo.
+   * do chassi vale so onde nao ha site: inventario e vitrine de estilo.
    */
   icone?: string;
   /**

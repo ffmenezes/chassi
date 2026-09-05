@@ -37,22 +37,22 @@ export const SITES: Record<string, Site> = Object.fromEntries(
   descobertos.map((s) => [s.slug, s]),
 );
 
-/** Site de demonstração da bancada: monta tudo, para o catálogo aparecer inteiro. */
+/** Site de demonstração do inventário: monta tudo, para o catálogo aparecer inteiro. */
 export const SITE_DEMO: Site = {
-  slug: "bancada",
-  nome: "Bancada",
+  slug: "inventario",
+  nome: "Inventário",
   dominio: "localhost",
   estilo: "vidro",
   modoPadrao: "escuro",
-  // Derivado do catálogo, não escrito à mão: a bancada monta tudo por
-  // definição — é o inventário do chassi —, e uma lista digitada diverge do
-  // catálogo assim que alguém acrescenta um bloco lá e esquece de repetir
-  // aqui. Já divergiu: faltavam os blocos 23 e 24, e eles simplesmente não
-  // apareciam na página, sem sinal nenhum de ausência.
+  // Derivado do catálogo, não escrito à mão: o inventário monta tudo por
+  // definição, e uma lista digitada diverge do catálogo assim que alguém
+  // acrescenta um bloco lá e esquece de repetir aqui. Já divergiu: faltavam
+  // os blocos 23 e 24, e eles simplesmente não apareciam na página, sem
+  // sinal nenhum de ausência.
   blocos: CATALOGO.map((b) => b.id),
   muroDeEmail: true,
   emailContato: "contato@localhost",
-  responsavel: { nome: "Bancada", tipo: "pf" },
+  responsavel: { nome: "Inventário", tipo: "pf" },
   analytics: "nenhum",
 };
 

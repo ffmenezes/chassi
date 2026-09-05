@@ -10,8 +10,8 @@
  *   catálogo    a lista fechada dos blocos que existem. É este arquivo.
  *   arquitetura a seleção e a ordem dos blocos DE UM ARTIGO.
  *   esqueleto   os fatos congelados que preenchem os slots.
- *   categoria   a família de FUNÇÃO de um bloco — o eixo que agrupa a
- *               bancada. Todo bloco declara a própria, e é isso que faz
+ *   categoria   a família de FUNÇÃO de um bloco — o eixo que agrupa o
+ *               inventário. Todo bloco declara a própria, e é isso que faz
  *               `GRUPOS` (abaixo) não precisar ser lembrado a cada bloco novo.
  */
 
@@ -31,7 +31,7 @@ export type Estado =
    *  lá cada um nasce inerte e visível, nunca um formulário que engole o dado
    *  em silêncio. Não confundir com `derivado`: aquele não espera infra
    *  nenhuma — a distinção existe porque "Previstos" já cobriu os dois juntos
-   *  e isso fazia a bancada anunciar como esperando infra três blocos (15,
+   *  e isso fazia o inventário anunciar como esperando infra três blocos (15,
    *  16, 17) que já renderizavam. */
   | "previsto"
   /** Reembala o artigo já publicado — áudio, mapa mental, PDF. Regenera na
@@ -44,7 +44,7 @@ export type Estado =
   | "atomo";
 
 /**
- * A família de função de um bloco — o eixo que agrupa a bancada.
+ * A família de função de um bloco — o eixo que agrupa o inventário.
  *
  * `estado` responde "isso depende de infra que ainda não existe?", uma
  * pergunta SOBRE um bloco; `categoria` responde "isso faz o quê?", a
@@ -71,7 +71,7 @@ export interface Bloco {
   estado: Estado;
   /** Também explícita, e pela mesma razão do campo acima: é o que faz
    *  `GRUPOS` sobreviver a bloco novo sem precisar de edição em dois lugares.
-   *  `conferirCategorias` (`src/bancada.ts`) quebra a build se faltar. */
+   *  `conferirCategorias` (`src/inventario.ts`) quebra a build se faltar. */
   categoria: Categoria;
   /** A trava, resumida. Texto integral no arquivo de doutrina. */
   regra: string;
@@ -123,7 +123,7 @@ export const CATALOGO: readonly Bloco[] = [
   // 13 e 14 são ATIVOS pela mesma régua do 23 contra o 24, escrita acima:
   // bloco ativo é bloco cuja dependência está no ar NESTE repositório. Os dois
   // ficaram anos marcados como previstos por herança da extração, e nenhum dos
-  // dois espera infra nenhuma — o sintoma era a bancada anunciar "previsto" em
+  // dois espera infra nenhuma — o sintoma era o inventário anunciar "previsto" em
   // cima de um espécime que renderiza inteiro ali do lado. O carrossel é
   // rolagem em CSS com arraste de mouse como enriquecimento; some o JS e ele
   // continua rolando por dedo, roda e teclado.
@@ -192,8 +192,8 @@ export const ROTULO_ESTADO: Record<Estado, string> = {
 };
 
 /**
- * O corte da bancada: um grupo por FUNÇÃO, e é ele que ordena TANTO o índice
- * QUANTO a página (ver `src/bancada.ts`). Antes o corte era por `estado`
+ * O corte do inventário: um grupo por FUNÇÃO, e é ele que ordena TANTO o índice
+ * QUANTO a página (ver `src/inventario.ts`). Antes o corte era por `estado`
  * ("No ar", "Previstos", "Derivados"...), e com 38 blocos esse eixo virou o
  * errado: `estado` responde "isso depende de infra que ainda não existe?",
  * uma pergunta SOBRE um bloco, e como divisória ela obriga quem procura "como

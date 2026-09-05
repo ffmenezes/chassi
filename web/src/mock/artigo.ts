@@ -529,7 +529,7 @@ export const calculadora: CamposCalculadora = {
  */
 export const ofertaIsca: CamposOfertaIsca = {
   isca: "checklist-pico",
-  site: "bancada",
+  site: "inventario",
   titulo: "Checklist de 5 passos para medir seu pico",
   promessa: "PDF de 1 página, chega em até 5 minutos por e-mail.",
   ancora: "Quero o checklist",

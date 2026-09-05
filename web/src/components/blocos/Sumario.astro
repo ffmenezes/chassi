@@ -13,20 +13,20 @@
  * leitor de tela ler o mesmo sumário duas vezes, e é o defeito que esta
  * versão fecha.
  *
- * `trilho` nasce DESLIGADO de propósito: a bancada mostra o bloco isolado
+ * `trilho` nasce DESLIGADO de propósito: o inventário mostra o bloco isolado
  * numa caixa pequena (o "palco"), e a página inteira rola por trás dela — um
  * `position: sticky` ligado ali faria esta nav grudar por cima dos blocos
  * vizinhos ao rolar a página, não só a caixa dele. É o mesmo motivo que faz o
- * bloco 5 (N5, barra de progresso) virar um mockup estático na bancada em vez
+ * bloco 5 (N5, barra de progresso) virar um mockup estático no inventário em vez
  * do componente de verdade: ver o comentário ao lado do Palco "N5" em
- * `pages/bancada.astro`. Um artigo de verdade é quem liga `trilho`. */
+ * `pages/inventario.astro`. Um artigo de verdade é quem liga `trilho`. */
 export interface ItemSumario { texto: string; href: string; nivel?: 2 | 3 }
 interface Props {
   rotulo?: string;
   itens: ItemSumario[];
   minimoH2?: number;
   /** Liga o comportamento de trilho fixo em tela larga. Ver o comentário
-   *  acima — default `false` para não vazar dentro da bancada. */
+   *  acima — default `false` para não vazar dentro do inventário. */
   trilho?: boolean;
 }
 const { rotulo = "Neste artigo", itens, minimoH2 = 4, trilho = false } = Astro.props;
