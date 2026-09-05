@@ -46,8 +46,12 @@ embutida em data URI foi **ignorado** pelo librsvg — o teste embutiu uma
 serifada e a saída veio em sans. Consequência: com sharp puro, o card sairia
 diferente na máquina do dono e no build da Cloudflare.
 
-A saída escolhida é converter os glifos em contorno com **opentype.js** (JS
-puro, MIT) e entregar ao sharp um SVG que **não tem texto** — só `<path>`.
+A saída escolhida é converter os glifos em contorno com **opentype.js 1.3.4**
+(JS puro, MIT — a 2.0.0 não publica `.d.ts` e o `@types` disponível é da linha
+1.3) e entregar ao sharp um SVG que **não tem texto** — só `<path>`. A cadeia
+inteira foi provada em 2026-09-05: `Inter-Bold.ttf` → `getAdvanceWidth` para
+medir → `getPath().toPathData(2)` → `sharp().png()` → PNG 1200×630 com
+acentuação correta e sem `<text>` no SVG.
 Não existe resolução de fonte na rasterização, então o PNG é igual em qualquer
 máquina. A alternativa (`@resvg/resvg-js`, que aceita `fontBuffers`) foi
 recusada por acrescentar um segundo binário nativo com prebuild por
@@ -207,8 +211,11 @@ de fato os executa.
 
 ## Riscos aceitos
 
-- **~300KB de fonte no repositório.** É o preço do card determinístico. Um
-  arquivo, um peso, licença junto.
+- **410 KB de fonte no repositório** (`Inter-Bold.ttf`, extraída de
+  `Inter-4.1.zip`, medida em 2026-09-05). É o preço do card determinístico. Um
+  arquivo, um peso, licença junto. Subsetar para Latin + acentuação derrubaria
+  para menos de 100 KB, mas acrescenta um passo de geração que precisaria ser
+  reprodutível — fica para depois, se o tamanho incomodar.
 - **`src` do bloco 19 muda de significado** (caminho livre → caminho no
   acervo). Custo zero hoje, porque nenhum consumidor passa `src`; se um dia
   passar, a build aponta o arquivo.
