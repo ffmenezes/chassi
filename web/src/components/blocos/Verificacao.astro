@@ -1,0 +1,170 @@
+---
+/** Bloco 28 — Verificação com estados.
+ *
+ * Distinto do Checklist (bloco 8), cuja regra é "recapitula, nunca introduz":
+ * o Checklist devolve ao leitor o que a própria seção já provou. Este bloco
+ * INTRODUZ — é auditoria, diagnóstico, comparação contra um critério que o
+ * leitor não tinha visto ainda no corpo do texto.
+ *
+ * Três estados, nunca dois: atendido, parcial, não atendido. "Parcial" existe
+ * porque forçar sim/não numa auditoria de verdade é mentira por
+ * arredondamento — a maioria das conformidades reais tem ressalva.
+ *
+ * Um nível de importância por item, também fechado em dois: essencial ou
+ * recomendado. Sem terceiro nível, pela mesma razão do tipo do Aviso (bloco
+ * 21): um terceiro é o começo do enfeite.
+ *
+ * REGRA DE ACESSIBILIDADE INEGOCIÁVEL: o ícone nunca carrega o significado
+ * sozinho. Cada item leva o estado em TEXTO, sempre, ao lado do símbolo —
+ * daltônico e leitor de tela precisam da mesma informação que quem enxerga
+ * cor e forma. É por isso que os três estados também mudam de FORMA (símbolo
+ * e estilo de borda), nunca só de cor — a mesma trava que o bloco 21 já usa
+ * para distinguir "atenção" de "nota".
+ *
+ * O bloco NÃO soma, não emite nota agregada nem selo de aprovação: pontuação
+ * própria sobre conteúdo próprio é markup autosservido, o mesmo motivo pelo
+ * qual o bloco 12 (Avaliação) nunca emite `AggregateRating`. Por isso não há
+ * nenhuma contagem "X de Y atendidos" aqui — é o mesmo cálculo, só que em
+ * prosa em vez de JSON-LD, e o problema é o cálculo, não o formato.
+ *
+ * Cada item declara contra QUAL critério foi avaliado — a norma, o manual, a
+ * promessa do fabricante — para o leitor conferir a régua, não só o
+ * resultado. Fora de "atendido", a nota é obrigatória: "parcial" e "não
+ * atendido" sem explicação são veredito sem apuração, o mesmo defeito que o
+ * catálogo já barra em outros lugares.
+ */
+export type EstadoVerificacao = "atendido" | "parcial" | "nao-atendido";
+export type Importancia = "essencial" | "recomendado";
+
+export interface ItemVerificacao {
+  /** O que foi avaliado. */
+  item: string;
+  /** A régua usada: norma, manual, promessa do fabricante — nunca "nossa opinião". */
+  criterio: string;
+  estado: EstadoVerificacao;
+  importancia: Importancia;
+  /** Por que não é um "atendido" redondo. Obrigatória fora de "atendido". */
+  nota?: string;
+}
+interface Props {
+  rotulo?: string;
+  itens: ItemVerificacao[];
+}
+const { rotulo, itens } = Astro.props;
+
+const erro = (m: string) => {
+  throw new Error(`[bloco 28] ${m}`);
+};
+
+for (const i of itens) {
+  if (i.estado !== "atendido" && !i.nota?.trim()) {
+    erro(
+      `item "${i.item}" está ${i.estado} sem nota. Estado que não é "atendido" ` +
+        `carrega a explicação do porquê, ou é veredito sem apuração.`
+    );
+  }
+}
+
+const ROTULO_ESTADO: Record<EstadoVerificacao, string> = {
+  atendido: "Atendido",
+  parcial: "Parcial",
+  "nao-atendido": "Não atendido",
+};
+/* Símbolos com FORMAS diferentes entre si (não variações da mesma forma em
+   cor diferente), para que a distinção sobreviva a escala de cinza e a
+   daltonismo — o texto ao lado é que carrega o significado de verdade. */
+const SIMBOLO_ESTADO: Record<EstadoVerificacao, string> = {
+  atendido: "✓",
+  parcial: "±",
+  "nao-atendido": "✕",
+};
+const ROTULO_IMPORTANCIA: Record<Importancia, string> = {
+  essencial: "Essencial",
+  recomendado: "Recomendado",
+};
+---
+
+<div class="verificacao">
+  {rotulo && <p class="b-rotulo">{rotulo}</p>}
+  <ul class="itens">
+    {itens.map((i) => (
+      <li class="item b-card" data-estado={i.estado}>
+        <span class="marca" aria-hidden="true">{SIMBOLO_ESTADO[i.estado]}</span>
+        <div class="corpo">
+          <p class="cab">
+            <b class="alvo">{i.item}</b>
+            <span class="chip chip-estado">{ROTULO_ESTADO[i.estado]}</span>
+            <span class="chip chip-importancia" data-importancia={i.importancia}>
+              {ROTULO_IMPORTANCIA[i.importancia]}
+            </span>
+          </p>
+          <p class="criterio"><span class="rot">Critério avaliado —</span> {i.criterio}</p>
+          {i.nota && <p class="nota">{i.nota}</p>}
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .verificacao { max-width: var(--b-medida); }
+
+  .itens { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+
+  .item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    padding: 14px 16px;
+    /* neutro por padrão ("atendido" não precisa de alarme nenhum); os outros
+       dois estados mudam BORDA e ESTILO de borda, não só cor — ver comentário
+       de topo. Espelha a régua que o bloco 21 (Aviso) já usa. */
+    border-left: 4px solid var(--b-linha-forte);
+  }
+  .item[data-estado="parcial"] { border-left-style: dashed; border-left-color: var(--b-acento); }
+  .item[data-estado="nao-atendido"] { border-left-color: var(--b-erro); }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--b-superficie);
+    color: var(--b-tinta-2);
+  }
+  .item[data-estado="parcial"] .marca { color: var(--b-acento-tinta); }
+  .item[data-estado="nao-atendido"] .marca { color: var(--b-erro); }
+
+  .cab { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 6px; }
+  .alvo { color: var(--b-tinta); font-size: 15px; }
+
+  .chip {
+    font-family: var(--b-fonte-meta);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: uppercase;
+    color: var(--b-tinta-2);
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--b-linha-forte);
+  }
+  .item[data-estado="parcial"] .chip-estado { color: var(--b-acento-tinta); border-color: var(--b-acento); }
+  .item[data-estado="nao-atendido"] .chip-estado { color: var(--b-erro); border-color: var(--b-erro); }
+  /* "essencial" ganha peso visual além da cor (fundo cheio, não só borda) —
+     de novo, forma reforçando texto, nunca cor sozinha carregando o dado. */
+  .chip-importancia[data-importancia="essencial"] {
+    color: var(--b-sobre-acento);
+    background: var(--b-tinta-2);
+    border-color: var(--b-tinta-2);
+  }
+
+  .criterio { margin: 0; color: var(--b-corpo); font-size: 13.5px; line-height: 1.55; }
+  .criterio .rot { color: var(--b-tinta-2); font-weight: 600; }
+  .nota { margin: 6px 0 0; color: var(--b-corpo); font-size: 13.5px; line-height: 1.55; font-style: italic; }
+</style>

@@ -23,6 +23,7 @@ import type { Props as CamposCalculadora } from "../components/blocos/Calculador
 import type { Props as CamposOfertaIsca } from "../components/blocos/OfertaIsca.astro";
 import type { Props as CamposCompartilhar } from "../components/blocos/Compartilhar.astro";
 import type { Passo } from "../components/blocos/Passos.astro";
+import type { ItemVerificacao } from "../components/blocos/Verificacao.astro";
 import type { Autor } from "../autor";
 
 export const abertura = {
@@ -490,5 +491,31 @@ export const passos: Passo[] = [
     resumo: "Compare com o Mbps da fatura.",
     detalhe:
       "Pico acima do contratado é queda garantida na próxima vez que a mesma combinação de aparelhos rodar junto — não depende de defeito no roteador.",
+  },
+];
+
+/** Bloco 28 — Verificação com estados. Auditoria de um roteador contra a
+ *  ficha técnica do fabricante — introduz informação nova, não recapitula
+ *  nada que o artigo já tenha provado antes. */
+export const verificacao: ItemVerificacao[] = [
+  {
+    item: "Suporta Wi-Fi 6 (802.11ax)",
+    criterio: "Ficha técnica do fabricante, modelo XR-420, revisão de 06/2026",
+    estado: "atendido",
+    importancia: "essencial",
+  },
+  {
+    item: "Portas LAN em 2,5 Gbps",
+    criterio: "Ficha técnica do fabricante, modelo XR-420, revisão de 06/2026",
+    estado: "parcial",
+    importancia: "recomendado",
+    nota: "Só a porta 1 é 2,5 Gbps; as outras três são 1 Gbps — a caixa do produto não deixa isso claro.",
+  },
+  {
+    item: "QoS por dispositivo, configurável sem app do fabricante",
+    criterio: "Manual do usuário, seção 4.2, edição impressa que acompanha a caixa",
+    estado: "nao-atendido",
+    importancia: "essencial",
+    nota: "O QoS existe, mas só é configurável pelo aplicativo do fabricante — não há essa opção na interface web do roteador.",
   },
 ];
