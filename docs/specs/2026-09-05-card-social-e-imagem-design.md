@@ -135,12 +135,18 @@ export function caminhoDe(
 ): string;
 ```
 
+`quebrar` decide as linhas; `caminhoDe` desenha **uma** linha. Quem compõe é
+o `arte.ts`, chamando `caminhoDe` por linha com o `y` avançando pela entrelinha
+— assim a medida e o desenho ficam testáveis separados.
+
 Regras: quebra por palavra; palavra que sozinha estoura a largura é cortada
 com `…`; ao passar de `maxLinhas`, a última linha termina em `…`; título vazio
 é erro, não card em branco.
 
-Peças enumeradas pelo `getStaticPaths`: `padrao` (as institucionais) mais uma
-por artigo, lidas da **mesma junta** que `[artigo].astro` usa hoje
+Peças enumeradas pelo `getStaticPaths`: `padrao` mais uma por artigo. O
+`padrao` é o card das institucionais e leva `site.nome` como título — não uma
+frase inventada, porque o nome do site é o que a home de fato afirma. Os
+artigos vêm da **mesma junta** que `[artigo].astro` usa hoje
 (`mock/artigos.ts`) e que troca para a coleção de markdown depois — sem tocar
 neste arquivo, pela mesma promessa que já está escrita lá.
 
@@ -155,7 +161,7 @@ caminho livre.
 
 ```ts
 export interface FiguraOtimizada {
-  src: string; srcset: string; largura: number; altura: number;
+  src: string; srcset: string; sizes: string; largura: number; altura: number;
 }
 export async function otimizar(
   src: string, largura?: number, altura?: number,
