@@ -7,7 +7,8 @@
  * pra voltar à home, rodapé é onde a lista jurídica cabe sem competir com a
  * marca — e é essa lista que a regra do item exige em TODA página.
  *
- * `renderizarResponsavel` já resolve a regra de nunca estampar CPF (ver
+ * `renderizarResponsavelRodape` já resolve a regra de nunca estampar CPF, e
+ * de só estampar CNPJ com `mostrarDocumentoNoRodape` ligado no site (ver
  * `institucional/dados.ts`); este componente só chama, não decide nada
  * sobre isso de novo.
  *
@@ -19,7 +20,7 @@
  * Zero JS: navegação é link.
  */
 import type { Site } from "../sites/tipos";
-import { renderizarResponsavel } from "../institucional/dados";
+import { renderizarResponsavelRodape } from "../institucional/dados";
 
 interface Props { site: Site }
 const { site } = Astro.props;
@@ -42,7 +43,7 @@ const ano = new Date().getFullYear();
       <a href="/termos/">Termos de uso</a>
       <a href="/direitos-autorais/">Direitos autorais</a>
     </nav>
-    <p class="rodape-copyright">© {ano} {renderizarResponsavel(site.responsavel)}</p>
+    <p class="rodape-copyright">© {ano} {renderizarResponsavelRodape(site.responsavel)}</p>
   </div>
 </footer>
 

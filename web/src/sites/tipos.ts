@@ -37,13 +37,29 @@ export type DesvioDeSite = Partial<Record<Modo, Partial<Record<TokenB, string>>>
  * Pessoa física e jurídica se comportam diferente na página jurídica: CNPJ é
  * registro público e é o que Ads e Meta esperam; CPF exposto em página
  * indexada é convite a fraude e não é exigido por lei nenhuma para
- * identificar controlador. Ver `renderizarResponsavel` na Task 11.
+ * identificar controlador. Ver `institucional/dados.ts` para as duas funções
+ * que leem este tipo.
  */
 export interface Responsavel {
   nome: string;
   tipo: "pf" | "pj";
-  /** CPF ou CNPJ. Só o CNPJ é renderizado. */
+  /** CPF ou CNPJ. Só o CNPJ é renderizado, e só onde a regra abaixo permitir. */
   documento?: string;
+  /**
+   * CNPJ é registro público, mas também é chave de busca: quem consulta na
+   * Receita recebe de volta o endereço registrado da empresa, que para MEI ou
+   * empresa de uma pessoa só é quase sempre a casa do dono. Mostrar o CNPJ no
+   * rodapé de toda página é publicar esse endereço em toda página, com um
+   * passo de indireção. Por isso o padrão é NÃO mostrar ali — a LGPD exige
+   * identificar o controlador e dar canal de contato, e nome e e-mail bastam,
+   * sem documento nenhum. Ligue este campo quando o site vende (identificação
+   * do fornecedor em lugar visível passa a ser exigida) ou quando o dono
+   * quer o sinal de legitimidade, que é convenção forte no Brasil. A página
+   * jurídica não usa este campo: lá o documento aparece sempre que for PJ,
+   * porque é a página que existe para essa identificação. Ausente = desligado,
+   * e pessoa física nunca estampa documento, aqui ligado ou não.
+   */
+  mostrarDocumentoNoRodape?: boolean;
 }
 
 export interface Site {

@@ -6,11 +6,11 @@
  * sozinha, inclusive quando o upstream corrige o texto.
  */
 import Institucional from "../layouts/Institucional.astro";
-import { siteInstitucional, renderizarResponsavel } from "../institucional/dados";
+import { siteInstitucional, renderizarResponsavelJuridico } from "../institucional/dados";
 import { analyticsDoSite } from "../analytics/porta";
 
 const site = siteInstitucional();
-const controlador = renderizarResponsavel(site.responsavel);
+const controlador = renderizarResponsavelJuridico(site.responsavel);
 const adaptador = analyticsDoSite(site);
 const usaCookieDeMedicao = adaptador.usaCookie;
 
