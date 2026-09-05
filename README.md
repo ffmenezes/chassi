@@ -48,6 +48,25 @@ Por que **clone**, e não "Use this template" nem fork:
 O clone com histórico entrega repositório privado **e** "o que mudou desde que
 eu clonei" de graça, porque o remote `upstream` continua enxergando a origem.
 
+## Duas vitrines antes de escrever
+
+Suba o servidor local:
+
+```bash
+cd web && npm run dev
+```
+
+- **http://localhost:4321/bancada/** — os 30 blocos de artigo, etiquetados
+  com número de catálogo, nome e a regra de cada um. Responde "quais blocos
+  existem e qual a regra de cada um".
+- **http://localhost:4321/exemplo/\<estilo\>/** — o mesmo artigo, em lorem
+  ipsum, nos cinco estilos (`ceu`, `circuito`, `concreto`, `linho`, `vidro`).
+  Responde "como fica o mesmo texto em cada um dos cinco estilos, para eu
+  escolher o meu".
+
+Sem essas duas rotas abertas, você tem 30 componentes e 5 estilos que
+ninguém te contou que existem.
+
 ## A fronteira
 
 | | Do participante | Do upstream |
