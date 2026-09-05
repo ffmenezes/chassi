@@ -7,10 +7,15 @@
  * de exemplo é lorem ipsum: sem o nome ao lado, "aquele retângulo com borda" não
  * se liga a nenhum arquivo nem a nenhuma linha da doutrina.
  *
- * Ela **envolve** o elemento e só aparece no hover, fora do fluxo, na folga que
- * já existe entre os blocos. Trinta e quatro rótulos permanentes viravam a
- * página inteira em legenda, e aí não se julgava mais nem o tema nem o ritmo —
- * que é a única coisa que esta rota existe para julgar.
+ * Ela **envolve** o elemento e, por padrão, só aparece no hover, fora do
+ * fluxo, na folga que já existe entre os blocos. Trinta e quatro rótulos
+ * permanentes viravam a página inteira em legenda, e aí não se julgava mais
+ * nem o tema nem o ritmo — que é a única coisa que esta rota existe para
+ * julgar. Por isso a barra de prévia oferece três estados (grupo de rádio
+ * `#etiquetas-hover` / `#etiquetas-sempre` / `#etiquetas-nunca`, em
+ * `pages/exemplo/[estilo].astro`): no hover, sempre visível, ou nunca — a
+ * página limpa para quando etiqueta é a própria poluição. Os três são CSS
+ * puro (`:has()` lendo o rádio marcado), sem JavaScript.
  *
  * Diz as três coisas de uma vez: o número no catálogo, o nome em português, e o
  * componente que renderiza.
@@ -65,8 +70,18 @@ const { bloco, nome, codigo, ancorado = false } = Astro.props;
   .marcado:focus-within > .etiqueta { opacity: 1; }
   /* o teclado também chega: focar qualquer coisa dentro revela o nome */
 
-  /* a chave da barra de prévia fixa todas de uma vez, para varrer a página */
-  :global(.etiquetas-fixas) .etiqueta { opacity: 1; }
+  /* "sempre": o rádio marcado liga todas de uma vez, para varrer a página.
+     :global(body:has(...)) porque o rádio mora na barra de prévia, fora deste
+     componente — não há classe nem JS no meio, só o estado do próprio input. */
+  :global(body:has(#etiquetas-sempre:checked)) .etiqueta { opacity: 1; }
+
+  /* "nunca": desliga até o hover e o foco, para ver o artigo limpo — a razão
+     de existir desta rota. !important vence a regra de hover acima, que tem a
+     mesma origem e ordem posterior no cascade. */
+  :global(body:has(#etiquetas-nunca:checked)) .etiqueta { opacity: 0 !important; }
+  :global(body:has(#etiquetas-nunca:checked)) .marcado:hover {
+    outline: 0;
+  }
 
   .marcado:hover {
     outline: 1px dashed var(--c-rule);
@@ -75,9 +90,10 @@ const { bloco, nome, codigo, ancorado = false } = Astro.props;
   }
 
   /* Invisível não recebe hover, então não tem como revelar: some de vez e volta
-     só no modo fixo, aí no fluxo, porque não há elemento acima do qual flutuar. */
+     só no modo "sempre", aí no fluxo, porque não há elemento acima do qual
+     flutuar. */
   .ancorado > .etiqueta { display: none; }
-  :global(.etiquetas-fixas) .ancorado > .etiqueta {
+  :global(body:has(#etiquetas-sempre:checked)) .ancorado > .etiqueta {
     display: flex;
     position: static;
     opacity: 1;

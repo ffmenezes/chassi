@@ -16,8 +16,10 @@
  *
  * Em troca, cada elemento se identifica. A <Etiqueta> envolve o elemento e diz,
  * no hover, número de catálogo, nome em português e componente; o próprio texto
- * do slot diz o que ele é ("Ressalva —", "Fonte e data —"). A chave da barra de
- * prévia fixa todas as etiquetas, para varrer o mapa de uma vez.
+ * do slot diz o que ele é ("Ressalva —", "Fonte e data —"). O grupo de rádio da
+ * barra de prévia dá três estados a essa etiqueta — no hover (padrão), sempre
+ * (varrer o mapa de uma vez) e nunca (o artigo limpo, para julgar tipografia e
+ * ritmo sem a própria etiqueta como poluição).
  */
 import Base from "../../layouts/Base.astro";
 import { ESTILOS, SITES, cssDoSite } from "../../sites";
@@ -103,13 +105,28 @@ const sec = Object.fromEntries(m.secoes.map((x) => [x.id, x]));
       {usam.length === 0 && (
         <span class="previa-nota">nenhum site usa este tema ainda</span>
       )}
-      {/* por padrão a etiqueta só aparece no hover do elemento: trinta e quatro
-          rótulos permanentes viram a página em legenda. Fixar serve para varrer
-          o mapa inteiro de uma vez. */}
-      <label class="chave">
-        <input type="checkbox" id="ver-etiquetas" />
-        Fixar etiquetas
-      </label>
+      {/* três estados, mutuamente exclusivos — por isso rádio, não checkbox.
+          Por padrão a etiqueta só aparece no hover do elemento; "sempre" fixa
+          as trinta e quatro de uma vez para varrer o mapa inteiro; "nunca" é
+          a página limpa, para quando etiqueta é a própria poluição — que é o
+          caso quando o que se julga é tipografia, ritmo e densidade. Os três
+          estados são CSS puro (regra em Etiqueta.astro, lida a partir do
+          rádio marcado com :has()): nenhum JS decide isso. */}
+      <fieldset class="seg seg-etiquetas">
+        <legend>Etiquetas</legend>
+        <label>
+          <input type="radio" name="etiquetas" id="etiquetas-hover" checked />
+          No hover
+        </label>
+        <label>
+          <input type="radio" name="etiquetas" id="etiquetas-sempre" />
+          Sempre
+        </label>
+        <label>
+          <input type="radio" name="etiquetas" id="etiquetas-nunca" />
+          Nunca
+        </label>
+      </fieldset>
       {/* a régua é token, então dá para desligá-la sem tocar no markup: é o
           mesmo `--b-regua-peso: 0` que o tema usaria para dispensá-la. Aqui a
           chave existe para julgar a página com e sem, lado a lado. */}
@@ -369,8 +386,29 @@ const sec = Object.fromEntries(m.secoes.map((x) => [x.id, x]));
     font-size: 12.5px; font-weight: 600; color: var(--c-ink-2); cursor: pointer;
   }
 
-  /* a etiqueta se revela no hover (regra em Etiqueta.astro); `etiquetas-fixas`
-     mostra todas de uma vez, e é a chave da barra de prévia */
+  /* o grupo de rádio das etiquetas usa a mesma moldura do .seg (borda,
+     cantos), mas o item é <label> em vez de <a>/<button> — reset do fieldset
+     nativo (borda, min-width, padding) e a legenda entra como o primeiro
+     segmento, no lugar do <span class="previa-rot"> que os outros grupos
+     usam ao lado. Os três estados de verdade são CSS puro em Etiqueta.astro,
+     lido a partir de qual rádio está :checked — este bloco só é aparência. */
+  .previa .seg-etiquetas {
+    border: 1px solid var(--c-rule); margin: 0; padding: 0; min-width: 0;
+  }
+  .previa .seg-etiquetas legend {
+    padding: 0 0 0 13px; font-family: var(--c-mono); font-size: 10.5px;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--c-dim);
+  }
+  .previa .seg-etiquetas label {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 13px; font-size: 12.5px; font-weight: 600;
+    color: var(--c-ink-2); cursor: pointer;
+    border-right: 1px solid var(--c-rule);
+  }
+  .previa .seg-etiquetas label:last-child { border-right: 0; }
+  .previa .seg-etiquetas label:has(input:checked) { background: var(--c-ink); color: var(--c-paper); }
+  .previa .seg-etiquetas input[type="radio"] { accent-color: currentColor; }
+
   .previa-link { margin-left: auto; font-size: 12.5px; color: var(--c-mark); text-decoration: none; }
 
   .pagina { min-height: 100vh; }
@@ -486,12 +524,8 @@ const sec = Object.fromEntries(m.secoes.map((x) => [x.id, x]));
     })
   );
 
-  /* etiquetas: melhoria progressiva. Sem JS o hover continua revelando cada
-     uma, que é o comportamento padrão — a chave só fixa todas. */
-  const verEtiquetas = document.getElementById("ver-etiquetas") as HTMLInputElement | null;
-  verEtiquetas?.addEventListener("change", () => {
-    pagina.classList.toggle("etiquetas-fixas", verEtiquetas.checked);
-  });
+  /* os três estados da etiqueta (hover / sempre / nunca) não têm JS: é
+     :has() lendo o rádio marcado, em Etiqueta.astro. */
 
   const verRegua = document.getElementById("ver-regua") as HTMLInputElement | null;
   verRegua?.addEventListener("change", () => {
