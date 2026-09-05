@@ -41,3 +41,34 @@ export const CONSENTIMENTO_ISCA =
  */
 export const PROMESSA_DA_ISCA =
   "Um e-mail, com o arquivo. Nada mais é enviado, e a saída é um clique no rodapé dele.";
+
+/**
+ * A frase do banner de cookies. Mesmo espírito das constantes acima: guarda-se
+ * a frase, nunca um booleano solto — a frase muda com o tempo, e o que a
+ * pessoa aceitou (ou recusou) foi a frase daquele dia, gravada junto da data
+ * em `localStorage` por `Consentimento.astro`.
+ *
+ * Mudou o texto aqui, muda a régua do que já foi respondido: quem já tinha
+ * decidido sob a frase antiga não decidiu sob esta, e o banner volta a
+ * aparecer — que é o correto, porque consentimento não se herda de um texto
+ * para outro.
+ */
+export const CONSENTIMENTO_COOKIES =
+  "Aceito o uso de cookies para medir a audiência deste site.";
+
+/**
+ * A chave do `localStorage` onde a escolha de cookies fica gravada. Mora
+ * aqui, uma vez só, porque `Consentimento.astro` (quem grava) e
+ * `Analytics.astro` (quem lê, antes de injetar o script de terceiro) têm de
+ * concordar exatamente na mesma string — divergência de chave entre os dois
+ * lados é o tipo de bug que não aparece em teste nenhum, só no navegador de
+ * quem já tinha decidido antes.
+ */
+export const CHAVE_CONSENTIMENTO_COOKIES = "chassi:consentimento-cookies";
+
+/**
+ * O nome do evento que `Consentimento.astro` dispara ao gravar a escolha, e
+ * que `Analytics.astro` escuta pra injetar o script sem esperar um reload da
+ * página. Mesma razão da chave acima: um nome só, importado dos dois lados.
+ */
+export const EVENTO_CONSENTIMENTO_COOKIES = "chassi:consentimento-cookies:mudou";

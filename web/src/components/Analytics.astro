@@ -5,13 +5,77 @@
  * JS novo aqui precisa de justificativa: crawler de IA não executa JavaScript,
  * e o que só aparece depois do JS não existe para ele. Medição é a
  * justificativa aceita — e mesmo assim o padrão é `nenhum`.
+ *
+ * A TRAVA DO CONSENTIMENTO (item 3): quando o adaptador usa cookie
+ * (`adaptador.usaCookie`, hoje GA4 e PostHog), o script de terceiro NUNCA
+ * entra direto no HTML — ele fica dentro de um `<template>`, que é inerte:
+ * nenhum `<script>` dentro de `<template>` executa enquanto o navegador não
+ * clona esse conteúdo pro documento vivo. Esse contêiner, e não o
+ * consentimento em si, é o que garante que o pior caso de um bug no JS de
+ * consentimento é o script nunca rodar — nunca é ele rodar sem aceite.
+ *
+ * JS de cliente aqui tem justificativa: ler o `localStorage` só é possível no
+ * navegador, e é o navegador que decide se o script entra ou não — o build é
+ * estático e não sabe, no momento em que gera o HTML, se quem vai abrir a
+ * página já aceitou antes. O script:
+ *   1. na carga, lê a escolha gravada (`Consentimento.astro`, mesma chave);
+ *      se for "aceito", clona o `<template>` pro `<head>` e o navegador
+ *      executa os `<script>` que vieram dentro dele;
+ *   2. escuta o evento que `Consentimento.astro` dispara ao gravar uma
+ *      escolha nova, pra aceitar na mesma visita injetar sem esperar reload.
+ *
+ * Adaptador que NÃO usa cookie (`cloudflare`, e `nenhum` que nunca tem
+ * `codigo`) não passa por trava nenhuma: o próprio `porta.ts` já garante que
+ * só declara cookie quem usa cookie, e é essa mesma régua — não uma segunda
+ * lista aqui — que decide se o script precisa de aceite antes de entrar.
  */
 import { analyticsDoSite } from "../analytics/porta";
+import { CHAVE_CONSENTIMENTO_COOKIES, EVENTO_CONSENTIMENTO_COOKIES } from "../consentimento";
 import type { Site } from "../sites/tipos";
 
 interface Props { site: Site }
 const { site } = Astro.props;
 const adaptador = analyticsDoSite(site);
 const codigo = adaptador.script(site.analyticsId ?? "");
+const precisaAceite = Boolean(codigo) && adaptador.usaCookie;
 ---
-{codigo && <Fragment set:html={codigo} />}
+
+{codigo && !precisaAceite && <Fragment set:html={codigo} />}
+
+{codigo && precisaAceite && (
+  <>
+    <template id="modelo-analytics" set:html={codigo} />
+    <script
+      is:inline
+      define:vars={{ chave: CHAVE_CONSENTIMENTO_COOKIES, evento: EVENTO_CONSENTIMENTO_COOKIES }}
+    >
+      let injetado = false;
+
+      function injetar() {
+        if (injetado) return;
+        const modelo = document.getElementById("modelo-analytics");
+        if (!(modelo instanceof HTMLTemplateElement)) return;
+        injetado = true;
+        document.head.appendChild(modelo.content.cloneNode(true));
+      }
+
+      function jaAceitou() {
+        try {
+          const bruto = window.localStorage.getItem(chave);
+          if (!bruto) return false;
+          return JSON.parse(bruto).escolha === "aceito";
+        } catch {
+          /* Sem storage legível, trata como não aceito: o pior caso aqui é o
+             script não rodar, nunca é ele rodar sem aceite. */
+          return false;
+        }
+      }
+
+      if (jaAceitou()) injetar();
+
+      window.addEventListener(evento, (ev) => {
+        if (ev.detail && ev.detail.escolha === "aceito") injetar();
+      });
+    </script>
+  </>
+)}

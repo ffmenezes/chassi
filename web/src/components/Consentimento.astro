@@ -1,0 +1,170 @@
+---
+/**
+ * O banner de aceite de cookies. Só existe quando existe cookie pra
+ * consentir — sem isso, banner é teatro: pedir aceite pra algo que não
+ * acontece não protege ninguém, só ensina o leitor a clicar sem ler.
+ *
+ * A régua, a mesma que decide se `/cookies/` tem algo a dizer
+ * (`analyticsDoSite(site).usaCookie`, Task 8): existe cookie de medição, OU
+ * existe conta de anúncio configurada (`site.adsenseId` — a aula 7 liga
+ * AdSense a cookie de personalização de anúncio). Sem os dois, `nenhum`
+ * renderiza aqui.
+ *
+ * A trava de verdade — o script de terceiro nunca entrar na página sem
+ * aceite — mora em `Analytics.astro`, não aqui: este componente só coleta a
+ * decisão e avisa. Ver o comentário de lá para o mecanismo completo.
+ *
+ * Recusar pesa o mesmo que aceitar: dois botões do mesmo tamanho, mesma
+ * hierarquia visual, mais o link para a política completa. Banner com
+ * recusa escondida atrás de link discreto é exatamente o que este item
+ * pede pra nunca existir aqui.
+ *
+ * JS de cliente, com justificativa: o que decide se o banner já foi
+ * respondido é o `localStorage`, e ele só existe no navegador — o build é
+ * estático, então no momento em que o HTML é gerado ninguém sabe se quem vai
+ * abrir a página já decidiu antes.
+ */
+import { analyticsDoSite } from "../analytics/porta";
+import {
+  CONSENTIMENTO_COOKIES,
+  CHAVE_CONSENTIMENTO_COOKIES,
+  EVENTO_CONSENTIMENTO_COOKIES,
+} from "../consentimento";
+import type { Site } from "../sites/tipos";
+
+interface Props { site: Site }
+const { site } = Astro.props;
+const adaptador = analyticsDoSite(site);
+const precisaConsentimento = adaptador.usaCookie || Boolean(site.adsenseId);
+---
+
+{precisaConsentimento && (
+  <div
+    id="banner-cookies"
+    class="banner-cookies"
+    data-estilo={site.estilo}
+    data-modo={site.modoPadrao}
+    data-site={site.slug}
+    role="dialog"
+    aria-label="Aviso de cookies"
+    tabindex="-1"
+    hidden
+  >
+    <p class="texto">
+      {CONSENTIMENTO_COOKIES} Veja os detalhes na{" "}
+      <a href="/cookies/">política de cookies</a>.
+    </p>
+    <div class="acoes">
+      <button type="button" class="botao botao--aceitar" data-acao="aceitar">
+        Aceitar
+      </button>
+      <button type="button" class="botao botao--recusar" data-acao="recusar">
+        Recusar
+      </button>
+    </div>
+  </div>
+)}
+
+{precisaConsentimento && (
+  <script
+    is:inline
+    define:vars={{
+      chave: CHAVE_CONSENTIMENTO_COOKIES,
+      frase: CONSENTIMENTO_COOKIES,
+      evento: EVENTO_CONSENTIMENTO_COOKIES,
+    }}
+  >
+    const banner = document.getElementById("banner-cookies");
+    if (banner) {
+      let jaDecidido = false;
+      try {
+        jaDecidido = window.localStorage.getItem(chave) !== null;
+      } catch {
+        /* localStorage indisponível (navegação privada, política do navegador):
+           trata como "ainda não decidiu" — pior caso é perguntar de novo, não
+           é injetar script sem aceite. */
+        jaDecidido = false;
+      }
+
+      if (!jaDecidido) {
+        banner.hidden = false;
+        banner.focus();
+      }
+
+      function gravar(escolha) {
+        const registro = { escolha, frase, data: new Date().toISOString().slice(0, 10) };
+        try {
+          window.localStorage.setItem(chave, JSON.stringify(registro));
+        } catch {
+          /* Sem storage, a escolha não persiste — o banner volta na próxima
+             visita, o que é o comportamento seguro, não um bug. */
+        }
+        banner.hidden = true;
+        window.dispatchEvent(new CustomEvent(evento, { detail: { escolha } }));
+      }
+
+      const botaoAceitar = banner.querySelector('[data-acao="aceitar"]');
+      const botaoRecusar = banner.querySelector('[data-acao="recusar"]');
+      if (botaoAceitar) botaoAceitar.addEventListener("click", () => gravar("aceito"));
+      if (botaoRecusar) botaoRecusar.addEventListener("click", () => gravar("recusado"));
+    }
+  </script>
+)}
+
+<style>
+  .banner-cookies {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    z-index: 40;
+    max-width: 560px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px;
+    background: var(--b-superficie);
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    box-shadow: var(--b-sombra);
+  }
+  .banner-cookies[hidden] { display: none; }
+
+  .texto {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--b-corpo);
+  }
+  .texto a { color: var(--b-acento-tinta); }
+
+  .acoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Mesmo tamanho, mesma família tipográfica, mesmo raio: recusar não é o
+     botão "menor" nem "apagado" — só muda a cor de fundo. */
+  .botao {
+    flex: 1 1 auto;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: var(--b-radius);
+    cursor: pointer;
+  }
+  .botao--aceitar {
+    border: 0;
+    background: var(--b-acento);
+    color: var(--b-sobre-acento);
+  }
+  .botao--aceitar:hover { background: var(--b-acento-forte); }
+  .botao--recusar {
+    border: var(--b-borda);
+    background: var(--b-fundo);
+    color: var(--b-tinta);
+  }
+  .botao--recusar:hover { background: var(--b-acento-fraco); }
+</style>
