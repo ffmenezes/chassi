@@ -11,9 +11,26 @@
  * envia, só que sem anti-spam. Widget que tenta montar sem chave é tela
  * quebrada para o leitor, o que é pior que ficar sem anti-spam por um tempo.
  * Mesmo padrão que `Comentarios.astro` já usa.
+ *
+ * A validação no cliente (script no fim do arquivo) NUNCA substitui a de
+ * `functions/_lib/contato.ts`: o servidor recusa de novo tudo o que passar
+ * por aqui, porque cliente pode estar com JS desligado, com extensão
+ * bloqueando, ou falando direto com a API sem passar por formulário nenhum.
+ * O que o cliente compra é só a distância entre errar e saber — sem ele, um
+ * e-mail malformado só falha depois do POST, numa resposta de texto puro.
+ * Bloco interativo sem interação é decoração: um formulário que só descobre
+ * o próprio erro no servidor é essa mesma decoração, só que mais lenta.
+ *
+ * O sucesso não ganha toast aqui: o envio de verdade é navegação nativa
+ * (sem fetch, de propósito), e o servidor já redireciona para
+ * `/contato-recebido/` — uma confirmação visível de verdade, e não um toast
+ * que a própria troca de página nem deixaria o leitor ver. Fingir um
+ * "enviado!" antes de o servidor confirmar seria a mesma mentira que
+ * `manejarContato` já recusa a contar ("não finge que enviou").
  */
 import { CAMINHOS, urlDaApi } from "../api/contrato";
 import type { Site } from "../sites/tipos";
+import Toast from "./blocos/Toast.astro";
 
 interface Props { site: Site }
 const { site } = Astro.props;
@@ -21,7 +38,7 @@ const { site } = Astro.props;
 const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
 ---
 
-<form class="formulario-contato" method="post" action={urlDaApi(CAMINHOS.contato)}>
+<form class="formulario-contato" method="post" action={urlDaApi(CAMINHOS.contato)} data-form-contato>
   <input type="hidden" name="site" value={site.slug} />
 
   <div class="campo-bloco">
@@ -56,6 +73,8 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
   <button class="botao" type="submit">Enviar mensagem</button>
 </form>
 
+<Toast id="fc-toast-erro" tipo="erro" titulo="Não deu para enviar" texto="Confira os campos destacados." hidden />
+
 {sitekey && (
   <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
 )}
@@ -87,6 +106,7 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
     resize: vertical;
     font-family: inherit;
   }
+  .campo:invalid { border-color: var(--b-erro); }
   .aviso-dev {
     margin: 0;
     padding: 10px 12px;
@@ -109,3 +129,43 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
   }
   .botao:hover { background: var(--b-acento-forte); }
 </style>
+
+<script>
+  /* Melhoria progressiva: `required`/`type="email"` no HTML são o piso —
+     sem JS, é o navegador que barra campo vazio e e-mail malformado, com a
+     bolha nativa dele. Só quando este script roda é que `noValidate` desliga
+     essa bolha, para o toast abaixo assumir o aviso (mesma regra, feedback
+     melhor). Se o script não rodar, a validação nativa continua de pé. */
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  const form = document.querySelector<HTMLFormElement>("[data-form-contato]");
+  const toastErro = document.getElementById("fc-toast-erro");
+  if (form) form.noValidate = true;
+
+  function mostrarErro(texto: string) {
+    if (!toastErro) return;
+    const msg = toastErro.querySelector<HTMLElement>(".txt");
+    if (msg) msg.textContent = texto;
+    toastErro.hidden = false;
+  }
+
+  form?.addEventListener("submit", (ev) => {
+    const nome = form.querySelector<HTMLInputElement>("#fc-nome")!;
+    const email = form.querySelector<HTMLInputElement>("#fc-email")!;
+    const mensagem = form.querySelector<HTMLTextAreaElement>("#fc-mensagem")!;
+
+    if (!nome.value.trim() || !email.value.trim() || !mensagem.value.trim()) {
+      ev.preventDefault();
+      mostrarErro("Preencha nome, e-mail e mensagem.");
+      return;
+    }
+    /* Mesmo regex de `functions/_lib/contato.ts`. Não dá para importar o
+       módulo da Function aqui (fica fora do bundle do cliente por design —
+       ver CLAUDE.md), então a regra é copiada, não compartilhada: mudou lá,
+       muda aqui também. */
+    if (!EMAIL.test(email.value.trim())) {
+      ev.preventDefault();
+      mostrarErro("E-mail inválido.");
+    }
+  });
+</script>

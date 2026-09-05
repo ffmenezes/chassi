@@ -14,9 +14,19 @@
  *  - comentário NÃO É FONTE: número ali não entra em conta nenhuma
  *  - sem contagem no topo, que é número na tela sem origem e métrica de vaidade
  *  - moderação antes de publicar, ou o bloco não nasce
+ *
+ * Validação no cliente (script no fim do arquivo) é a mesma conveniência do
+ * `FormularioContato.astro`: campo obrigatório vazio ou e-mail malformado
+ * dispara um toast de erro e não envia, mas NUNCA substitui a validação do
+ * servidor — que ainda nem existe aqui (`/api/comentario` não tem Function
+ * neste repositório, ver README), e é o que vai recusar de novo tudo isto
+ * quando existir. Sucesso não ganha toast: sem fetch, envio de verdade é
+ * navegação nativa, e uma confirmação chega no que o backend, um dia,
+ * redirecionar de volta — nunca antes disso.
  */
 import type { Comentario } from "../../comentarios";
 import { CONSENTIMENTO_NEWSLETTER, PROMESSA_DO_EMAIL } from "../../consentimento";
+import Toast from "./Toast.astro";
 
 export type { Comentario };
 
@@ -69,7 +79,7 @@ const previa = !site || !slug || !sitekey;
     {/* Formulário HTML comum, com `method="post"` e sem fetch. É o que permite
         o bloco funcionar sem JavaScript próprio: o único script da página é o
         do Turnstile, e a resposta ao leitor é um redirect. */}
-    <form class="b-card formulario" method="post" action={previa ? undefined : "/api/comentario"}>
+    <form class="b-card formulario" method="post" action={previa ? undefined : "/api/comentario"} data-form-comentario>
       {!previa && (
         <>
           <input type="hidden" name="site" value={site} />
@@ -124,6 +134,8 @@ const previa = !site || !slug || !sitekey;
         </span>
       </div>
     </form>
+
+    <Toast id="cm-toast-erro" tipo="erro" titulo="Não deu para enviar" texto="Confira os campos destacados." hidden />
 
     {!previa && (
       <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
@@ -244,4 +256,41 @@ const previa = !site || !slug || !sitekey;
   for (const campo of document.querySelectorAll<HTMLInputElement>(".comentarios [data-carimbo]")) {
     campo.value = String(Date.now());
   }
+
+  /* Validação no cliente, mesma conveniência do FormularioContato.astro:
+     melhoria progressiva sobre `required`/`type="email"`, que continuam
+     sendo o piso de quem não roda este script. Bloco interativo sem
+     interação é decoração — um formulário que só descobre o próprio erro
+     numa resposta de servidor em texto puro é essa decoração, mais lenta. */
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  const formComentario = document.querySelector<HTMLFormElement>("[data-form-comentario]");
+  const toastErroComentario = document.getElementById("cm-toast-erro");
+  if (formComentario) formComentario.noValidate = true;
+
+  function mostrarErroComentario(texto: string) {
+    if (!toastErroComentario) return;
+    const msg = toastErroComentario.querySelector<HTMLElement>(".txt");
+    if (msg) msg.textContent = texto;
+    toastErroComentario.hidden = false;
+  }
+
+  formComentario?.addEventListener("submit", (ev) => {
+    const nome = formComentario.querySelector<HTMLInputElement>("#c-nome")!;
+    const email = formComentario.querySelector<HTMLInputElement>("#c-email")!;
+    const texto = formComentario.querySelector<HTMLTextAreaElement>("#c-texto")!;
+
+    if (!nome.value.trim() || !email.value.trim() || !texto.value.trim()) {
+      ev.preventDefault();
+      mostrarErroComentario("Preencha nome, e-mail e comentário.");
+      return;
+    }
+    /* Mesmo regex de `functions/_lib/contato.ts` — a Function de comentário
+       ainda não existe (ver README), mas quando existir vai validar de
+       novo com a mesma regra, porque cliente nunca é a última palavra. */
+    if (!EMAIL.test(email.value.trim())) {
+      ev.preventDefault();
+      mostrarErroComentario("E-mail inválido.");
+    }
+  });
 </script>

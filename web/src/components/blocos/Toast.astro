@@ -7,21 +7,66 @@
  * interface), não pede nada, e não é onde se coleta consentimento.
  *
  * Sucesso some sozinho; erro fica até ser dispensado, porque quem precisa
- * agir precisa continuar lendo. */
-interface Props { tipo?: "ok" | "erro"; titulo: string; texto: string }
-const { tipo = "ok", titulo, texto } = Astro.props;
+ * agir precisa continuar lendo — por isso o botão de fechar abaixo, e por
+ * isso só o sucesso ganha temporizador.
+ *
+ * Até aqui o componente só nascia visível: bom para espécime de bancada,
+ * inútil para quem precisa mostrá-lo em resposta a uma ação real. Agora ele
+ * nasce oculto quando `hidden` é passado (é o que `FormularioContato.astro`
+ * e `Comentarios.astro` fazem: o toast já existe no HTML, silencioso, até a
+ * validação do cliente tirar o `hidden`) e é anunciado por leitor de tela
+ * assim que aparece, porque `role`/`aria-live` já vivem no elemento antes
+ * de ele ficar visível.
+ *
+ * `demo` é só para a bancada: liga um botão que dispara o próprio toast, com
+ * `id`/desligado por padrão. Comente é a peça: com `demo` desligado (o caso
+ * de qualquer artigo real), este componente é exatamente o que sempre foi —
+ * sem botão extra e sem esse script de demonstração no bundle daquela
+ * página, porque a marcação condicional some no build.
+ */
+interface Props {
+  tipo?: "ok" | "erro";
+  titulo: string;
+  texto: string;
+  /** Identifica o toast para quem for mostrá-lo via JS (`getElementById`). */
+  id?: string;
+  /** Nasce escondido, para um script tirar o `hidden` em resposta a uma
+   *  ação. Sem isto, o toast é o espécime estático de sempre. */
+  hidden?: boolean;
+  /** Só a bancada liga isto: rende um botão que dispara este mesmo toast,
+   *  para dar para ver entrada, permanência e saída sem simular um formulário. */
+  demo?: boolean;
+}
+const { tipo = "ok", titulo, texto, id, hidden = false, demo = false } = Astro.props;
 const erro = tipo === "erro";
+
+const paraSlug = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(new RegExp("[\\u0300-\\u036f]", "g"), "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+const idToast = id ?? "toast-" + paraSlug(titulo);
 ---
+{demo && (
+  <button class="b-btn" type="button" data-demo-toast={idToast}>
+    Mostrar toast: {titulo}
+  </button>
+)}
 <div
+  id={idToast}
+  hidden={demo ? true : hidden}
   class:list={["b-card toast", { erro }]}
   role={erro ? "alert" : "status"}
   aria-live={erro ? "assertive" : "polite"}
 >
   <span class="ico" aria-hidden="true">{erro ? "!" : "✓"}</span>
   <span class="msg">
-    <b>{titulo}</b>
-    <span>{texto}</span>
+    <b class="tit">{titulo}</b>
+    <span class="txt">{texto}</span>
   </span>
+  <button class="fechar" type="button" data-fecha-toast aria-label="Fechar aviso">✕</button>
 </div>
 <style>
   .toast { padding: 13px 15px; display: flex; gap: 11px; align-items: flex-start; max-width: 420px; }
@@ -32,7 +77,48 @@ const erro = tipo === "erro";
   }
   .erro { border-color: var(--b-erro); }
   .erro .ico { background: var(--b-erro); color: #fff; }
-  .msg { font-size: 13.5px; line-height: 1.5; }
-  .msg b { display: block; margin-bottom: 2px; color: var(--b-tinta); }
-  .msg span { color: var(--b-tinta-2); }
+  .msg { flex: 1; font-size: 13.5px; line-height: 1.5; }
+  .msg .tit { display: block; margin-bottom: 2px; color: var(--b-tinta); }
+  .msg .txt { color: var(--b-tinta-2); }
+  .fechar {
+    flex: none; width: 20px; height: 20px; margin: -2px -4px 0 0; padding: 0;
+    display: grid; place-items: center; border: 0; border-radius: 50%;
+    background: transparent; color: var(--b-tinta-2); font-size: 11px; cursor: pointer;
+  }
+  .fechar:hover { background: color-mix(in srgb, var(--b-tinta) 10%, transparent); }
 </style>
+
+<script>
+  /* Quem mostra um toast (a validação do formulário, o botão de demonstração
+     acima) só precisa tirar o `hidden` do elemento certo — o que acontece
+     depois disso é deste script, e vale para qualquer toast da página:
+     fechar manualmente é sempre por este X, e sumir sozinho é só do sucesso.
+     Bloco interativo sem interação é decoração: um toast que só sabe ficar
+     visível, sem nunca fechar sozinho nem por clique, era exatamente essa
+     decoração parada na bancada. */
+  document.addEventListener("click", (ev) => {
+    const alvo = ev.target as HTMLElement;
+
+    const fechar = alvo.closest?.("[data-fecha-toast]");
+    if (fechar) {
+      fechar.closest<HTMLElement>(".toast")!.hidden = true;
+      return;
+    }
+
+    const gatilho = alvo.closest?.("[data-demo-toast]") as HTMLElement | null;
+    if (gatilho) {
+      const alvoToast = document.getElementById(gatilho.dataset.demoToast!);
+      if (alvoToast) alvoToast.hidden = false;
+    }
+  });
+
+  /* Um observador por toast de sucesso: dispara o temporizador assim que
+     ele deixa de estar oculto, não importa quem tirou o `hidden`. Erro não
+     entra aqui — erro só fecha pelo X, de propósito. */
+  for (const toast of document.querySelectorAll<HTMLElement>(".toast:not(.erro)")) {
+    const observador = new MutationObserver(() => {
+      if (!toast.hidden) setTimeout(() => { toast.hidden = true; }, 4000);
+    });
+    observador.observe(toast, { attributes: true, attributeFilter: ["hidden"] });
+  }
+</script>

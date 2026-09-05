@@ -42,6 +42,8 @@ import Toast from "../components/blocos/Toast.astro";
 import Overlay from "../components/blocos/Overlay.astro";
 import Comentarios from "../components/blocos/Comentarios.astro";
 import Autor from "../components/blocos/Autor.astro";
+import Calculadora from "../components/blocos/Calculadora.astro";
+import OfertaIsca from "../components/blocos/OfertaIsca.astro";
 
 import * as m from "../mock/artigo";
 
@@ -196,6 +198,8 @@ const previstos = {
             <Autor autor={m.autor} variante="card" />
           </div>
         </Palco>
+        <Palco id={23} {...palco}><Calculadora {...m.calculadora} /></Palco>
+        <Palco id={24} {...palco}><OfertaIsca {...m.ofertaIsca} /></Palco>
         <Palco id="A1" {...palco}><AtomosDemo pico={m.atomos.pico} /></Palco>
         <Palco id="A2" {...palco}>
           <ListasDemo
@@ -221,8 +225,12 @@ const previstos = {
           <GradeArtigos rotulo="Continue por aqui" artigos={m.irmas} />
         </Palco>
         <Palco id="N3" {...palco}>
+          {/* `demo` é só daqui: rende o botão que dispara cada toast, para
+              dar para ver entrada, permanência (sucesso some sozinho) e saída
+              (erro fecha pelo X) sem simular um formulário inteiro. Em
+              qualquer artigo real este componente nasce sem esse botão. */}
           <div style="display:flex;flex-direction:column;gap:11px">
-            {m.toasts.map((t) => <Toast {...t} />)}
+            {m.toasts.map((t) => <Toast {...t} demo />)}
           </div>
         </Palco>
         <Palco id="N4" {...palco}>
