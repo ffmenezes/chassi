@@ -19,6 +19,8 @@ import type { Props as CamposCodigo } from "../components/blocos/Codigo.astro";
 import type { Props as CamposAviso } from "../components/blocos/Aviso.astro";
 import type { Artigo } from "../components/blocos/GradeArtigos.astro";
 import type { Comentario } from "../components/blocos/Comentarios.astro";
+import type { Props as CamposCalculadora } from "../components/blocos/Calculadora.astro";
+import type { Props as CamposOfertaIsca } from "../components/blocos/OfertaIsca.astro";
 import type { Autor } from "../autor";
 
 export const abertura = {
@@ -415,3 +417,44 @@ export const comentarios: Comentario[] = [
       "Vocês têm algum artigo sobre como escolher o cabo entre modem e roteador? A perda de sinal ali também não atrapalha na hora do pico?",
   },
 ];
+
+/**
+ * Bloco 23 — a mesma conta da tabela de contraste, com as variáveis abertas.
+ * O link contratado e o pico medido são os dois números que a caixa de
+ * conclusões já declara; a folga é a subtração dos dois, e fica negativa
+ * quando o pico passa do link — que é exatamente o caso do exemplo.
+ */
+export const calculadora: CamposCalculadora = {
+  id: "calc-pico",
+  titulo: "Sua folga no pico simultâneo",
+  descricao: "A mesma conta do texto, com os números trocados pelos seus.",
+  campos: [
+    { id: "link", rotulo: "Link contratado", inicial: 300, unidade: "Mbps", origem: "plano contratado, da fatura do provedor" },
+    { id: "pico", rotulo: "Pico medido", inicial: 340, unidade: "Mbps", origem: "medido com monitor de rede, 09/08/2026" },
+  ],
+  saidas: [
+    {
+      id: "folga",
+      rotulo: "Folga no pico",
+      expr: "link - pico",
+      unidade: "Mbps",
+      arredonda: "normal",
+      ressalva: "negativo é queda garantida no próximo pico igual a este",
+    },
+  ],
+  ancoraDaConta: "#s2",
+};
+
+/**
+ * Bloco 24 — a oferta de isca. `site` e `isca` aqui são de mentira, como todo
+ * o resto deste arquivo: sem `PUBLIC_ISCA_HABILITADA`, o componente já sai em
+ * modo prévia sozinho, então estes valores nunca chegam a um `action` de
+ * verdade.
+ */
+export const ofertaIsca: CamposOfertaIsca = {
+  isca: "checklist-pico",
+  site: "bancada",
+  titulo: "Checklist de 5 passos para medir seu pico",
+  promessa: "PDF de 1 página, chega em até 5 minutos por e-mail.",
+  ancora: "Quero o checklist",
+};

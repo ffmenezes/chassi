@@ -11,6 +11,7 @@
 import type { Site } from "./tipos";
 import { validar, cssDoSite, TETO_DE_DESVIO } from "./validacao";
 import { nomesDeEstilo } from "../styles/estilos";
+import { CATALOGO } from "../catalogo";
 
 export type { Site, Modo, Estilo, TokenB, DesvioDeSite, Responsavel } from "./tipos";
 export { cssDoSite, TETO_DE_DESVIO, validar };
@@ -43,10 +44,12 @@ export const SITE_DEMO: Site = {
   dominio: "localhost",
   estilo: "vidro",
   modoPadrao: "escuro",
-  blocos: [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-    "N1", "N2", "N3", "N4", "N5", "A1", "A2",
-  ],
+  // Derivado do catálogo, não escrito à mão: a bancada monta tudo por
+  // definição — é o inventário do chassi —, e uma lista digitada diverge do
+  // catálogo assim que alguém acrescenta um bloco lá e esquece de repetir
+  // aqui. Já divergiu: faltavam os blocos 23 e 24, e eles simplesmente não
+  // apareciam na página, sem sinal nenhum de ausência.
+  blocos: CATALOGO.map((b) => b.id),
   muroDeEmail: true,
   emailContato: "contato@localhost",
   responsavel: { nome: "Bancada", tipo: "pf" },

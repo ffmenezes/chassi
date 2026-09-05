@@ -38,6 +38,15 @@ export interface Props {
 const { isca, site, titulo, promessa, ancora } = Astro.props;
 const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY;
 
+/* `/api/isca` ainda não existe neste repositório — chega junto com a aula de
+   iscas do workshop (ver o comentário do bloco 24 em `src/catalogo.ts`). Até
+   lá, sem esta variável configurada o formulário sai **inerte**: mesmo padrão
+   que `Comentarios.astro` usa para sitekey ausente — sem `action`, campo
+   desabilitado, e uma linha visível dizendo por quê. Um formulário que sempre
+   cai em 404 é pior que nenhum formulário. */
+const habilitada = import.meta.env.PUBLIC_ISCA_HABILITADA === "true";
+const previa = !habilitada || !sitekey;
+
 const erro = (m: string) => {
   throw new Error(`[bloco 24] ${m}`);
 };
@@ -64,11 +73,15 @@ if (/\b(?:últim|vagas?|agora|corre|expira|somente hoje|por tempo)\b/i.test(`${t
   <h3 class="titulo">{titulo}</h3>
   <p class="promessa">{promessa}</p>
 
-  <form method="post" action="/api/isca">
-    <input type="hidden" name="isca" value={isca} />
-    <input type="hidden" name="site" value={site} />
-    {/* campo-armadilha, invisível para gente e irresistível para robô */}
-    <input type="text" name="website" tabindex="-1" autocomplete="off" class="armadilha" aria-hidden="true" />
+  <form method="post" action={previa ? undefined : "/api/isca"}>
+    {!previa && (
+      <>
+        <input type="hidden" name="isca" value={isca} />
+        <input type="hidden" name="site" value={site} />
+        {/* campo-armadilha, invisível para gente e irresistível para robô */}
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="armadilha" aria-hidden="true" />
+      </>
+    )}
 
     <div class="linha">
       <label for={`isca-email-${isca}`}>Seu e-mail</label>
@@ -80,18 +93,29 @@ if (/\b(?:últim|vagas?|agora|corre|expira|somente hoje|por tempo)\b/i.test(`${t
         required
         maxlength="254"
         placeholder="voce@exemplo.com.br"
+        disabled={previa}
       />
     </div>
 
     <p class="consent">{CONSENTIMENTO_ISCA}</p>
     <p class="b-ressalva">{PROMESSA_DA_ISCA}</p>
 
-    {sitekey && <div class="cf-turnstile" data-sitekey={sitekey}></div>}
+    {!previa && sitekey && <div class="cf-turnstile" data-sitekey={sitekey}></div>}
 
-    <button class="b-btn b-btn--forte" type="submit">{ancora}</button>
+    <div class="acoes">
+      <button class="b-btn b-btn--forte" type="submit" disabled={previa}>{ancora}</button>
+      {previa && (
+        <span class="nota">
+          Prévia: este bloco ainda não tem <code>/api/isca</code> neste repositório, então o
+          formulário não envia.
+        </span>
+      )}
+    </div>
   </form>
 
-  <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+  {!previa && (
+    <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+  )}
 </aside>
 
 <style>
@@ -119,10 +143,12 @@ if (/\b(?:últim|vagas?|agora|corre|expira|somente hoje|por tempo)\b/i.test(`${t
     width: 100%;
   }
   input[type="email"]:hover { border-color: var(--b-acento); }
+  input[type="email"]:disabled { opacity: .6; cursor: not-allowed; }
 
   .consent { margin: 12px 0 4px; font-size: 13px; color: var(--b-corpo); }
   .b-ressalva { display: block; margin-bottom: 14px; }
 
   .cf-turnstile { margin-bottom: 14px; }
-  button { margin-top: 2px; }
+  .acoes { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 2px; }
+  .nota { font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2); }
 </style>

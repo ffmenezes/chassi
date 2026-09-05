@@ -38,8 +38,10 @@ const ancora = `b${String(id).toLowerCase()}`;
   </div>
 
   <p class="sem-suporte">
-    Este estilo não prevê o bloco. Ele continua no catálogo: para ativá-lo,
+    Este site não monta o bloco. Ele continua no catálogo: para ativá-lo,
     acrescente <code>{typeof id === "string" ? `"${id}"` : id}</code> em{" "}
-    <code>blocos</code> do site, em <code>src/sites/index.ts</code>.
+    <code>blocos</code>, no arquivo do site em{" "}
+    <code>src/sites/&lt;slug&gt;.ts</code> — nunca em <code>src/sites/index.ts</code>,
+    que só varre e valida.
   </p>
 </section>
