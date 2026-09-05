@@ -65,8 +65,18 @@ export function quebrar(
 
   const visiveis = linhas.slice(0, maxLinhas);
   if (linhas.length > maxLinhas) {
-    const ultima = visiveis[maxLinhas - 1].replace(/\s+\S*$/, "");
-    visiveis[maxLinhas - 1] = (ultima || visiveis[maxLinhas - 1]) + ELIPSE;
+    const indice = maxLinhas - 1;
+    const ultima = visiveis[indice];
+    /* Se `ultima` ja termina em elipse, ela ja foi truncada por `cortar` —
+       grudar outra elipse por cima dobraria o glifo e nunca teve a largura
+       revalidada. Nesse caso ela ja e a representacao certa do corte. */
+    if (!ultima.endsWith(ELIPSE)) {
+      const semUltimaPalavra = ultima.replace(/\s+\S*$/, "");
+      const base = semUltimaPalavra || ultima;
+      visiveis[indice] = medir(fonte, base + ELIPSE, tamanho) <= larguraMax
+        ? base + ELIPSE
+        : cortar(fonte, base, tamanho, larguraMax);
+    }
   }
 
   return visiveis.map((t) => ({ texto: t, largura: medir(fonte, t, tamanho) }));
