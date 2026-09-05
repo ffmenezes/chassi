@@ -6,11 +6,89 @@ e de variável. Mantenha assim.
 
 ## A fronteira
 
-Você edita: `web/src/sites/<slug>.ts`, `web/src/meu/**`, `sites/**`.
-O upstream edita: todo o resto.
+Você edita: `web/src/sites/<slug>.ts`, `web/src/meu/**`, `sites/**`, e as três
+páginas de identidade `web/src/pages/{index,sobre,contato}.astro` (nascem em
+branco, com roteiro embutido — a partir do clone são suas, para sempre).
+
+O upstream edita: todo o resto, inclusive as quatro páginas jurídicas
+(`privacidade`, `cookies`, `termos`, `direitos-autorais`) — alimentadas por
+configuração, texto igual para todo mundo, você nunca as abre, e é por isso
+que continuam recebendo correção nossa para sempre, sem conflito.
 
 Cara própria sai de **até 6 tokens** em `web/src/sites/<slug>.ts`, nunca de
-editar um `.astro`. É essa regra que faz `scripts/atualizar` nunca conflitar.
+editar um `.astro`. É essa regra que faz `scripts/atualizar` nunca conflitar:
+no minuto em que você editar um bloco `.astro`, aquele arquivo para de receber
+correção nossa.
+
+**Nunca rode `git merge upstream/main`.** As fronteiras deste repositório
+foram desenhadas para puxada arquivo por arquivo (`git checkout upstream/main
+-- <caminho>`); merge traz de volta o conflito que o desenho evita.
+
+## Estrutura
+
+```
+AGENTS.md                              arquivo real
+CLAUDE.md               → symlink →    AGENTS.md
+.agents/skills/atualizar-template/     arquivos reais
+.claude/skills          → symlink →    ../.agents/skills
+LICENSE                                MIT
+README.md
+scripts/instalar                       roda uma vez, após o clone
+scripts/atualizar                      puxada por arquivo, nunca merge
+web/src/sites/<slug>.ts                ← o site do participante (só este)
+web/src/sites/index.ts                 ← varre e valida. Nunca editado à mão.
+web/src/sites/exemplo.ts               ← o modelo. Único arquivo do upstream que se apaga
+web/src/api/contrato.ts                ← a porta de transporte: caminhos + tipos
+web/src/{components,layouts,styles,mock,pages}/
+web/src/meu/                           ← estilo próprio, blocos próprios. Upstream nunca escreve
+web/functions/{api,_lib}/              ← Pages Functions: adaptador fino + lógica pura em _lib
+web/worker/                            ← adaptadores de runtime Worker, inertes
+sites/_modelo/{base,estado,pautas,pesquisa,posts}/
+```
+
+`sites/_modelo/base/*.md` não nasce vazio nem preenchido: cada arquivo é o
+roteiro de perguntas que ele responde. É o que substitui uma skill de conteúdo
+neste repositório público.
+
+## As três camadas de token
+
+```css
+@layer contrato, estilo, modo, site;
+
+[data-estilo]              forma e tipografia. Nenhuma cor.
+[data-estilo][data-modo]   cor. Nenhuma medida.
+[data-site][data-modo]     desvio declarado do site (até 6 tokens). Vence sempre.
+```
+
+A ordem vem de `@layer`, não de especificidade — é isso que evita a armadilha
+de `[data-site]` sozinho (especificidade 0,1,0) perder para
+`[data-estilo][data-modo]` (0,2,0). Todo bloco fala só `--b-*`; nenhum
+componente conhece cor, fonte ou medida literal.
+
+## Validações que quebram a build (não são avisos)
+
+- **slug repetido** — um slug, um arquivo, um site.
+- **estilo inexistente** — o site declara um `estilo` que não existe em
+  `web/src/styles/estilos/`.
+- **troca de família tipográfica** — `--b-fonte-titulo`, `--b-fonte-corpo` e
+  `--b-fonte-meta` não entram no desvio de site. Isso não é personalização, é
+  estilo novo se escondendo dentro de outro.
+- **`TETO_DE_DESVIO = 6`** — mais de 6 tokens sobrescritos por site não é
+  desvio, é estilo novo usando o de baixo como atalho.
+- **Figura (bloco 19)** — `alt` vazio, `alt` igual à legenda, prova ou
+  diagrama sem legenda ou sem fonte e data, raster sem `width`/`height`, SVG
+  inline junto com `src`.
+- **Código (bloco 20)** — sem rótulo de contexto, linha abrindo com `$`, `#`
+  ou `>` (não colável).
+- **Aviso (bloco 21)** — tipo `atencao` sem `fonte`.
+
+## A regra das portas
+
+`nenhum` é o adaptador padrão de toda porta, e o chassi builda e publica com
+ele em todo lugar — zero conta configurada. Um arquivo por adaptador. **Porta
+nova nunca edita arquivo existente**: `escolherX(env)` em `porta.ts` cresce um
+`if`, o adaptador novo chega como arquivo novo — é isso que faz
+`scripts/atualizar` entregá-lo sem conflito.
 
 ## Comandos
 
@@ -19,3 +97,5 @@ editar um `.astro`. É essa regra que faz `scripts/atualizar` nunca conflitar.
     cd web && npm run dev     Astro em 4321
     cd web && npm run build
     cd web && npm test
+    cd web && npm run check           astro check (tipos de src/)
+    cd web && npm run check:functions tsc -p functions (Functions ficam fora do tsconfig de src/)
