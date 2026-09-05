@@ -21,9 +21,9 @@
  * diferente sem este arquivo crescer um `if` por artigo.
  *
  * Os blocos usados aqui são exatamente os que `sites/exemplo.ts` declara em
- * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, A1, A2, A3) mais a navegação que o site
- * escolheu em `NAVEGACAO_DE_ARTIGO` (N2 e N5, com o porquê de cada um dos
- * cinco comentado lá) — bloco fora da lista do site não é montado nesta
+ * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, 26, A1, A2, A3) mais a navegação que o
+ * site escolheu em `NAVEGACAO_DE_ARTIGO` (N2 e N5, com o porquê de cada um
+ * dos cinco comentado lá) — bloco fora da lista do site não é montado nesta
  * página, pela mesma regra que vale para qualquer site do chassi. Por isso
  * os dois blocos de navegação abaixo checam `site.blocos.includes(...)`
  * antes de montar, em vez de nascerem incondicionais.
@@ -50,6 +50,7 @@ import Checklist from "../components/blocos/Checklist.astro";
 import Faq from "../components/blocos/Faq.astro";
 import Fechamento from "../components/blocos/Fechamento.astro";
 import AutorBloco from "../components/blocos/Autor.astro";
+import Compartilhar from "../components/blocos/Compartilhar.astro";
 import BarraProgresso from "../components/blocos/BarraProgresso.astro";
 import GradeArtigos from "../components/blocos/GradeArtigos.astro";
 import type { Artigo as ItemDeGrade } from "../components/blocos/GradeArtigos.astro";
@@ -89,6 +90,10 @@ const sumario = artigo.slots.filter(ehTitulo).map((s) => ({
    seria uma coluna vazia no desktop, nunca um sumário fantasma. */
 const h2DoSumario = sumario.filter((s) => (s.nivel ?? 2) === 2).length;
 const temSumario = h2DoSumario >= 4;
+
+/* Bloco 26 (Compartilhar) pede URL absoluta e canônica — `site.dominio` mais
+   o mesmo slug que vira a rota desta página (ver `getStaticPaths` acima). */
+const urlDoArtigo = `https://${site.dominio}/${artigo.slug}/`;
 ---
 
 <Artigo site={site} titulo={`${artigo.titulo} — ${site.nome}`} descricao={artigo.descricao}>
@@ -154,6 +159,11 @@ const temSumario = h2DoSumario >= 4;
           ))}
 
           <AutorBloco autor={autor} variante="card" />
+
+          {/* 26, depois do card do autor: o último ato de quem terminou de
+              ler, não conteúdo do corpo — por isso vem fora do map de slots,
+              igual ao Autor logo acima. */}
+          <Compartilhar url={urlDoArtigo} texto={artigo.titulo} />
         </div>
       </div>
     </article>

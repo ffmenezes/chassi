@@ -12,14 +12,25 @@
  *
  * `navigator.share()` é o caminho do celular — entrega o menu nativo do
  * sistema, que já inclui WhatsApp e qualquer outro app instalado — e por isso
- * é preferido ONDE EXISTIR. Onde não existir (a maioria dos desktops), os
- * destinos explícitos abaixo são o que o leitor vê e usa.
+ * ele SOMA à lista abaixo, nunca a substitui. Já existiu versão deste bloco
+ * que escondia os cinco destinos quando `navigator.share` existia — errado
+ * por dois motivos, e os dois valem registrar aqui para ninguém desfazer o
+ * conserto: o menu nativo é opaco (o leitor não sabe o que vai encontrar lá
+ * dentro antes de clicar, enquanto cinco destinos nomeados dizem exatamente
+ * o que o site oferece) e `navigator.share` é reportado por navegadores de
+ * DESKTOP também, onde o menu do sistema costuma ser pior que um link direto
+ * para o WhatsApp. Trocar informação explícita por um botão surpresa era
+ * perda, não simplificação.
+ *
+ * Onde o nativo existe, ele costuma ser o melhor caminho — por isso vem
+ * PRIMEIRO no HTML, com a lista abaixo como alternativa explícita. Ele nasce
+ * `hidden` e o script no fim do arquivo só tira o `hidden`; nunca esconde a
+ * lista.
  *
  * Melhoria progressiva, sem exceção: a lista de links nasce visível no HTML,
- * funciona clicada sem JS nenhum, e é isso que o script no fim do arquivo
- * respeita — ele só ESCONDE a lista e mostra um botão único quando confirma
- * que `navigator.share` existe. Sem JS, ou em navegador sem a API, a lista
- * continua ali, cada item um link de verdade.
+ * funciona clicada sem JS nenhum, e o script deste arquivo só ACRESCENTA o
+ * nativo por cima dela. Sem JS, ou em navegador sem a API, a lista continua
+ * ali sozinha, cada item um link de verdade.
  *
  * "Copiar link" reusa `ligarCopia()` (de `../../copiarLink`), o mesmo botão
  * do cabeçalho e do título de seção: mesmo ouvinte delegado, mesmo aviso a
@@ -31,8 +42,17 @@ export interface Props {
   url: string;
   /** Frase curta que acompanha o link — o título do artigo, ou um gancho de uma linha. */
   texto: string;
+  /** Só a bancada usa isto: força o estado do botão nativo sem depender da
+   *  capacidade real do navegador que abriu a página. Existe porque o
+   *  espécime na bancada é o inventário — o lugar onde o dono decide se quer
+   *  o bloco — e ali um único navegador só mostra metade da verdade: quem
+   *  abre no desktop nunca vê o estado "com nativo", quem abre no celular
+   *  nunca vê o estado "sem nativo" sozinho. `true` força visível, `false`
+   *  força oculto. Ausente — o único caminho em produção, e o padrão — o
+   *  bloco detecta `navigator.share` em runtime, exatamente como sempre. */
+  forcarNativo?: boolean;
 }
-const { url, texto } = Astro.props;
+const { url, texto, forcarNativo } = Astro.props;
 
 const urlCodificada = encodeURIComponent(url);
 const textoCodificado = encodeURIComponent(texto);
@@ -50,8 +70,24 @@ const DESTINOS = [
 ] as const;
 ---
 
-<div class="compartilhar" data-compartilhar data-url={url} data-texto={texto}>
+<div
+  class="compartilhar"
+  data-compartilhar
+  data-url={url}
+  data-texto={texto}
+  data-forcar-nativo={forcarNativo === undefined ? undefined : String(forcarNativo)}
+>
   <p class="b-rotulo">Compartilhar</p>
+
+  {/* Primeiro no HTML, escondido por padrão: em produção (`forcarNativo`
+      ausente) só aparece quando o script confirma `navigator.share`. Na
+      bancada, `forcarNativo` decide o `hidden` aqui mesmo, sem depender do
+      navegador que abriu a página. É o botão que entrega o menu nativo do
+      sistema — SOMA à lista abaixo, nunca a substitui (ver o porquê no topo
+      do arquivo). */}
+  <button type="button" class="dest nativo" data-compartilhar-nativo hidden={forcarNativo !== true}>
+    Compartilhar
+  </button>
 
   <ul class="destinos" data-destinos>
     {DESTINOS.map((d) => (
@@ -74,12 +110,6 @@ const DESTINOS = [
       </button>
     </li>
   </ul>
-
-  {/* Escondido por padrão: só aparece quando o script confirma navigator.share.
-      É o botão que entrega o menu nativo do sistema no celular. */}
-  <button type="button" class="dest nativo" data-compartilhar-nativo hidden>
-    Compartilhar
-  </button>
 </div>
 
 <style>
@@ -120,6 +150,10 @@ const DESTINOS = [
   .dest svg { width: 14px; height: 14px; }
 
   .nativo {
+    /* `margin-bottom` só conta quando o botão está visível — `hidden` tira o
+       elemento do fluxo, então isto não move nada no caso comum (a maioria
+       dos desktops), e abre o respiro certo quando ele soma à lista abaixo. */
+    margin: 0 0 10px;
     padding: 10px 18px;
     border-radius: var(--b-radius);
     border: 0;
@@ -156,23 +190,29 @@ const DESTINOS = [
   /* `navigator.share` é o único jeito de saber se o sistema tem menu nativo,
      e só existe descobrindo em runtime — daí o `<script>`, com a mesma régua
      de melhoria progressiva do resto do catálogo: a lista de links já
-     funciona sozinha, isto só troca a apresentação quando há algo melhor. */
+     funciona sozinha, isto só ACRESCENTA o botão nativo por cima dela quando
+     há algo melhor. Nunca esconde `[data-destinos]` — essa era a versão
+     antiga, e o porquê de ela estar errada está no comentário do topo do
+     arquivo. */
   for (const raiz of document.querySelectorAll<HTMLElement>("[data-compartilhar]")) {
-    if (!("share" in navigator)) continue;
-
-    const destinos = raiz.querySelector<HTMLElement>("[data-destinos]");
     const nativo = raiz.querySelector<HTMLButtonElement>("[data-compartilhar-nativo]");
-    if (!destinos || !nativo) continue;
+    if (!nativo) continue;
 
-    destinos.hidden = true;
-    nativo.hidden = false;
+    /* `data-forcar-nativo` só existe na bancada: quando presente, o `hidden`
+       já foi decidido no servidor (ver o Props do componente) e este script
+       não deve sobrepor a escolha com a capacidade real do navegador que
+       está rodando o espécime. */
+    const forcado = raiz.dataset.forcarNativo !== undefined;
+    if (!forcado && "share" in navigator) nativo.hidden = false;
 
-    nativo.addEventListener("click", () => {
-      const dados = { title: raiz.dataset.texto, url: raiz.dataset.url };
-      /* Recusa do leitor (fechou o menu) ou API indisponível no momento: os
-         dois caem aqui, e não há o que fazer além de não quebrar a página —
-         o botão continua onde estava, pronto para um novo clique. */
-      navigator.share(dados).catch(() => {});
-    });
+    if ("share" in navigator) {
+      nativo.addEventListener("click", () => {
+        const dados = { title: raiz.dataset.texto, url: raiz.dataset.url };
+        /* Recusa do leitor (fechou o menu) ou API indisponível no momento: os
+           dois caem aqui, e não há o que fazer além de não quebrar a página —
+           o botão continua onde estava, pronto para um novo clique. */
+        navigator.share(dados).catch(() => {});
+      });
+    }
   }
 </script>

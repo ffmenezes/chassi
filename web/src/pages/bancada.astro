@@ -49,6 +49,7 @@ import Newsletter from "../components/blocos/Newsletter.astro";
 import Compartilhar from "../components/blocos/Compartilhar.astro";
 import Passos from "../components/blocos/Passos.astro";
 import Verificacao from "../components/blocos/Verificacao.astro";
+import Slides from "../components/blocos/Slides.astro";
 
 import * as m from "../mock/artigo";
 
@@ -210,9 +211,30 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
         <Palco id={16} {...palco}><Download {...m.derivados.mapa} muro /></Palco>
         <Palco id={17} {...palco}><Download {...m.derivados.pdf} muro /></Palco>
         <Palco id={18} {...palco}><Comentarios itens={m.comentarios.slice(0, 2)} /></Palco>
-        <Palco id={26} {...palco}><Compartilhar {...m.compartilhar} /></Palco>
+        <Palco id={26} {...palco}>
+          {/* os dois estados lado a lado, forçados por `forcarNativo`: a
+              bancada é o inventário, e um navegador só nunca é o desktop e o
+              celular ao mesmo tempo. Sem os dois juntos, quem decide se quer
+              o bloco vê só metade do que ele faz. */}
+          <div style="display:flex;flex-direction:column;gap:26px">
+            <div>
+              <p class="b-rotulo">Com menu nativo do sistema — celular, a maioria dos navegadores</p>
+              <Compartilhar {...m.compartilhar} forcarNativo={true} />
+            </div>
+            <div>
+              <p class="b-rotulo">Sem menu nativo — a maioria dos desktops</p>
+              <Compartilhar {...m.compartilhar} forcarNativo={false} />
+            </div>
+          </div>
+        </Palco>
         <Palco id={27} {...palco}><Passos itens={m.passos} /></Palco>
         <Palco id={28} {...palco}><Verificacao itens={m.verificacao} /></Palco>
+        <Palco id={29} {...palco}>
+          {/* os dois tipos de slide no mesmo deck, que é o único jeito de
+              conferir de um olhar que o de texto e o de imagem têm a mesma
+              altura, os mesmos controles e a mesma posição escrita */}
+          <Slides rotulo="Por que o pico derruba a chamada" slides={m.slides} />
+        </Palco>
         <Palco id="N1" {...palco}>
           <Paginacao total={9} atual={2} href={(p) => `#p${p}`} />
         </Palco>

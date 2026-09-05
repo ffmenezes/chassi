@@ -14,8 +14,10 @@
 import type { Site, BlocoId } from "./tipos";
 
 /** Os ativos: HTML que qualquer build entrega hoje. Os átomos vêm junto porque
- *  não se escolhe usá-los — a prosa usa. */
-const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, "A1", "A2", "A3"];
+ *  não se escolhe usá-los — a prosa usa. 26 (Compartilhar) fecha a lista,
+ *  depois do card do autor: é o último ato do leitor que terminou o texto,
+ *  não conteúdo do corpo. */
+const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, 26, "A1", "A2", "A3"];
 
 /**
  * Navegação (N1–N5) é chrome de site, não conteúdo de artigo — por isso nunca
