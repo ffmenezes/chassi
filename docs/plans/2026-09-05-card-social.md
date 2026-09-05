@@ -35,6 +35,13 @@ opentype.js 1.3.4, sharp 0.35.4, Inter Bold (OFL).
 - Card: 1200×630. Título em no máximo **3 linhas**, 64px, margem de 80px.
 - Rodar `cd web && npm test` antes de cada commit; `npm run build` nas tarefas
   4 e 5, que são as que só o build exercita.
+- **`git add` é sempre seletivo, nunca varredura.** Nomeie cada caminho que
+  você mesmo editou. Nunca `git add -A`, `git add .`, `git add <diretório>`
+  nem `git commit -a`, mesmo quando o `git status` parece ter só as suas
+  mudanças — o arquivo alheio que entra junto credita a pessoa errada no
+  histórico e não se separa depois. Antes de commitar, rode
+  `git status --porcelain` e compare com a lista do que você tocou; o que não
+  for seu fica de fora e é relatado.
 
 ---
 
@@ -627,7 +634,7 @@ rodapé com domínio e nome do site. Acentuação desenhada corretamente.
 - [ ] **Passo 5: commitar**
 
 ```bash
-git add web/src/pages/social/
+git add "web/src/pages/social/[peca].png.ts"
 git commit -m "feat(social): endpoint que assa o card de cada peca no build"
 ```
 
@@ -761,7 +768,9 @@ Esperado: os três verdes.
 - [ ] **Passo 8: commitar**
 
 ```bash
-git add web/src/sites/tipos.ts web/src/sites/exemplo.ts web/src/layouts/ web/src/pages/
+git add web/src/sites/tipos.ts web/src/sites/exemplo.ts \
+  web/src/layouts/Base.astro web/src/layouts/Artigo.astro \
+  web/src/layouts/Institucional.astro "web/src/pages/[artigo].astro"
 git commit -m "feat(head): canonical, OG e o favicon que e do participante"
 ```
 
