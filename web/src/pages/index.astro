@@ -18,8 +18,18 @@ import GradeArtigos from "../components/blocos/GradeArtigos.astro";
 import type { Artigo as ItemDeGrade } from "../components/blocos/GradeArtigos.astro";
 import { ARTIGOS } from "../mock/artigos";
 import { dataBR } from "../data";
+import { ESTILOS } from "../sites";
 
 const site = siteInstitucional();
+
+/* As quatro vitrines que sobram depois de tirar a do próprio site — só para
+   quem quer comparar antes de escolher. `nomesDeEstilo()` (varredura) daria
+   a mesma lista, mas aqui já se precisa do objeto ESTILOS inteiro para pegar
+   o nome de exibição de cada uma, então ordenar as chaves dele resolve os
+   dois sem duas fontes de verdade. */
+const outrosEstilos = Object.keys(ESTILOS)
+  .filter((e) => e !== site.estilo)
+  .sort();
 
 /**
  * Os três artigos de exemplo, na forma que o GradeArtigos (catálogo N2) espera.
@@ -105,6 +115,46 @@ const artigosParaGrade: ItemDeGrade[] = ARTIGOS.map((a) => ({
       <h2 class="b-h2">Últimos artigos</h2>
       <GradeArtigos artigos={artigosParaGrade} />
     </section>
+
+    {/*
+      ANDAIME DO CHASSI — nasce nesta seção visível (não só em comentário, e
+      não só em DEV como o roteiro lá em cima) porque sem link nenhum para
+      /bancada/ e /exemplo/<estilo>/ hoje só se chega ali digitando a URL, e
+      as duas existem exatamente para o participante descobrir o que o
+      chassi oferece antes de escrever. O aviso de "apague ao publicar" fica
+      no próprio texto, visível, pela mesma razão: quem só lê o código-fonte
+      no editor não vê comentário nenhum na página publicada.
+    */}
+    <section class="andaime">
+      <p class="andaime-selo">Andaime do chassi — apague esta seção quando publicar</p>
+      <h2 class="b-h2">As duas vitrines deste chassi</h2>
+      <p class="b-p">
+        As duas páginas abaixo não são conteúdo do seu site: são ferramenta de quem
+        ainda está escrevendo o site, e não têm por que sobreviver à publicação.
+      </p>
+      <div class="andaime-grade">
+        <a class="b-card andaime-cartao" href="/bancada/">
+          <b>Bancada</b>
+          <span>Responde: quais blocos existem, e qual é a regra de cada um.</span>
+        </a>
+        <a class="b-card andaime-cartao" href={`/exemplo/${site.estilo}/`}>
+          <b>Exemplo — tema {ESTILOS[site.estilo]?.nome ?? site.estilo}</b>
+          <span>Responde: como o mesmo texto fica em cada um dos cinco estilos.</span>
+        </a>
+      </div>
+      {outrosEstilos.length > 0 && (
+        <p class="andaime-outros">
+          Os outros estilos, para comparar antes de escolher:{" "}
+          {outrosEstilos.map((e, i) => (
+            <>
+              {i > 0 && ", "}
+              <a href={`/exemplo/${e}/`}>{ESTILOS[e].nome}</a>
+            </>
+          ))}
+          .
+        </p>
+      )}
+    </section>
   </div>
 </Artigo>
 
@@ -154,4 +204,37 @@ const artigosParaGrade: ItemDeGrade[] = ARTIGOS.map((a) => ({
     padding: 15px 17px; text-decoration: none; color: var(--b-tinta); font-size: 14px;
   }
   .cartao span { color: var(--b-tinta-2); font-size: 12.5px; }
+
+  /* Borda tracejada é a mesma linguagem do `.roteiro` lá em cima: sinaliza
+     "isto é andaime", mesmo esta seção sobrevivendo ao build de produção
+     (o roteiro não sobrevive — ver o `import.meta.env.DEV` dele). */
+  .andaime {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 20px 20px;
+    border: 1px dashed var(--b-linha-forte);
+    border-radius: var(--b-radius);
+    background: var(--b-superficie);
+  }
+  .andaime-selo {
+    margin: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-acento-tinta);
+  }
+  .andaime-grade {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .andaime-cartao {
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 15px 17px; text-decoration: none; color: var(--b-tinta); font-size: 14px;
+  }
+  .andaime-cartao span { color: var(--b-tinta-2); font-size: 12.5px; }
+  .andaime-outros { margin: 0; font-size: 13px; color: var(--b-tinta-2); }
+  .andaime-outros a { color: var(--b-acento-tinta); }
 </style>
