@@ -32,6 +32,13 @@ Vitest 3.
 - O bloco 19 continua aceitando figura **sem** `src`: marcador é estado de
   prévia, não erro. Só `src` presente e inválido quebra.
 - Rodar `cd web && npm test && npm run build` antes de cada commit.
+- **`git add` é sempre seletivo, nunca varredura.** Nomeie cada caminho que
+  você mesmo editou. Nunca `git add -A`, `git add .`, `git add <diretório>`
+  nem `git commit -a`, mesmo quando o `git status` parece ter só as suas
+  mudanças. Antes de commitar, rode `git status --porcelain` e compare com a
+  lista do que você tocou; o que não for seu fica de fora e é relatado.
+- `sharp` já é dependência declarada do projeto — entrou com o card social.
+  O passo que gera a imagem do acervo pode usá-la direto, sem instalar nada.
 
 ---
 
@@ -231,7 +238,8 @@ e rodar de novo. Registrar no arquivo o motivo de ele existir.
 - [ ] **Passo 6: commitar**
 
 ```bash
-git add web/src/imagens.ts web/src/imagens.test.ts web/src/imagens/ web/vitest.config.ts
+git add web/src/imagens.ts web/src/imagens.test.ts \
+  web/src/imagens/exemplo/medicao.png web/vitest.config.ts
 git commit -m "feat(imagens): acervo varrido, com src inexistente e medida errada quebrando a build"
 ```
 
