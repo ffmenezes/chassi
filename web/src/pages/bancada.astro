@@ -167,7 +167,7 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
         <Fragment slot="b6"><CitacaoDestacada texto={m.destaque} /></Fragment>
         <Fragment slot="b7"><CitacaoFonte {...m.citacao} /></Fragment>
         <Fragment slot="b8">
-          <Checklist rotulo="Antes de trocar qualquer equipamento" itens={m.checklist} />
+          <Checklist rotulo="Antes de trocar qualquer equipamento" itens={m.checklist} especime />
         </Fragment>
         <Fragment slot="b9"><Faq itens={m.faq} /></Fragment>
         <Fragment slot="b10"><Fechamento paragrafos={m.fechamento} /></Fragment>
@@ -203,8 +203,8 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
         <Fragment slot="b23"><Calculadora {...m.calculadora} /></Fragment>
         <Fragment slot="b24"><OfertaIsca {...m.ofertaIsca} /></Fragment>
         <Fragment slot="b25"><Newsletter site="bancada" /></Fragment>
-        <Fragment slot="b11"><Enquete {...m.enquete} /></Fragment>
-        <Fragment slot="b12"><Avaliacao /></Fragment>
+        <Fragment slot="b11"><Enquete {...m.enquete} especime /></Fragment>
+        <Fragment slot="b12"><Avaliacao especime /></Fragment>
         <Fragment slot="b13">
           <Carrossel rotulo="Como medir o pico, passo a passo" slides={m.carrossel} />
         </Fragment>
