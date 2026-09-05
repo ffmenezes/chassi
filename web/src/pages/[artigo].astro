@@ -97,12 +97,19 @@ const temSumario = h2DoSumario >= 4;
 const urlDoArtigo = `https://${site.dominio}/${artigo.slug}/`;
 ---
 
+{/* Duas renderizações do MESMO título, e é de propósito: o `<title>` leva a
+    marca porque é o que serve a aba do navegador e o resultado de busca; o
+    `og:title` (`tituloSocial`) leva o título cru, porque `og:site_name` já
+    diz a marca uma vez e o PNG em `/social/<slug>.png` desenha exatamente
+    este valor. Repetir a marca no card é a marca aparecendo três vezes no
+    mesmo compartilhamento. */}
 <Artigo
   site={site}
   titulo={`${artigo.titulo} — ${site.nome}`}
   descricao={artigo.descricao}
   tipo="article"
   imagemCard={`/social/${artigo.slug}.png`}
+  tituloSocial={artigo.titulo}
 >
   <div class="colunas">
     <article class="artigo b-regua-lados">

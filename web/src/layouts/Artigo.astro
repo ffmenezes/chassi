@@ -27,8 +27,10 @@ interface Props {
   tipo?: "website" | "article";
   /** Caminho do card desta pagina. O padrao serve as institucionais. */
   imagemCard?: string;
+  /** O título do card, SEM a marca. Ausente, o `titulo` serve. Ver `Base.astro`. */
+  tituloSocial?: string;
 }
-const { site, titulo, descricao, modo, noindex, tipo, imagemCard } = Astro.props;
+const { site, titulo, descricao, modo, noindex, tipo, imagemCard, tituloSocial } = Astro.props;
 const modoAtual = modo ?? site.modoPadrao;
 const desvio = cssDoSite(site);
 ---
@@ -36,7 +38,7 @@ const desvio = cssDoSite(site);
 {/* `site` chega até o `Base` para o <Analytics> montar o script do adaptador
     ativo — sem isto nenhuma página que usa este layout mede nada, mesmo
     quando o site declara `analytics`. */}
-<Base titulo={titulo} descricao={descricao} noindex={noindex} site={site} tipo={tipo} imagemCard={imagemCard}>
+<Base titulo={titulo} descricao={descricao} noindex={noindex} site={site} tipo={tipo} imagemCard={imagemCard} tituloSocial={tituloSocial}>
   {desvio && <style set:html={desvio} />}
   <div class="pagina" data-estilo={site.estilo} data-modo={modoAtual} data-site={site.slug}>
     <slot />

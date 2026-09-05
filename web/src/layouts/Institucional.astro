@@ -25,12 +25,14 @@ interface Props {
   tipo?: "website" | "article";
   /** Caminho do card desta pagina. O padrao serve as institucionais. */
   imagemCard?: string;
+  /** O título do card, SEM a marca. Ausente, o `titulo` serve. Ver `Base.astro`. */
+  tituloSocial?: string;
 }
-const { site, titulo, atualizado, tipo, imagemCard } = Astro.props;
+const { site, titulo, atualizado, tipo, imagemCard, tituloSocial } = Astro.props;
 const desvio = cssDoSite(site);
 ---
 
-<Base titulo={`${titulo} — ${site.nome}`} descricao={titulo} site={site} tipo={tipo} imagemCard={imagemCard}>
+<Base titulo={`${titulo} — ${site.nome}`} descricao={titulo} site={site} tipo={tipo} imagemCard={imagemCard} tituloSocial={tituloSocial}>
   {desvio && <style set:html={desvio} />}
   <div class="pagina" data-estilo={site.estilo} data-modo={site.modoPadrao} data-site={site.slug}>
     <main class="institucional">

@@ -10,7 +10,7 @@ import Rodape from "../components/Rodape.astro";
 import Consentimento from "../components/Consentimento.astro";
 import type { Site } from "../sites/tipos";
 import { LANG_HTML } from "../idioma";
-import { urlAbsoluta } from "../url";
+import { tagsSociais } from "../social/tags";
 
 interface Props {
   titulo: string;
@@ -24,16 +24,34 @@ interface Props {
   tipo?: "website" | "article";
   /** Caminho do card desta pagina. O padrao serve as institucionais. */
   imagemCard?: string;
+  /**
+   * O título do card, SEM a marca. O `<title>` leva a marca de propósito —
+   * é o que serve a aba do navegador e o resultado de busca —, mas `og:title`
+   * não: `og:site_name` já diz a marca, e o PNG do card desenha o título cru.
+   * Um valor, duas renderizações. Padrão: o próprio `titulo`.
+   */
+  tituloSocial?: string;
 }
 const {
   titulo, descricao, lang = LANG_HTML, noindex = false, site,
-  tipo = "website", imagemCard = "/social/padrao.png",
+  tipo = "website", imagemCard = "/social/padrao.png", tituloSocial = titulo,
 } = Astro.props;
-const url = site ? urlAbsoluta(site, Astro.url.pathname) : null;
 
+/* A DECISÃO — se esta página se anuncia, e com o quê — mora em
+   `social/tags.ts`, onde um teste consegue fixá-la. Aqui só se mapeia dado
+   para elemento. */
+const social = tagsSociais({
+  site, caminho: Astro.url.pathname, titulo: tituloSocial,
+  descricao, noindex, tipo, imagemCard,
+});
+
+/* `encodeURIComponent` porque o emoji agora é do participante, e não mais uma
+   constante nossa: `#️⃣` começa com `#`, que dentro de um data URI abre
+   fragmento e engole o resto do SVG — a aba ficaria sem ícone nenhum, sem
+   erro nenhum, e ninguém descobriria por quê. */
 const iconeEmoji = (e: string) =>
   `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'>` +
-  `<text y='14' font-size='14'>${e}</text></svg>`;
+  `<text y='14' font-size='14'>${encodeURIComponent(e)}</text></svg>`;
 ---
 <!doctype html>
 <html lang={lang}>
@@ -54,22 +72,14 @@ const iconeEmoji = (e: string) =>
     <title>{titulo}</title>
     {descricao && <meta name="description" content={descricao} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
-    {/* Canonical e OG so existem quando ha site: a bancada e a vitrine de
-        estilo nao sao site, nao tem dominio, e nao se anunciam. Em pagina
-        noindex tambem nao sai nada — pagina de servico nao se anuncia. */}
-    {site && url && !noindex && (
-      <>
-        <link rel="canonical" href={url} />
-        <meta property="og:type" content={tipo} />
-        <meta property="og:title" content={titulo} />
-        {descricao && <meta property="og:description" content={descricao} />}
-        <meta property="og:url" content={url} />
-        <meta property="og:site_name" content={site.nome} />
-        <meta property="og:image" content={urlAbsoluta(site, imagemCard)} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </>
+    {social.map((t) =>
+      t.tag === "link" ? (
+        <link rel={t.rel} href={t.href} />
+      ) : t.atributo === "property" ? (
+        <meta property={t.nome} content={t.conteudo} />
+      ) : (
+        <meta name={t.nome} content={t.conteudo} />
+      ),
     )}
     {site?.icone && (
       <link rel="icon" href={iconeEmoji(site.icone)} />
