@@ -63,6 +63,20 @@ ul[class], ol[class] { list-style: none; margin: 0; padding: 0; }
 
 :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 3px; }
 
+/* Fica FORA de `@layer contrato` de propósito, e não é descuido: uma regra
+   dentro de camada perde para QUALQUER regra sem camada, mesmo com
+   especificidade menor — é assim que cascata de `@layer` funciona, e é por
+   isso que esta linha não pode morar junto das outras declarações de
+   `[data-estilo]`, lá embaixo, ainda que fale do mesmo elemento.
+   Auditoria confirmou no navegador (getComputedStyle): com a regra dentro da
+   camada, `outline-color` nunca chegava a vencer — o anel de foco saía
+   sempre com `currentColor`, a cor do próprio texto, nunca `--b-acento-tinta`.
+   Aqui fora, sem camada, `[data-estilo] :focus-visible` (mais específico que
+   o `:focus-visible` isolado acima) vence pelas regras normais de
+   especificidade — e SEM camada nenhuma dos dois lados, especificidade volta
+   a valer. */
+[data-estilo] :focus-visible { outline-color: var(--b-acento-tinta); }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -150,5 +164,9 @@ ul[class], ol[class] { list-style: none; margin: 0; padding: 0; }
   font-family: var(--b-fonte-corpo);
 }
 
-[data-estilo] :focus-visible { outline-color: var(--b-acento-tinta); }
+/* O `outline-color` de `:focus-visible` NÃO mora aqui — mora sem camada,
+   logo depois do reset em `:focus-visible`, no topo do arquivo. Dentro da
+   camada ele nunca venceria (ver o comentário lá). `background`, `color` e
+   `font-family` acima continuam aqui porque nada fora de camada disputa esse
+   mesmo seletor: medido no navegador, os três chegam ao elemento. */
 }
