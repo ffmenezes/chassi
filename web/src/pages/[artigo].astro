@@ -97,7 +97,13 @@ const temSumario = h2DoSumario >= 4;
 const urlDoArtigo = `https://${site.dominio}/${artigo.slug}/`;
 ---
 
-<Artigo site={site} titulo={`${artigo.titulo} — ${site.nome}`} descricao={artigo.descricao}>
+<Artigo
+  site={site}
+  titulo={`${artigo.titulo} — ${site.nome}`}
+  descricao={artigo.descricao}
+  tipo="article"
+  imagemCard={`/social/${artigo.slug}.png`}
+>
   <div class="colunas">
     <article class="artigo b-regua-lados">
       {/* N5 — mede este <article>, nunca o documento inteiro. É por isso que

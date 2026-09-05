@@ -10,6 +10,7 @@ import Rodape from "../components/Rodape.astro";
 import Consentimento from "../components/Consentimento.astro";
 import type { Site } from "../sites/tipos";
 import { LANG_HTML } from "../idioma";
+import { urlAbsoluta } from "../url";
 
 interface Props {
   titulo: string;
@@ -19,8 +20,20 @@ interface Props {
   noindex?: boolean;
   /** Ausente na bancada, de propósito: espécime não é site, e não mede nada. */
   site?: Site;
+  /** Artigo ou pagina. Decide o og:type. */
+  tipo?: "website" | "article";
+  /** Caminho do card desta pagina. O padrao serve as institucionais. */
+  imagemCard?: string;
 }
-const { titulo, descricao, lang = LANG_HTML, noindex = false, site } = Astro.props;
+const {
+  titulo, descricao, lang = LANG_HTML, noindex = false, site,
+  tipo = "website", imagemCard = "/social/padrao.png",
+} = Astro.props;
+const url = site ? urlAbsoluta(site, Astro.url.pathname) : null;
+
+const iconeEmoji = (e: string) =>
+  `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'>` +
+  `<text y='14' font-size='14'>${e}</text></svg>`;
 ---
 <!doctype html>
 <html lang={lang}>
@@ -41,7 +54,27 @@ const { titulo, descricao, lang = LANG_HTML, noindex = false, site } = Astro.pro
     <title>{titulo}</title>
     {descricao && <meta name="description" content={descricao} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🧱</text></svg>" />
+    {/* Canonical e OG so existem quando ha site: a bancada e a vitrine de
+        estilo nao sao site, nao tem dominio, e nao se anunciam. Em pagina
+        noindex tambem nao sai nada — pagina de servico nao se anuncia. */}
+    {site && url && !noindex && (
+      <>
+        <link rel="canonical" href={url} />
+        <meta property="og:type" content={tipo} />
+        <meta property="og:title" content={titulo} />
+        {descricao && <meta property="og:description" content={descricao} />}
+        <meta property="og:url" content={url} />
+        <meta property="og:site_name" content={site.nome} />
+        <meta property="og:image" content={urlAbsoluta(site, imagemCard)} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </>
+    )}
+    {site?.icone && (
+      <link rel="icon" href={iconeEmoji(site.icone)} />
+    )}
+    {!site && <link rel="icon" href={iconeEmoji("🧱")} />}
     {site && <Analytics site={site} />}
   </head>
   <body>

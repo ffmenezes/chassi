@@ -21,12 +21,16 @@ interface Props {
   titulo: string;
   /** ISO `YYYY-MM-DD`. Dia de calendário, nunca instante — mesma regra do resto do site. */
   atualizado: string;
+  /** Artigo ou pagina. Decide o og:type. */
+  tipo?: "website" | "article";
+  /** Caminho do card desta pagina. O padrao serve as institucionais. */
+  imagemCard?: string;
 }
-const { site, titulo, atualizado } = Astro.props;
+const { site, titulo, atualizado, tipo, imagemCard } = Astro.props;
 const desvio = cssDoSite(site);
 ---
 
-<Base titulo={`${titulo} — ${site.nome}`} descricao={titulo} site={site}>
+<Base titulo={`${titulo} — ${site.nome}`} descricao={titulo} site={site} tipo={tipo} imagemCard={imagemCard}>
   {desvio && <style set:html={desvio} />}
   <div class="pagina" data-estilo={site.estilo} data-modo={site.modoPadrao} data-site={site.slug}>
     <main class="institucional">

@@ -81,6 +81,10 @@ const site: Site = {
   emailContato: "contato@exemplo.com.br",
   responsavel: { nome: "Seu Nome", tipo: "pf" },
 
+  // O emoji da aba. Sem ele, o site nasce sem favicon — e isso e melhor que
+  // herdar o tijolo do chassi.
+  // icone: "📡",
+
   // "nenhum" é o padrão de toda porta: o site builda e publica sem conta
   // nenhuma configurada. Troque quando tiver o identificador em mãos.
   analytics: "nenhum",

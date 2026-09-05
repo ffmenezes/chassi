@@ -100,6 +100,12 @@ export interface Site {
   /** Conta do AdSense. Ausente = o slot de anúncio não renderiza nada. */
   adsenseId?: string;
   /**
+   * O emoji do favicon. Ausente, NENHUMA tag de icone sai — em vez de
+   * carimbar a marca do template na aba do leitor de outra pessoa. O tijolo
+   * do chassi vale so onde nao ha site: bancada e vitrine de estilo.
+   */
+  icone?: string;
+  /**
    * Recado curto e passageiro no topo de toda página: aviso, evento,
    * promoção, mudança de regra. Ausente = a barra não existe no HTML —
    * clonar o chassi não pode herdar propaganda de ninguém por engano.
