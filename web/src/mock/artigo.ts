@@ -26,6 +26,7 @@ import type { Props as CamposCompartilhar } from "../components/blocos/Compartil
 import type { Passo } from "../components/blocos/Passos.astro";
 import type { ItemVerificacao } from "../components/blocos/Verificacao.astro";
 import type { Autor } from "../autor";
+import type { Props as CamposQuiz } from "../components/blocos/Quiz.astro";
 
 export const abertura = {
   cena: "Às seis e vinte da manhã a chamada de vídeo travou sozinha e o roteador piscou três vezes na sala.",
@@ -592,3 +593,163 @@ export const verificacao: ItemVerificacao[] = [
   },
 ];
 
+/** Bloco 30 — Quiz em modo DIAGNÓSTICO. Sem resposta certa: cada opção tem um
+ *  peso, a soma cai numa faixa. Os pesos vão de -2 a 18, e é exatamente esse
+ *  alcance que as quatro faixas cobrem — a trava de `validarQuiz` recusaria
+ *  qualquer buraco ou sobreposição entre elas. */
+export const quizDiagnostico: CamposQuiz = {
+  id: "quiz-rede",
+  titulo: "Quão exposta está a sua rede de casa?",
+  descricao:
+    "Cinco perguntas sobre o que já foi mexido no seu roteador. Nenhuma tem resposta certa — o que muda é o quanto cada escolha protege ou expõe.",
+  modo: "diagnostico",
+  perguntas: [
+    {
+      id: "origem",
+      enunciado: "De onde veio o roteador que está na sua casa?",
+      tipo: "unica",
+      opcoes: [
+        { texto: "Veio do provedor e nunca foi mexido", peso: 0 },
+        { texto: "Veio do provedor, mas eu reconfigurei", peso: 2 },
+        { texto: "Comprei e configurei eu mesmo", peso: 3 },
+      ],
+    },
+    {
+      id: "cuidados",
+      enunciado: "O que você já fez no aparelho?",
+      tipo: "multipla",
+      opcoes: [
+        { texto: "Troquei a senha de administrador", peso: 2 },
+        { texto: "Desliguei o WPS", peso: 2 },
+        { texto: "Atualizei o firmware nos últimos 12 meses", peso: 2 },
+        { texto: "Deixei o acesso remoto ligado", peso: -2 },
+      ],
+    },
+    {
+      id: "firmware",
+      enunciado: "Firmware desatualizado é problema de segurança, não só de desempenho.",
+      tipo: "vf",
+      opcoes: [{ peso: 2 }, { peso: 0 }],
+    },
+    {
+      id: "visitas",
+      enunciado: "Quanta gente sabe a senha do seu Wi-Fi hoje?",
+      tipo: "escala",
+      escala: {
+        min: 0,
+        max: 4,
+        ancoraMin: "meio bairro",
+        ancoraMax: "só quem mora aqui",
+      },
+    },
+    {
+      id: "senha",
+      enunciado: "Que senha protege a rede agora?",
+      tipo: "unica",
+      opcoes: [
+        { texto: "A que veio impressa na etiqueta", peso: 0 },
+        { texto: "Uma que eu criei, curta", peso: 1 },
+        { texto: "Uma frase longa, só minha", peso: 3 },
+      ],
+    },
+  ],
+  faixas: [
+    {
+      de: -2,
+      ate: 4,
+      titulo: "Aberta",
+      texto:
+        "A rede está como saiu da caixa, e é assim que o vizinho entra sem precisar de nenhuma habilidade especial.",
+    },
+    {
+      de: 5,
+      ate: 10,
+      titulo: "Frouxa",
+      texto: "Você mexeu no básico, mas sobrou pelo menos uma porta aberta por padrão de fábrica.",
+    },
+    {
+      de: 11,
+      ate: 15,
+      titulo: "Razoável",
+      texto: "O essencial está fechado. O que falta é rotina: firmware e senha envelhecem.",
+    },
+    {
+      de: 16,
+      ate: 18,
+      titulo: "Fechada",
+      texto: "Nada aqui é padrão de fábrica. Dá para dormir tranquilo e revisar uma vez por ano.",
+    },
+  ],
+};
+
+/** Bloco 30 — Quiz em modo PROVA. Cada pergunta tem gabarito, e o gabarito
+ *  exige porquê e fonte com ano: afirmar que uma resposta é a certa é afirmar
+ *  um fato. As fontes abaixo são do mesmo universo fictício do resto deste
+ *  arquivo (o roteador XR-420 já citado no mock de Verificação) — dado de
+ *  exemplo não afirma fato do mundo real. */
+export const quizProva: CamposQuiz = {
+  id: "quiz-xr420",
+  titulo: "O que ficou do que você leu",
+  descricao:
+    "Três perguntas sobre a ficha técnica que este artigo auditou. Cada resposta traz o porquê e a fonte, apareça você acertando ou errando.",
+  modo: "prova",
+  perguntas: [
+    {
+      id: "portas",
+      enunciado: "Todas as quatro portas LAN do XR-420 entregam 2,5 Gbps.",
+      tipo: "vf",
+      correta: 1,
+      porque:
+        "Só a porta 1 é de 2,5 Gbps; as outras três são de 1 Gbps, e a caixa do produto não deixa isso claro.",
+      fonte: "Ficha técnica do fabricante, modelo XR-420, revisão de 06/2026",
+    },
+    {
+      id: "qos",
+      enunciado: "Onde se configura o QoS por dispositivo neste roteador?",
+      tipo: "unica",
+      opcoes: [
+        { texto: "Na interface web do roteador" },
+        { texto: "Só pelo aplicativo do fabricante" },
+        { texto: "Por linha de comando, via SSH" },
+      ],
+      correta: 1,
+      porque:
+        "O QoS existe e funciona, mas a opção não aparece na interface web — só no aplicativo, o que amarra a configuração a uma conta.",
+      fonte: "Manual do usuário, seção 4.2, edição impressa que acompanha a caixa, 2026",
+    },
+    {
+      id: "pico",
+      enunciado: "Quais medições servem para comparar com o Mbps da sua fatura?",
+      tipo: "multipla",
+      opcoes: [
+        { texto: "O valor mais alto registrado em 10 minutos" },
+        { texto: "A média do período inteiro" },
+        { texto: "O pico com todos os aparelhos de casa ativos ao mesmo tempo" },
+      ],
+      correta: [0, 2],
+      porque:
+        "A média esconde exatamente o momento em que a rede cai: o que precisa caber dentro do link contratado é o pico, não o repouso.",
+      fonte: "Metodologia de medição descrita neste artigo, seção de aferição, 2026",
+    },
+  ],
+  faixas: [
+    {
+      de: 0,
+      ate: 0,
+      titulo: "Nada ficou",
+      texto: "Vale reler a seção da ficha técnica — as três respostas estão lá, com a fonte.",
+    },
+    {
+      de: 1,
+      ate: 2,
+      titulo: "Ficou o essencial",
+      texto: "Você pegou o principal. O que escapou está explicado na pergunta que errou.",
+    },
+    {
+      de: 3,
+      ate: 3,
+      titulo: "Ficou tudo",
+      texto: "As três certas, incluindo a de múltipla escolha, que só conta com o conjunto exato.",
+    },
+  ],
+};

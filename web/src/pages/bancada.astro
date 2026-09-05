@@ -50,6 +50,7 @@ import Compartilhar from "../components/blocos/Compartilhar.astro";
 import Passos from "../components/blocos/Passos.astro";
 import Verificacao from "../components/blocos/Verificacao.astro";
 import Slides from "../components/blocos/Slides.astro";
+import Quiz from "../components/blocos/Quiz.astro";
 
 import * as m from "../mock/artigo";
 
@@ -235,6 +236,23 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
               conferir de um olhar que o de texto e o de imagem têm a mesma
               altura, os mesmos controles e a mesma posição escrita */}
           <Slides rotulo="Por que o pico derruba a chamada" slides={m.slides} />
+        </Fragment>
+        <Fragment slot="b30">
+          {/* os dois modos no mesmo palco, que é o único lugar onde dá para
+              comparar de um olhar o que muda entre eles: o diagnóstico não
+              tem gabarito nenhum, e a prova traz o porquê e a fonte em toda
+              pergunta. Estados diferentes do mesmo bloco não se conferem em
+              páginas separadas. */}
+          <div style="display:flex;flex-direction:column;gap:26px">
+            <div>
+              <p class="b-rotulo">Modo diagnóstico — peso por opção, sem resposta certa</p>
+              <Quiz {...m.quizDiagnostico} />
+            </div>
+            <div>
+              <p class="b-rotulo">Modo prova — gabarito com porquê e fonte em cada pergunta</p>
+              <Quiz {...m.quizProva} />
+            </div>
+          </div>
         </Fragment>
         <Fragment slot="bn1">
           <Paginacao total={9} atual={2} href={(p) => `#p${p}`} />

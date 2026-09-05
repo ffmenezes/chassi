@@ -16,7 +16,7 @@
 export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
-  | 26 | 27 | 28 | 29
+  | 26 | 27 | 28 | 29 | 30
   | "N1" | "N2" | "N3" | "N4" | "N5"
   | "A1" | "A2" | "A3";
 
@@ -112,6 +112,16 @@ export const CATALOGO: readonly Bloco[] = [
   // e é o navegador que rola o trilho, sem um script sequer. O JS do arquivo é
   // enriquecimento declarado, não dependência.
   { id: 29, estado: "ativo", nome: "Slides", regra: "Um slide por vez esconde conteúdo por desenho, então todos nascem no HTML e cada um funciona sozinho: título próprio e a posição em texto (\"2 de 5\"), nunca só um ponto aceso. Avança e retrocede só por gesto do leitor — sem autoplay, e sem laço: o último não volta ao primeiro. Slide é texto OU imagem, nunca os dois; o texto usa a tipografia base e nada mais. Teto de 10, e acima disso é artigo escondido dentro de um carrossel." },
+  // 30 é ATIVO, e a régua é a mesma que separou 23 de 24: bloco ativo é bloco
+  // cuja dependência está no ar. A dele é JavaScript no cliente, e só — sem
+  // endpoint, sem conta, sem env var. É por isso que ele NÃO pede e-mail e não
+  // esconde o resultado: as faixas precisam estar no HTML inicial de qualquer
+  // forma (crawler não roda JS), então um muro sobre elas seria um
+  // `display:none` que Ctrl+U atravessa. Muro de e-mail é assunto do 17 e do
+  // 24, cada um com o endpoint e o consentimento próprios, e nenhum dos dois
+  // no meio do artigo. O trilho é o do bloco 29, pela mesma razão escrita lá:
+  // slide fora da vez tem posição, nunca supressão.
+  { id: 30, estado: "ativo", nome: "Quiz", regra: "Um modo por quiz: diagnóstico (peso por opção, sem resposta certa) ou prova (gabarito). Na prova, afirmar que uma resposta é a certa é afirmar um fato, então cada gabarito traz o porquê e a fonte com ano, ou a build quebra — e escala não entra em prova, porque escala não tem resposta certa. As faixas cobrem do piso ao teto possível, sem buraco e sem sobreposição: quiz que pode terminar em \"nenhuma faixa\" não nasce. Não pede e-mail, não esconde resultado e não manda resposta a lugar nenhum. Sem JavaScript, faltam só a soma e a faixa apontada — todo o resto, gabarito e faixas inclusive, está no HTML inicial." },
   { id: "N1", estado: "navegacao", nome: "Paginação", regra: "URL própria por página, canônica apontando para ela mesma, sem noindex, e link é <a href>." },
   { id: "N2", estado: "navegacao", nome: "Card de artigo", regra: "Título de feed, description do meta.md, dateModified visível. O que está no grid não conta como link tecido." },
   { id: "N3", estado: "navegacao", nome: "Toast de aviso", regra: "Resposta a uma ação do leitor, nada mais. Toast com número não existe. Erro se diz por inteiro e não some sozinho." },

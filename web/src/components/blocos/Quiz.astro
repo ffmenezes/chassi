@@ -1,0 +1,589 @@
+---
+/** Bloco 30 — Quiz.
+ *
+ * Perguntas com resultado calculado no fim. Um quiz tem um modo só:
+ * `diagnostico` (peso por opção, sem resposta certa) ou `prova` (gabarito).
+ * A conta, os tipos e as travas moram em `src/quiz.ts`, separados daqui pelo
+ * mesmo motivo que `calculo.ts` é separado de `Calculadora.astro`: trava presa
+ * no frontmatter de um `.astro` não tem como falhar num teste, e trava sem
+ * teste que discrimina é confiança falsa.
+ *
+ * ## O que este bloco NÃO faz
+ *
+ * Não pede e-mail, não esconde o resultado atrás de cadastro e não manda a
+ * resposta de ninguém para lugar nenhum — nem por trás de guarda, como a
+ * Enquete (11) faz com `CAMINHOS.enquete`. Aqui não existe caminho de API
+ * declarado, e é de propósito.
+ *
+ * Isso não é gosto: é o que três regras vizinhas do catálogo já dizem, e a
+ * quarta razão é técnica. O bloco 11 diz "voto não fica atrás de e-mail"; o
+ * 23 diz que a calculadora "não pede e-mail, não esconde resultado"; o 17 diz
+ * que "o muro de e-mail fica aqui, nunca no artigo". E o motivo técnico: as
+ * faixas de resultado PRECISAM estar no HTML inicial, porque crawler de IA não
+ * roda JavaScript e porque quem lê sem JS não teria resultado nenhum. Um muro
+ * sobre um texto que já está no HTML é um `display: none` que qualquer Ctrl+U
+ * atravessa — muro que não é muro, com o custo de um cadastro de verdade.
+ *
+ * Se um dia a captura de e-mail entrar aqui, ela precisa de duas coisas que
+ * este repositório não tem: uma Function que receba o endereço (hoje só existe
+ * `functions/api/contato.ts`) e uma decisão explícita de abrir exceção às
+ * regras dos blocos 11, 17 e 23. Nenhuma prop foi deixada pronta esperando por
+ * isso, e nenhuma linha aqui finge que o caminho existe: prop que ninguém
+ * exercita nasce quebrada, e comentário que promete "funciona quando ligado"
+ * é o defeito que `analytics/posthog.ts` já cometeu uma vez.
+ *
+ * ## Uma pergunta por tela, sem suprimir nenhuma
+ *
+ * O trilho é o do bloco 29 (Slides), e a razão de ser o mesmo está escrita
+ * lá: mostrar um por vez é esconder conteúdo por desenho, então o que os
+ * slides fora da vez têm é POSIÇÃO — estão ao lado, fora da janela de
+ * rolagem —, nunca `display: none`. Suprimir tiraria as perguntas da árvore
+ * de acessibilidade e as deixaria fora do alcance de quem lê sem enxergar.
+ * Aqui isso pesa ainda mais que num deck de texto: um quiz cujas perguntas
+ * somem é um quiz que não dá para responder.
+ *
+ * Os controles são âncoras — `<a href="#quiz-p3">` —, e quem rola o trilho é
+ * o navegador, sem um script sequer. Como uma âncora sozinha não sabe onde o
+ * leitor está, cada slide carrega o próprio par de controles, apontando para
+ * os vizinhos dele. O último aponta para o resultado, que fica FORA do trilho:
+ * ele não é uma pergunta, e quem chega ao fim precisa vê-lo junto com as
+ * faixas, não deslizando ao lado delas.
+ *
+ * ## Sem JavaScript
+ *
+ * Tudo o que é conteúdo está no HTML inicial: enunciados, opções, e — na prova
+ * — o gabarito com o porquê e a fonte de cada resposta, mais TODAS as faixas
+ * de resultado com o alcance de pontos de cada uma. Sem JS o leitor responde
+ * pelos rádios e caixas nativos, anda pelo trilho pelos mesmos controles (ou
+ * arrastando, no dedo) e lê as faixas para se situar; o que ele não recebe é a
+ * soma calculada, e a frase visível no fim do bloco diz exatamente isso, sem
+ * usar verbo que prometa mais.
+ *
+ * ## O que o `<script>` acrescenta
+ *
+ * Quatro coisas, e nenhuma delas é conteúdo:
+ *
+ *  1. **Soma e faixa.** É a única coisa que não existe sem ele.
+ *  2. **Rolar sem escrever a âncora na URL** (e sem o pulinho vertical que o
+ *     navegador dá para trazer o alvo ao campo de visão). É por isso que, com
+ *     JS, o botão Voltar continua saindo da página em vez de percorrer
+ *     pergunta a pergunta: sem script cada âncora empilha uma entrada de
+ *     histórico, e com script não empilha nenhuma. O script melhora o Voltar;
+ *     ele não é o que faz a navegação existir.
+ *  3. **O gabarito só depois de responder.** Na prova, o gabarito nasce
+ *     VISÍVEL no HTML e o script o recolhe ao carregar, devolvendo-o quando a
+ *     pergunta é respondida. Nessa ordem, e não na contrária: quem está sem JS
+ *     fica com um quiz de livro aberto, que ainda ensina, em vez de um quiz
+ *     cujas respostas nunca aparecem. O recolhimento usa o atributo `hidden`,
+ *     que some da árvore de acessibilidade junto com a tela — leitor de tela
+ *     não deve receber o gabarito antes de quem enxerga. É a única supressão
+ *     do bloco, e ela recai sobre o que o script mesmo devolve.
+ *  4. **Memória entre visitas.** As respostas ficam no `localStorage` junto
+ *     com `versaoDe(perguntas)`. Versão diferente, respostas descartadas: o
+ *     que foi guardado é um índice, e índice só quer dizer algo contra a lista
+ *     que estava na tela naquele dia. É a mesma doutrina de `avisoBarra.ts`,
+ *     que guarda o texto fechado e não um booleano.
+ *
+ * Nenhuma cor carrega significado sozinha: a posição vive escrita em cada
+ * slide ("Pergunta 3 de 6"), a faixa alcançada leva o rótulo "sua faixa" em
+ * texto, e o acerto e o erro se dizem por escrito no gabarito — a regra do
+ * bloco 28.
+ */
+import {
+  validarQuiz,
+  opcoesDe,
+  extremos,
+  versaoDe,
+  type FaixaQuiz,
+  type ModoQuiz,
+  type PerguntaQuiz,
+} from "../../quiz";
+
+export interface Props {
+  /** Único na página: prefixa toda âncora e todo `name` deste quiz. */
+  id: string;
+  titulo: string;
+  /** Uma frase dizendo o que o quiz responde. Não é metadiscurso do artigo. */
+  descricao: string;
+  modo: ModoQuiz;
+  perguntas: PerguntaQuiz[];
+  faixas: FaixaQuiz[];
+}
+const { id, titulo, descricao, modo, perguntas, faixas } = Astro.props;
+
+validarQuiz({ modo, perguntas, faixas });
+
+const versao = versaoDe(perguntas);
+const total = perguntas.length;
+const { min, max } = extremos(perguntas, modo);
+
+const alvo = (sufixo: string) => `${id}-${sufixo}`;
+const alvoResultado = alvo("resultado");
+
+/** Quantas perguntas exigem escolha para o resultado existir. A múltipla fica
+ *  de fora: "não marquei nenhuma" é resposta possível nela, e é
+ *  indistinguível de "ainda não cheguei aqui". */
+const obrigatorias = perguntas.filter((p) => p.tipo !== "multipla").length;
+
+const unidade = modo === "prova" ? "acerto" : "ponto";
+const alcanceDe = (f: FaixaQuiz) =>
+  f.de === f.ate
+    ? `${f.de} ${f.de === 1 ? unidade : unidade + "s"}`
+    : `de ${f.de} a ${f.ate} ${unidade}s`;
+
+const textoDasCorretas = (p: PerguntaQuiz): string => {
+  const opcoes = opcoesDe(p);
+  const alvos = Array.isArray(p.correta) ? p.correta : [p.correta as number];
+  return alvos.map((i) => opcoes[i]?.texto ?? "").join(" e ");
+};
+
+const dados = JSON.stringify({ modo, perguntas, faixas });
+---
+
+<section
+  class="b-card quiz"
+  id={id}
+  data-quiz
+  data-modo={modo}
+  data-versao={versao}
+  data-obrigatorias={obrigatorias}
+  data-dados={dados}
+>
+  <p class="b-rotulo">{modo === "prova" ? "Quiz" : "Diagnóstico"}</p>
+  <h3 class="titulo">{titulo}</h3>
+  <p class="desc">{descricao}</p>
+
+  <p class="n regra">
+    {
+      modo === "prova"
+        ? `${total} perguntas com resposta certa. Cada acerto vale um ponto, e o porquê de cada resposta fica na própria pergunta, com a fonte.`
+        : `${total} perguntas sem resposta certa. Cada opção tem um peso, e a soma cai numa das ${faixas.length} faixas abaixo — de ${min} a ${max} pontos.`
+    }
+  </p>
+
+  {/* `div`, e nao `form`: este bloco nunca submete nada a lugar nenhum,
+      e um formulario de verdade aqui prometeria um envio que nao
+      existe. `fieldset` fora de formulario e valido, e continua
+      agrupando a pergunta para leitor de tela. */}
+  <div class="trilho" data-trilho>
+    {
+      perguntas.map((p, i) => (
+        <fieldset class="slide" id={alvo(p.id)} data-pergunta={p.id} data-tipo={p.tipo}>
+          <legend class="legenda">
+            <span class="contador">
+              Pergunta {i + 1} de {total}
+            </span>
+            <span class="enunciado">{p.enunciado}</span>
+          </legend>
+
+          {p.tipo === "escala" && p.escala ? (
+            <div class="escala">
+              <span class="ancora">{p.escala.ancoraMin}</span>
+              <div class="degraus">
+                {Array.from(
+                  { length: p.escala.max - p.escala.min + 1 },
+                  (_, k) => p.escala!.min + k,
+                ).map((valor) => (
+                  <label class="degrau">
+                    <input type="radio" name={alvo(p.id)} value={String(valor)} />
+                    <span>{valor}</span>
+                  </label>
+                ))}
+              </div>
+              <span class="ancora">{p.escala.ancoraMax}</span>
+            </div>
+          ) : (
+            <div class="opcoes">
+              {opcoesDe(p).map((o, k) => (
+                <label class="opcao">
+                  <input
+                    type={p.tipo === "multipla" ? "checkbox" : "radio"}
+                    name={alvo(p.id)}
+                    value={String(k)}
+                  />
+                  <span>{o.texto}</span>
+                </label>
+              ))}
+              {p.tipo === "multipla" && (
+                <p class="n dica">Marque quantas valerem. Nenhuma também é resposta.</p>
+              )}
+            </div>
+          )}
+
+          {modo === "prova" && (
+            /* Nasce visível: sem JS, o gabarito é o que faz a prova ensinar
+               alguma coisa. O script o recolhe ao carregar e o devolve quando
+               a pergunta é respondida — ver o comentário do frontmatter. */
+            <div class="gabarito" data-gabarito>
+              <p class="g-linha">
+                <b>Resposta correta:</b> {textoDasCorretas(p)}
+              </p>
+              <p class="g-porque">{p.porque}</p>
+              <p class="g-fonte">Fonte: {p.fonte}</p>
+              <p class="g-sua" data-sua hidden />
+            </div>
+          )}
+
+          {/* Cada slide carrega o próprio par de controles, apontando para os
+              vizinhos dele: âncora sozinha não sabe onde o leitor está. Sem
+              "anterior" no primeiro e sem "próxima" além do último — a mesma
+              recusa de laço do bloco 29. */}
+          <p class="nav">
+            {i > 0 && (
+              <a class="passo" href={`#${alvo(perguntas[i - 1].id)}`} data-passo>
+                ← anterior
+              </a>
+            )}
+            <a
+              class="passo adiante"
+              href={i < total - 1 ? `#${alvo(perguntas[i + 1].id)}` : `#${alvoResultado}`}
+              data-passo
+            >
+              {i < total - 1 ? "próxima →" : "ver o resultado →"}
+            </a>
+          </p>
+        </fieldset>
+      ))
+    }
+  </div>
+
+  <div class="resultado" id={alvoResultado} data-resultado>
+    <p class="b-rotulo">Resultado</p>
+
+    <p class="n pendente" data-pendente hidden aria-live="polite"></p>
+    <p class="soma" data-soma hidden aria-live="polite"></p>
+
+    <ol class="faixas">
+      {
+        faixas.map((f) => (
+          <li class="faixa" data-faixa data-de={f.de} data-ate={f.ate}>
+            <p class="f-cab">
+              <b class="f-titulo">{f.titulo}</b>
+              <span class="f-alcance">{alcanceDe(f)}</span>
+              <span class="f-sua" data-sua hidden>
+                sua faixa
+              </span>
+            </p>
+            <p class="f-texto">{f.texto}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="n sem-js" data-sem-js>
+      Com JavaScript, esta caixa soma as suas respostas e aponta a sua faixa. Sem ele, a soma não
+      é calculada — e é por isso que as faixas estão todas aqui, com o alcance de pontos de cada
+      uma. Nada foi escondido, e nada do que você responde sai deste navegador.
+    </p>
+  </div>
+</section>
+
+<style>
+  .quiz { padding: 20px 22px; max-width: var(--b-medida); }
+
+  .titulo { margin: 6px 0 0; font-family: var(--b-fonte-titulo); font-size: 20px; color: var(--b-tinta); }
+  .desc { margin: 6px 0 0; color: var(--b-corpo); font-size: 15px; line-height: 1.6; }
+
+  .n {
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--b-tinta-2);
+  }
+  .regra { margin: 12px 0 0; }
+
+  /* O trilho: uma pergunta por tela, e as outras AO LADO — nunca suprimidas.
+     Não há uma única regra de `display` neste bloco fora do `[hidden]` que o
+     contrato já resolve; o que tira um slide da vista é posição de rolagem, e
+     é isso que o mantém na árvore de acessibilidade e no HTML que o crawler
+     lê. Ver o bloco 29, de onde esta escolha vem. */
+  .trilho {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 12px;
+    margin: 16px 0 0;
+    padding: 0 0 6px;
+    border: 0;
+    /* o trilho é rolável, então precisa ser alcançável por teclado */
+    scrollbar-width: thin;
+  }
+  .trilho:focus-visible { outline: 2px solid var(--b-acento-tinta); outline-offset: 3px; }
+
+  .slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    padding: 16px 18px 14px;
+    margin: 0;
+    background: var(--b-superficie);
+  }
+
+  .legenda { padding: 0; }
+  .contador {
+    display: block;
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: uppercase;
+    color: var(--b-tinta-2);
+  }
+  .enunciado {
+    display: block;
+    margin-top: 5px;
+    color: var(--b-tinta);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  .opcoes { display: flex; flex-direction: column; gap: 8px; margin: 13px 0 0; }
+  .opcao {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 13px;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    cursor: pointer;
+    color: var(--b-corpo);
+    line-height: 1.45;
+  }
+  .opcao:hover { border-color: var(--b-acento); }
+  .opcao:focus-within { outline: 2px solid var(--b-acento-tinta); outline-offset: 2px; }
+  input { accent-color: var(--b-acento); flex-shrink: 0; }
+  .dica { margin: 2px 0 0; }
+
+  .escala { display: flex; align-items: center; gap: 12px; margin: 15px 0 0; flex-wrap: wrap; }
+  .ancora { font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2); }
+  .degraus { display: flex; gap: 6px; flex: 1 1 auto; justify-content: center; }
+  .degrau {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 11px;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    cursor: pointer;
+    color: var(--b-corpo);
+    font-family: var(--b-fonte-meta);
+    font-size: 13px;
+  }
+  .degrau:hover { border-color: var(--b-acento); }
+  .degrau:focus-within { outline: 2px solid var(--b-acento-tinta); outline-offset: 2px; }
+
+  .gabarito {
+    margin: 13px 0 0;
+    padding: 11px 13px;
+    border-left: 3px solid var(--b-acento);
+    background: var(--b-acento-fraco);
+    border-radius: var(--b-radius);
+  }
+  .g-linha { margin: 0; color: var(--b-tinta); font-size: 14px; line-height: 1.5; }
+  .g-porque { margin: 5px 0 0; color: var(--b-corpo); font-size: 13.5px; line-height: 1.6; }
+  .g-fonte {
+    margin: 5px 0 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    color: var(--b-tinta-2);
+  }
+  .g-sua { margin: 6px 0 0; font-size: 13.5px; color: var(--b-tinta); font-weight: 600; }
+  .g-sua[data-errou] { color: var(--b-erro); }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 14px 0 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+  }
+  .passo { color: var(--b-acento-tinta); text-decoration: none; border-bottom: 1px solid transparent; }
+  .passo:hover, .passo:focus-visible { border-bottom-color: var(--b-acento); }
+  .adiante { margin-left: auto; }
+
+  .resultado {
+    margin: 16px 0 0;
+    padding: 16px 18px;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    background: var(--b-superficie);
+  }
+  .soma {
+    margin: 8px 0 0;
+    font-family: var(--b-fonte-titulo);
+    font-size: 19px;
+    color: var(--b-tinta);
+  }
+  .pendente { margin: 8px 0 0; }
+
+  .faixas { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .faixa { padding: 11px 13px; border: var(--b-borda); border-radius: var(--b-radius); }
+  .faixa[data-alcancada] { border-color: var(--b-acento); background: var(--b-acento-fraco); }
+  .f-cab { display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; margin: 0; }
+  .f-titulo { color: var(--b-tinta); font-size: 15px; }
+  .f-alcance { font-family: var(--b-fonte-meta); font-size: 11.5px; color: var(--b-tinta-2); }
+  .f-sua {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--b-acento);
+    color: var(--b-sobre-acento);
+    font-family: var(--b-fonte-meta);
+    font-size: 10.5px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: uppercase;
+  }
+  .f-texto { margin: 5px 0 0; color: var(--b-corpo); font-size: 13.5px; line-height: 1.6; }
+
+  .sem-js { margin: 13px 0 0; }
+
+  /* Quem pediu menos movimento não deve receber rolagem animada. */
+  @media (prefers-reduced-motion: reduce) {
+    .trilho { scroll-behavior: auto; }
+  }
+</style>
+
+<script>
+  import { pontuar, faixaDe, opcoesDe, type QuizDeclarado, type RespostasQuiz } from "../../quiz";
+
+  /* Melhoria progressiva. Sem este script o quiz continua inteiro: as
+     perguntas se respondem nos campos nativos, o trilho anda pelas mesmas
+     âncoras (é o navegador que rola, não o JS), o gabarito da prova fica
+     visível e as faixas estão todas na tela com o alcance de pontos de cada
+     uma. O que NÃO existe sem ele é a soma — e a frase `[data-sem-js]`, que só
+     some quando este arquivo roda, é quem diz isso ao leitor. Ver o comentário
+     do frontmatter. */
+
+  for (const quiz of document.querySelectorAll<HTMLElement>("[data-quiz]")) {
+    const decl: QuizDeclarado = JSON.parse(quiz.dataset.dados ?? "null");
+    if (!decl) continue;
+
+    const versao = quiz.dataset.versao ?? "";
+    const obrigatorias = Number(quiz.dataset.obrigatorias ?? "0");
+    const slides = [...quiz.querySelectorAll<HTMLElement>(".slide")];
+    const pendente = quiz.querySelector<HTMLElement>("[data-pendente]")!;
+    const soma = quiz.querySelector<HTMLElement>("[data-soma]")!;
+    const semJs = quiz.querySelector<HTMLElement>("[data-sem-js]")!;
+    const chave = "quiz:" + location.pathname + ":" + quiz.id;
+
+    /* A soma passa a existir, então a frase sobre a ausência dela sai. */
+    semJs.hidden = true;
+
+    /* Rolar sem escrever a âncora na URL: é o que impede o botão Voltar de
+       virar um desfazer de pergunta em pergunta. Sem este trecho as mesmas
+       âncoras continuam funcionando — é o navegador que rola o trilho. */
+    for (const link of quiz.querySelectorAll<HTMLAnchorElement>("[data-passo]")) {
+      link.addEventListener("click", (ev) => {
+        const destino = quiz.querySelector<HTMLElement>(
+          "#" + CSS.escape(link.getAttribute("href")!.slice(1)),
+        );
+        if (!destino) return;
+        ev.preventDefault();
+        destino.scrollIntoView({ block: "nearest", inline: "nearest" });
+      });
+    }
+
+    /* Na prova o gabarito nasce visível no HTML — para quem está sem script —
+       e é aqui, e só aqui, que ele recolhe. */
+    for (const g of quiz.querySelectorAll<HTMLElement>("[data-gabarito]")) g.hidden = true;
+
+    const lerRespostas = (): RespostasQuiz => {
+      const r: RespostasQuiz = {};
+      for (const slide of slides) {
+        const campos = [...slide.querySelectorAll<HTMLInputElement>("input")];
+        r[slide.dataset.pergunta!] = campos.filter((c) => c.checked).map((c) => Number(c.value));
+      }
+      return r;
+    };
+
+    const respondidas = (r: RespostasQuiz) =>
+      decl.perguntas.filter((p) => p.tipo !== "multipla" && (r[p.id] ?? []).length > 0).length;
+
+    const plural = (n: number, um: string, muitos: string) => (n === 1 ? um : muitos);
+
+    const apurar = () => {
+      const r = lerRespostas();
+      const feitas = respondidas(r);
+
+      for (const slide of slides) {
+        const p = decl.perguntas.find((x) => x.id === slide.dataset.pergunta);
+        const gabarito = slide.querySelector<HTMLElement>("[data-gabarito]");
+        if (!p || !gabarito) continue;
+        const marcados = r[p.id] ?? [];
+        gabarito.hidden = marcados.length === 0;
+        const sua = gabarito.querySelector<HTMLElement>("[data-sua]")!;
+        if (marcados.length === 0) {
+          sua.hidden = true;
+          continue;
+        }
+        // acerto e erro se dizem por escrito, nunca só pela cor da caixa
+        const acertou = pontuar([p], "prova", { [p.id]: marcados }) === 1;
+        const opcoes = opcoesDe(p);
+        const escolhido = marcados.map((i) => opcoes[i]?.texto ?? "").join(" e ");
+        sua.textContent = acertou
+          ? `Você marcou ${escolhido}. Acertou.`
+          : `Você marcou ${escolhido}. Errou.`;
+        sua.toggleAttribute("data-errou", !acertou);
+        sua.hidden = false;
+      }
+
+      const faltam = obrigatorias - feitas;
+      const completo = faltam <= 0;
+      pendente.hidden = completo;
+      soma.hidden = !completo;
+      if (!completo) {
+        pendente.textContent = `Falta${plural(faltam, "", "m")} ${faltam} ${plural(
+          faltam,
+          "pergunta",
+          "perguntas",
+        )} para o resultado sair.`;
+      }
+
+      const valor = pontuar(decl.perguntas, decl.modo, r);
+      const alcancada = completo ? faixaDe(decl.faixas, valor) : null;
+      if (completo) {
+        soma.textContent =
+          decl.modo === "prova"
+            ? `${valor} de ${decl.perguntas.length} ${plural(decl.perguntas.length, "acerto", "acertos")}.`
+            : `${valor} ${plural(valor, "ponto", "pontos")}.`;
+      }
+
+      for (const li of quiz.querySelectorAll<HTMLElement>("[data-faixa]")) {
+        const marca = li.querySelector<HTMLElement>("[data-sua]")!;
+        const eh =
+          alcancada !== null &&
+          Number(li.dataset.de) === alcancada.de &&
+          Number(li.dataset.ate) === alcancada.ate;
+        li.toggleAttribute("data-alcancada", eh);
+        marca.hidden = !eh;
+      }
+
+      try {
+        localStorage.setItem(chave, JSON.stringify({ versao, respostas: r }));
+      } catch {}
+    };
+
+    /* Respostas guardadas valem para a versão do quiz em que foram dadas. O
+       que ficou salvo é um índice, e trocar a ordem das perguntas ou o peso de
+       uma opção faz esse índice apontar para outra coisa — por isso a versão
+       viaja junto e uma versão diferente descarta tudo, em vez de mostrar um
+       resultado que ninguém respondeu. Mesma doutrina de `avisoBarra.ts`. */
+    try {
+      const salvo = JSON.parse(localStorage.getItem(chave) ?? "null");
+      if (salvo && salvo.versao === versao) {
+        for (const slide of slides) {
+          const marcados: number[] = salvo.respostas?.[slide.dataset.pergunta!] ?? [];
+          for (const campo of slide.querySelectorAll<HTMLInputElement>("input"))
+            campo.checked = marcados.includes(Number(campo.value));
+        }
+      }
+    } catch {}
+
+    quiz.addEventListener("change", apurar);
+    apurar();
+  }
+</script>
