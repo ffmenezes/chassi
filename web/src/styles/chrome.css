@@ -159,7 +159,6 @@ body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 
 }
 .indice-caixa a:hover { background: var(--c-bench); color: var(--c-ink); }
 .indice-caixa a .n { font-family: var(--c-mono); font-size: 11px; color: var(--c-dim); min-width: 20px; }
-.indice-caixa a[data-fora="1"] { opacity: .38; }
 
 /* ---------- seção de bloco ---------- */
 .blocos { display: flex; flex-direction: column; gap: calc(var(--c-sp) * 4); min-width: 0; }
@@ -185,18 +184,8 @@ body.bancada :focus-visible { outline: 2px solid var(--c-mark); outline-offset: 
 .chip[data-estado="navegacao"] { border: 1px solid var(--c-rule); color: var(--c-ink-2); }
 /* átomo: forma própria, porque ele não é escolhido — a prosa usa e pronto */
 .chip[data-estado="atomo"] { border: 1px solid var(--c-mark); color: var(--c-mark); }
-.chip[data-fora] { border: 1px solid var(--c-rule); color: var(--c-dim); background: var(--c-bench); }
-
 .palco { border: 1px solid var(--c-rule); border-radius: 12px; overflow: hidden; }
 .palco > [data-estilo] { padding: clamp(20px, 4vw, 40px); }
-.bloco[data-suportado="nao"] .palco { display: none; }
-
-.sem-suporte {
-  border: 1px dashed var(--c-rule); border-radius: 10px;
-  padding: calc(var(--c-sp) * 3); background: var(--c-paper);
-  color: var(--c-dim); font-size: 13.5px;
-}
-.bloco[data-suportado="sim"] .sem-suporte { display: none; }
 
 /* ---------- rodapé ---------- */
 .estender { background: var(--c-paper); border-top: 1px solid var(--c-rule); padding: calc(var(--c-sp) * 6) 0; }

@@ -10,24 +10,18 @@ import { blocoPorId, estadoDe, numeroDe, ROTULO_ESTADO } from "../catalogo";
 import type { BlocoId } from "../catalogo";
 import type { Estilo, Modo } from "../sites";
 
-interface Props { id: BlocoId; estilo: Estilo; modo: Modo; suportado: boolean }
-const { id, estilo, modo, suportado } = Astro.props;
+interface Props { id: BlocoId; estilo: Estilo; modo: Modo }
+const { id, estilo, modo } = Astro.props;
 const bloco = blocoPorId(id);
 const estado = estadoDe(id);
 const ancora = `b${String(id).toLowerCase()}`;
 ---
 
-<section
-  class="bloco"
-  id={ancora}
-  data-bloco={String(id)}
-  data-suportado={suportado ? "sim" : "nao"}
->
+<section class="bloco" id={ancora} data-bloco={String(id)}>
   <div class="bloco-cab">
     <span class="bloco-n">{numeroDe(id)}</span>
     <h2 class="bloco-nome">{bloco.nome}</h2>
     <span class="chip" data-estado={estado}>{ROTULO_ESTADO[estado]}</span>
-    <span class="chip" data-fora hidden={suportado}>fora deste estilo</span>
     <p class="bloco-regra">{bloco.regra}</p>
   </div>
 
@@ -36,12 +30,4 @@ const ancora = `b${String(id).toLowerCase()}`;
       <slot />
     </div>
   </div>
-
-  <p class="sem-suporte">
-    Este site não monta o bloco. Ele continua no catálogo: para ativá-lo,
-    acrescente <code>{typeof id === "string" ? `"${id}"` : id}</code> em{" "}
-    <code>blocos</code>, no arquivo do site em{" "}
-    <code>src/sites/&lt;slug&gt;.ts</code> — nunca em <code>src/sites/index.ts</code>,
-    que só varre e valida.
-  </p>
 </section>
