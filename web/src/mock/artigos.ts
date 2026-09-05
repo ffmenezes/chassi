@@ -143,9 +143,9 @@ export const ARTIGOS: DadosArtigo[] = [
         dados: {
           papel: "prova",
           src: "exemplo/medicao.png",
-          alt: "Gráfico de barras com três colunas crescentes, a terceira bem mais alta que as duas primeiras",
-          legenda: "Ilustração do salto entre consumo médio e pico simultâneo, o problema desta seção.",
-          fonte: "Fonte e data fictícias — ilustração de exemplo, 07/2026.",
+          alt: "Gráfico de barras sem eixos nem rótulos: três colunas crescentes sobre uma linha de base, a terceira quase três vezes a altura da primeira",
+          legenda: "Consumo médio, pico de um aparelho e pico simultâneo: é a terceira barra que passa do link contratado, e é dela que trata esta seção.",
+          fonte: "Fonte e data fictícias — medição de exemplo, 07/2026.",
         } satisfies CamposFigura,
       },
       { tipo: "titulo", nivel: 2, id: "s2", texto: "O que muda quando você reordena os aparelhos" },
