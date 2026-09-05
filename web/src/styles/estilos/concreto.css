@@ -22,6 +22,16 @@
      A cor vem de graça: neste tema `--b-linha` já é a tinta cheia. */
   --b-regua-peso: 2px;
   --b-regua-vao: 0px;
+
+  /* lista de certificado: quadrado em vez de disco (nada redondo sobra na
+     borda de 2px), e numeração com zero à esquerda — "01, 02, 03" lê como
+     item de checklist carimbado, que é a voz deste tema. Recuo e vão maiores
+     porque a fonte de meta é monoespaçada e "01." pesa mais que "1.". */
+  --b-lista-marcador: square;
+  --b-lista-marcador-num: decimal-leading-zero;
+  --b-lista-recuo: 1.5em;
+  --b-lista-vao: 10px;
+  --b-lista-recuo-aninhado: 1.3em;
 }
 }
 

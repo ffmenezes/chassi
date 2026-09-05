@@ -22,6 +22,14 @@
   --b-esquina: 7px;
   position: relative;
   isolation: isolate;
+
+  /* lista sobre aurora: o marcador é o mesmo brilho pontual que a aurora
+     espalha atrás do vidro, não um disco opaco. Recuo e vão mais largos
+     porque a superfície inteira já respira largo, com blur e cantos de 18px. */
+  --b-lista-marcador: "✦ ";
+  --b-lista-recuo: 1.5em;
+  --b-lista-vao: 11px;
+  --b-lista-recuo-aninhado: 1.3em;
 }
 }
 

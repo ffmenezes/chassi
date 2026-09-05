@@ -117,6 +117,18 @@ ul[class], ol[class] { list-style: none; margin: 0; padding: 0; }
   --b-regua-vao: 4px;
   /* a cruzinha onde duas réguas se encontram. 0 desliga. */
   --b-esquina: 0px;
+
+  /* AS LISTAS — lista é forma (A2 do catálogo), e por isso mora aqui e não
+     em `atomos.css` com valor fixo. A cor do marcador continua na camada de
+     modo, saindo de `--b-acento-tinta`, que já varia por estilo e modo — os
+     quatro tokens abaixo não tocam cor.
+     Os valores aqui são os de hoje: quem não redefinir não muda nada. */
+  --b-lista-marcador: disc;
+  --b-lista-marcador-num: decimal;
+  --b-lista-recuo: 1.35em;
+  --b-lista-vao: 7px;
+  /* dois níveis é o teto (ver `atomos.css`): só o segundo nível tem recuo próprio */
+  --b-lista-recuo-aninhado: 1.2em;
 }
 
 /* A superfície do estilo. Fundo explícito sempre: superfície transparente

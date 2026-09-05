@@ -20,6 +20,14 @@
   --b-regua-traco: 4px;
   --b-regua-vao: 4px;
   --b-esquina: 7px;
+
+  /* lista de esquema técnico: o marcador é um traço, não um ponto — a mesma
+     ideia da régua tracejada, só que dentro do texto. Recuo maior porque o
+     traço com o espaço embutido é mais largo que um disco. */
+  --b-lista-marcador: "– ";
+  --b-lista-recuo: 1.5em;
+  --b-lista-vao: 8px;
+  --b-lista-recuo-aninhado: 1.3em;
 }
 }
 

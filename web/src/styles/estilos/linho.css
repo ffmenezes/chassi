@@ -18,6 +18,13 @@
   /* linha sólida de um pixel, e nenhuma cruz: este tema é a voz do Não Pague
      Luz, e planta baixa ali transformaria o artigo em documentação técnica. */
   --b-regua-vao: 0px;
+
+  /* lista de jornal: disco cheio, sem enfeite, e um respiro maior entre
+     itens — o mesmo ar que sobra no canvas creme. Nada de documentação
+     técnica aqui também, então o marcador numerado fica no decimal simples. */
+  --b-lista-recuo: 1.3em;
+  --b-lista-vao: 9px;
+  --b-lista-recuo-aninhado: 1.15em;
 }
 }
 

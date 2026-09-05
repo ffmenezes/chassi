@@ -342,23 +342,25 @@
 .b-lista,
 .b-lista-num {
   margin: 0 0 14px;
-  padding-left: 1.35em;
+  padding-left: var(--b-lista-recuo);
   max-width: var(--b-medida);
   color: var(--b-corpo);
   line-height: 1.68;
   font-size: 16px;
 }
-.b-lista { list-style: disc; }
-.b-lista-num { list-style: decimal; }
+/* `list-style-type` e não o atalho `list-style`: o token pode carregar uma
+   string (marcador customizado), e o atalho nem sempre aceita isso. */
+.b-lista { list-style-type: var(--b-lista-marcador); }
+.b-lista-num { list-style-type: var(--b-lista-marcador-num); }
 .b-lista li,
-.b-lista-num li { margin-bottom: 7px; }
+.b-lista-num li { margin-bottom: var(--b-lista-vao); }
 .b-lista li:last-child,
 .b-lista-num li:last-child { margin-bottom: 0; }
 .b-lista li::marker,
 .b-lista-num li::marker { color: var(--b-acento-tinta); }
 /* dois níveis é o teto: o terceiro é seção mal dividida */
 .b-lista :is(ul, ol),
-.b-lista-num :is(ul, ol) { margin: 7px 0 0; padding-left: 1.2em; }
+.b-lista-num :is(ul, ol) { margin: var(--b-lista-vao) 0 0; padding-left: var(--b-lista-recuo-aninhado); }
 
 /* Glossário é <dl>, com o termo que o leitor procura no <dt>. */
 .b-glossario {

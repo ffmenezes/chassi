@@ -44,6 +44,14 @@
   --b-regua-peso: 1px;
   --b-regua-vao: 0px;
   --b-esquina: 0px;
+
+  /* lista densa, no espírito do feed: círculo vazado em vez de disco cheio —
+     é a mesma lógica do hairline, estrutura por contorno e não por peso — e
+     recuo/vão mais curtos, porque este sistema é compacto em toda parte. */
+  --b-lista-marcador: circle;
+  --b-lista-recuo: 1.15em;
+  --b-lista-vao: 6px;
+  --b-lista-recuo-aninhado: 1.05em;
 }
 }
 
