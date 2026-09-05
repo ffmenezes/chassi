@@ -1,6 +1,7 @@
 /**
  * O que o leitor copia com um clique — elo de título/seção, e também o texto
- * literal de um bloco de código (bloco 20). As duas cópias têm a mesma forma
+ * literal de um bloco de código (bloco 20), lido do próprio DOM no instante do
+ * clique, nunca pré-gravado num atributo. As duas cópias têm a mesma forma
  * (clique, retorno visual, aviso a leitor de tela, reverte sozinho depois de
  * `ESPERA`), então dividem o mesmo ouvinte delegado e o mesmo aviso — daí
  * `ligarCopia` servir os dois casos em vez de cada componente reimplementar
@@ -87,13 +88,21 @@ export function ligarCopia(): void {
     if (!navigator.clipboard) return;
 
     ev.preventDefault();
-    /* `data-copia-texto` é o texto LITERAL a copiar (o código do bloco 20).
-       Ausente, o elemento é elo de âncora — título ou cabeçalho — e o que se
-       copia é a URL da seção; o cabeçalho não tem href, e sem fragmento sai a
-       página limpa. */
-    const textoLiteral = alvo.dataset.copiaTexto;
+    /* `data-copia-alvo` é um seletor CSS, lido contra o `[data-copia-bloco]`
+       mais próximo: aponta o elemento cujo `textContent`, lido AGORA, é o
+       texto literal a copiar (o código do bloco 20). Não guardamos esse texto
+       num atributo: um atributo com o código inteiro dobraria o peso do bloco
+       no HTML, e `textContent` devolve o mesmo texto limpo mesmo que um
+       realce de sintaxe futuro envolva cada token em `<span>`.
+       Sem `data-copia-alvo`, o elemento é elo de âncora — título ou
+       cabeçalho — e o que se copia é a URL da seção; o cabeçalho não tem
+       href, e sem fragmento sai a página limpa. */
+    const seletorAlvo = alvo.dataset.copiaAlvo;
+    const elementoAlvo = seletorAlvo
+      ? alvo.closest<HTMLElement>("[data-copia-bloco]")?.querySelector<HTMLElement>(seletorAlvo)
+      : null;
     const href = alvo.getAttribute("href") ?? "";
-    const texto = textoLiteral !== undefined ? textoLiteral : urlDaAncora(href, location.href);
+    const texto = elementoAlvo ? elementoAlvo.textContent ?? "" : urlDaAncora(href, location.href);
 
     navigator.clipboard.writeText(texto).then(
       () => marcar(alvo),
@@ -104,7 +113,7 @@ export function ligarCopia(): void {
            é pior que não ter o botão. Devolve o comportamento de <a>.
            Texto literal não tem "para onde ir" — o botão do bloco de código
            fica calado, mesmo preço que o botão do cabeçalho já paga hoje. */
-        if (textoLiteral === undefined && href) location.hash = href;
+        if (!elementoAlvo && href) location.hash = href;
       },
     );
   });

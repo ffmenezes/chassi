@@ -16,6 +16,14 @@
  * e um que o terminal rejeita, e é isso que faz a regra valer a pena de
  * verdade, não só em revisão de PR.
  *
+ * O botão NÃO guarda o código num atributo (`data-copia-texto`, tentado e
+ * revertido): isso dobrava o peso deste bloco no HTML, que é exatamente o que
+ * `infra.md` proíbe pagar sem necessidade. `data-copia-alvo="code"` aponta o
+ * `<code>` logo abaixo, e `ligarCopia()` lê o `textContent` dele NO CLIQUE —
+ * o mesmo texto limpo que já está na página, sem segunda cópia. Um realce de
+ * sintaxe futuro (comentário abaixo) não muda nada aqui: `textContent` de um
+ * elemento com `<span>` dentro devolve o texto sem as tags do mesmo jeito.
+ *
  * JS de cliente, com justificativa: `ligarCopia()` (de `../../copiarLink`) é
  * melhoria progressiva pura — sem JS, ou sem `navigator.clipboard`, o botão
  * não aparece (a prop é `false`) ou aparece e não faz nada ao clicar, e o
@@ -60,7 +68,7 @@ if (comCifrao) {
 const texto = linhas.join("\n");
 ---
 
-<div class="codigo">
+<div class="codigo" data-copia-bloco>
   <div class="cab">
     <p class="b-rotulo rot">{rotulo}</p>
     {copiar && (
@@ -68,7 +76,7 @@ const texto = linhas.join("\n");
         type="button"
         class="copia"
         data-copia
-        data-copia-texto={texto}
+        data-copia-alvo="code"
         data-copia-antes="Copiar"
         data-copia-depois="Copiado"
         data-copia-anuncio="Código copiado."
