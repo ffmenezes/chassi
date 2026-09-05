@@ -1,16 +1,41 @@
 ---
 /** Bloco 3 — Sumário.
  * Gerado dos headings, nunca escrito à mão. Sai inline no celular e como
- * trilho fixo no desktop: nunca só no desktop, que é quem menos precisa. */
+ * trilho fixo no desktop: nunca só no desktop, que é quem menos precisa.
+ *
+ * UM <nav> só, sempre — nunca dois. `trilho` não desenha uma segunda cópia:
+ * ele liga, na MESMA marcação, o comportamento que faz essa cópia única virar
+ * a coluna fixa da leitura em tela larga (`position: sticky`, altura presa à
+ * janela, rolagem própria). Quem decide onde essa coluna existe no grid é a
+ * página (ver `.corpo-grade` em `pages/[artigo].astro`); o componente só
+ * decide o que ACONTECE com ele mesmo quando aquela coluna existir. Duas
+ * cópias no HTML — uma para o fluxo, outra para o trilho — é o que faz
+ * leitor de tela ler o mesmo sumário duas vezes, e é o defeito que esta
+ * versão fecha.
+ *
+ * `trilho` nasce DESLIGADO de propósito: a bancada mostra o bloco isolado
+ * numa caixa pequena (o "palco"), e a página inteira rola por trás dela — um
+ * `position: sticky` ligado ali faria esta nav grudar por cima dos blocos
+ * vizinhos ao rolar a página, não só a caixa dele. É o mesmo motivo que faz o
+ * bloco 5 (N5, barra de progresso) virar um mockup estático na bancada em vez
+ * do componente de verdade: ver o comentário ao lado do Palco "N5" em
+ * `pages/bancada.astro`. Um artigo de verdade é quem liga `trilho`. */
 export interface ItemSumario { texto: string; href: string; nivel?: 2 | 3 }
-interface Props { rotulo?: string; itens: ItemSumario[]; minimoH2?: number }
-const { rotulo = "Neste artigo", itens, minimoH2 = 4 } = Astro.props;
+interface Props {
+  rotulo?: string;
+  itens: ItemSumario[];
+  minimoH2?: number;
+  /** Liga o comportamento de trilho fixo em tela larga. Ver o comentário
+   *  acima — default `false` para não vazar dentro da bancada. */
+  trilho?: boolean;
+}
+const { rotulo = "Neste artigo", itens, minimoH2 = 4, trilho = false } = Astro.props;
 /* regra do slot: menos de quatro H2 e o sumário não nasce */
 const h2 = itens.filter((i) => (i.nivel ?? 2) === 2).length;
 const nasce = h2 >= minimoH2;
 ---
 {nasce && (
-  <nav class="b-card sumario" data-sumario aria-label={rotulo}>
+  <nav class:list={["b-card", "sumario", { trilho }]} data-sumario aria-label={rotulo}>
     <p class="b-rotulo">{rotulo}</p>
     <ol>
       {itens.map((i) => (
@@ -24,6 +49,22 @@ const nasce = h2 >= minimoH2;
 <style>
   .sumario { padding: 18px 20px; }
   ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+
+  /* O extra do bloco 3. 1180px é o mesmo ponto de corte da coluna do trilho
+     em `.corpo-grade` (pages/[artigo].astro) — os dois têm que mudar juntos,
+     porque um dá a coluna e o outro decide o que mora dentro dela. Sticky, e
+     não fixed: a página já entrega a coluna certa via grid, e sticky segue a
+     rolagem sem precisar calcular posição nenhuma na mão. A altura presa à
+     janela com rolagem própria evita que um sumário comprido empurre o
+     rodapé da página para fora enquanto tenta se manter visível. */
+  @media (min-width: 1180px) {
+    .sumario.trilho {
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+  }
   a { color: var(--b-tinta); text-decoration: none; border-bottom: 1px solid transparent; }
   a:hover { border-bottom-color: var(--b-acento); color: var(--b-acento-tinta); }
 

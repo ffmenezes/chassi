@@ -65,6 +65,13 @@ const sumario = artigo.slots.filter(ehTitulo).map((s) => ({
   href: `#${s.id}`,
   nivel: s.nivel,
 }));
+
+/* O mesmo gate de nascimento de Sumario.astro (menos de 4 H2 e ele não
+   nasce), replicado aqui só para decidir se a coluna do trilho existe no
+   grid abaixo. Divergir deste número do de lá não quebra nada — o sintoma
+   seria uma coluna vazia no desktop, nunca um sumário fantasma. */
+const h2DoSumario = sumario.filter((s) => (s.nivel ?? 2) === 2).length;
+const temSumario = h2DoSumario >= 4;
 ---
 
 <Artigo site={site} titulo={`${artigo.titulo} — ${site.nome}`} descricao={artigo.descricao}>
@@ -84,36 +91,46 @@ const sumario = artigo.slots.filter(ehTitulo).map((s) => ({
         <CaixaConclusoes rotulo={artigo.conclusoes.rotulo} itens={artigo.conclusoes.itens} />
       )}
 
-      <div class="sumario-inline"><Sumario itens={sumario} /></div>
+      {/* UM sumário só no HTML — nunca dois. No celular este bloco é só mais
+          um item da coluna, no fluxo, antes do corpo: "inline no celular",
+          como o catálogo exige. A partir de 1180px o CSS abaixo transforma
+          este mesmo elemento na segunda coluna do grid (`.corpo-grade`) e
+          `trilho` (em Sumario.astro) liga o sticky que o mantém visível
+          durante a rolagem — sem desenhar uma segunda nav em lugar nenhum. */}
+      <div class:list={["corpo-grade", { "com-sumario": temSumario }]}>
+        <Sumario itens={sumario} trilho />
 
-      {artigo.slots.map((s) => (
-        <>
-          {s.tipo === "titulo" && <Titulo nivel={s.nivel} id={s.id}>{s.texto}</Titulo>}
-          {s.tipo === "paragrafo" && <p class="b-p">{s.texto}</p>}
-          {s.tipo === "prosa" && <p class="b-p" set:html={s.html} />}
-          {s.tipo === "lista" && (
-            <ol class="b-lista-num">{s.itens.map((item) => <li>{item}</li>)}</ol>
-          )}
-          {s.tipo === "tabelaPanorama" && (
-            <TabelaPanorama colunas={s.colunas} linhas={s.linhas} fonte={s.fonte} />
-          )}
-          {s.tipo === "tabelaContraste" && (
-            <TabelaContraste colunas={s.colunas} linhas={s.linhas} fonte={s.fonte} />
-          )}
-          {s.tipo === "figura" && <Figura {...s.dados} />}
-          {s.tipo === "citacaoDestacada" && <CitacaoDestacada texto={s.texto} />}
-          {s.tipo === "citacaoFonte" && (
-            <CitacaoFonte texto={s.texto} nome={s.nome} papel={s.papel} conflito={s.conflito} />
-          )}
-          {s.tipo === "codigo" && <Codigo {...s.dados} />}
-          {s.tipo === "aviso" && <Aviso {...s.dados} />}
-          {s.tipo === "checklist" && <Checklist rotulo={s.rotulo} itens={s.itens} />}
-          {s.tipo === "faq" && <Faq itens={s.itens} />}
-          {s.tipo === "fechamento" && <Fechamento paragrafos={s.paragrafos} />}
-        </>
-      ))}
+        <div class="corpo">
+          {artigo.slots.map((s) => (
+            <>
+              {s.tipo === "titulo" && <Titulo nivel={s.nivel} id={s.id}>{s.texto}</Titulo>}
+              {s.tipo === "paragrafo" && <p class="b-p">{s.texto}</p>}
+              {s.tipo === "prosa" && <p class="b-p" set:html={s.html} />}
+              {s.tipo === "lista" && (
+                <ol class="b-lista-num">{s.itens.map((item) => <li>{item}</li>)}</ol>
+              )}
+              {s.tipo === "tabelaPanorama" && (
+                <TabelaPanorama colunas={s.colunas} linhas={s.linhas} fonte={s.fonte} />
+              )}
+              {s.tipo === "tabelaContraste" && (
+                <TabelaContraste colunas={s.colunas} linhas={s.linhas} fonte={s.fonte} />
+              )}
+              {s.tipo === "figura" && <Figura {...s.dados} />}
+              {s.tipo === "citacaoDestacada" && <CitacaoDestacada texto={s.texto} />}
+              {s.tipo === "citacaoFonte" && (
+                <CitacaoFonte texto={s.texto} nome={s.nome} papel={s.papel} conflito={s.conflito} />
+              )}
+              {s.tipo === "codigo" && <Codigo {...s.dados} />}
+              {s.tipo === "aviso" && <Aviso {...s.dados} />}
+              {s.tipo === "checklist" && <Checklist rotulo={s.rotulo} itens={s.itens} />}
+              {s.tipo === "faq" && <Faq itens={s.itens} />}
+              {s.tipo === "fechamento" && <Fechamento paragrafos={s.paragrafos} />}
+            </>
+          ))}
 
-      <AutorBloco autor={autor} variante="card" />
+          <AutorBloco autor={autor} variante="card" />
+        </div>
+      </div>
     </article>
   </div>
 </Artigo>
@@ -140,9 +157,32 @@ const sumario = artigo.slots.filter(ehTitulo).map((s) => ({
     gap: 26px;
   }
 
-  /* Inline é o mínimo que o bloco 3 exige, e aqui é também o único: sem
-     trilho fixo de desktop, porque esta página não é a bancada e uma coluna
-     de leitura só já cumpre a regra ("nunca só no desktop" não proíbe never
-     ter o trilho — proíbe ter SÓ o trilho). */
-  .sumario-inline { display: block; }
+  /* No celular o sumário é só mais um item desta coluna, no fluxo — o mínimo
+     que o bloco 3 exige. `.corpo` repete o mesmo gap de `.artigo`: para o
+     leitor a costura entre os dois é invisível, é só um wrapper para o
+     desktop conseguir tratar "sumário" e "corpo" como as duas colunas do
+     grid abaixo. */
+  .corpo-grade { display: flex; flex-direction: column; gap: 26px; }
+  .corpo { display: flex; flex-direction: column; gap: 26px; }
+
+  /* O extra do bloco 3: o trilho fixo do desktop, a partir de 1180px — mesmo
+     ponto de corte do `@media` em Sumario.astro, que decide o que acontece
+     DENTRO da coluna (sticky, altura, rolagem). Aqui só se abre a coluna: o
+     grid nasce apenas quando o sumário nasceu de verdade (`.com-sumario`),
+     senão o artigo continua de uma coluna só e não sobra gutter vazio.
+     `order` deixa a nav primeiro no DOM (cumprindo "antes do corpo" no
+     celular) e ainda assim desenhada à direita no desktop. */
+  @media (min-width: 1180px) {
+    .colunas { max-width: 1164px; }
+    .artigo { max-width: 1108px; }
+
+    .corpo-grade.com-sumario {
+      display: grid;
+      grid-template-columns: minmax(0, 836px) 232px;
+      column-gap: 40px;
+      align-items: start;
+    }
+    .corpo-grade.com-sumario > .corpo { order: 1; }
+    .corpo-grade.com-sumario > :global(nav.sumario) { order: 2; }
+  }
 </style>
