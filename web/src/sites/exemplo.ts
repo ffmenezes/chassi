@@ -13,11 +13,27 @@
  */
 import type { Site, BlocoId } from "./tipos";
 
-/** Os ativos: HTML que qualquer build entrega hoje. Os átomos vêm junto porque
- *  não se escolhe usá-los — a prosa usa. 26 (Compartilhar) fecha a lista,
- *  depois do card do autor: é o último ato do leitor que terminou o texto,
- *  não conteúdo do corpo. */
-const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, 26, "A1", "A2", "A3"];
+/**
+ * Blocos ATIVOS que este site monta — uma seleção deles, não todos: o catálogo
+ * tem ativo que este site de exemplo escolheu não montar (13 prateleira, 14
+ * card de rede social, 23 calculadora, 27 passos, 28 verificação), e essa
+ * escolha é o que a lista existe para registrar. Os átomos vêm junto porque
+ * não se escolhe usá-los — a prosa usa.
+ *
+ * A ordem é a do catálogo, com duas leituras dentro dela:
+ *
+ *   26 Compartilhar — DEPOIS do card do autor, fechando a lista: é o último
+ *                     ato do leitor que terminou o texto, não conteúdo do
+ *                     corpo.
+ *   29 Slides       — DENTRO, e no corpo. O deck é reforço do argumento, e
+ *                     por isso ele exige que exista argumento em volta: só o
+ *                     artigo-1 monta um, no meio da seção que ele percorre
+ *                     (ver `mock/artigos.ts`). Declarar aqui é o que faz
+ *                     `[artigo].astro` poder montá-lo — bloco fora desta
+ *                     lista não existe na página, e a recíproca também vale:
+ *                     declarar sem ter roteiro de slot é declaração inerte.
+ */
+const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, 26, 29, "A1", "A2", "A3"];
 
 /**
  * Navegação (N1–N5) é chrome de site, não conteúdo de artigo — por isso nunca

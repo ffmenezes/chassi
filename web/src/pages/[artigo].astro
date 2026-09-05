@@ -21,7 +21,7 @@
  * diferente sem este arquivo crescer um `if` por artigo.
  *
  * Os blocos usados aqui são exatamente os que `sites/exemplo.ts` declara em
- * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, 26, A1, A2, A3) mais a navegação que o
+ * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, 26, 29, A1, A2, A3) mais a navegação que o
  * site escolheu em `NAVEGACAO_DE_ARTIGO` (N2 e N5, com o porquê de cada um
  * dos cinco comentado lá) — bloco fora da lista do site não é montado nesta
  * página, pela mesma regra que vale para qualquer site do chassi. Por isso
@@ -42,6 +42,7 @@ import CaixaConclusoes from "../components/blocos/CaixaConclusoes.astro";
 import TabelaPanorama from "../components/blocos/TabelaPanorama.astro";
 import TabelaContraste from "../components/blocos/TabelaContraste.astro";
 import Figura from "../components/blocos/Figura.astro";
+import Slides from "../components/blocos/Slides.astro";
 import CitacaoDestacada from "../components/blocos/CitacaoDestacada.astro";
 import CitacaoFonte from "../components/blocos/CitacaoFonte.astro";
 import Codigo from "../components/blocos/Codigo.astro";
@@ -154,6 +155,13 @@ const urlDoArtigo = `https://${site.dominio}/${artigo.slug}/`;
               {s.tipo === "aviso" && <Aviso {...s.dados} />}
               {s.tipo === "checklist" && <Checklist rotulo={s.rotulo} itens={s.itens} />}
               {s.tipo === "faq" && <Faq itens={s.itens} />}
+              {/* O `id` sai do slug do artigo: dois decks na mesma página
+                  precisam de prefixos diferentes, senão os controles de um
+                  rolam o outro. Um artigo tem um deck só hoje, e o prefixo
+                  por slug é o que mantém isso verdadeiro se ganhar dois. */}
+              {s.tipo === "slides" && (
+                <Slides rotulo={s.rotulo} slides={s.slides} id={`deck-${artigo.slug}`} />
+              )}
               {s.tipo === "fechamento" && <Fechamento paragrafos={s.paragrafos} />}
             </>
           ))}

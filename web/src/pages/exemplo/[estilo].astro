@@ -42,6 +42,7 @@ import Aviso from "../../components/blocos/Aviso.astro";
 import Enquete from "../../components/blocos/Enquete.astro";
 import Avaliacao from "../../components/blocos/Avaliacao.astro";
 import Carrossel from "../../components/blocos/Carrossel.astro";
+import Slides from "../../components/blocos/Slides.astro";
 import CardRedeSocial from "../../components/blocos/CardRedeSocial.astro";
 import Audio from "../../components/blocos/Audio.astro";
 import Download from "../../components/blocos/Download.astro";
@@ -211,6 +212,13 @@ const sec = Object.fromEntries(m.secoes.map((x) => [x.id, x]));
 
         <Etiqueta bloco={13} nome="Carrossel" codigo="Carrossel.astro">
           <Carrossel rotulo="Rótulo do carrossel — sequência visual" slides={m.carrossel} />
+        </Etiqueta>
+
+        {/* 29 logo depois do 13 de propósito: lado a lado é onde fica óbvio
+            que prateleira e deck são peças diferentes — lá vários à vista de
+            uma vez, aqui um por vez com avançar e retroceder. */}
+        <Etiqueta bloco={29} nome="Slides — deck de um por vez" codigo="Slides.astro">
+          <Slides rotulo="Rótulo do deck — um slide por vez" slides={m.slides} id="exemplo-deck" />
         </Etiqueta>
 
         <Titulo nivel={3} id={sec.s2b.id}>{sec.s2b.texto}</Titulo>

@@ -27,6 +27,7 @@ import type { Celula } from "../components/blocos/_Tabela.astro";
 import type { ItemCheck } from "../components/blocos/Checklist.astro";
 import type { Pergunta } from "../components/blocos/Faq.astro";
 import type { Slide } from "../components/blocos/Carrossel.astro";
+import type { Slide as SlideDeDeck } from "../components/blocos/Slides.astro";
 import type { Artigo } from "../components/blocos/GradeArtigos.astro";
 import type { Comentario } from "../components/blocos/Comentarios.astro";
 import type { Autor } from "../autor";
@@ -227,6 +228,58 @@ export const carrossel: Slide[] = [
   { titulo: "Slide 3", legenda: "Ut labore et dolore magna aliqua, ut enim ad minim.", fig: "figura 3" },
   { titulo: "Slide 4", legenda: "Quis nostrud exercitation ullamco laboris nisi ut aliquip.", fig: "figura 4" },
 ];
+
+/**
+ * Bloco 29 — o deck, ao lado da prateleira (13) de propósito: no artigo de
+ * exemplo os dois aparecem em sequência, que é onde se vê que são peças
+ * diferentes e não duas versões da mesma.
+ *
+ * Como no resto deste arquivo, cada texto nomeia o próprio slot antes do
+ * lorem — e aqui isso tem função extra: "Título do slide 3" impresso na tela
+ * é o que prova, de olho, que cada slide funciona sozinho.
+ */
+export const slides: SlideDeDeck[] = [
+  {
+    tipo: "texto",
+    titulo: "Título do slide 1 — abre o deck",
+    paragrafos: [
+      "Parágrafo do slide — lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "Segundo parágrafo — ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+    ],
+  },
+  {
+    tipo: "texto",
+    titulo: "Título do slide 2 — com lista",
+    paragrafos: [
+      "Parágrafo antes da lista — duis aute irure dolor in reprehenderit in voluptate velit esse.",
+    ],
+    lista: [
+      "Item da lista — lorem ipsum dolor sit amet.",
+      "Segundo item — consectetur adipiscing elit, sed do eiusmod.",
+      "Terceiro item — tempor incididunt ut labore et dolore.",
+    ],
+  },
+  {
+    tipo: "imagem",
+    titulo: "Título do slide 3 — este é de imagem",
+    figura: {
+      papel: "prova",
+      alt: "Alt da figura — descreve o que está na imagem para quem não a vê, e nunca repete a legenda nem o título do slide.",
+      legenda: "Legenda — diz por que a imagem está aqui, e é a frase que funciona sozinha para quem só viu este slide.",
+      fonte: "Fonte e data — obrigatórias em prova, 09/08/2026.",
+      pendencia: "Pendência — o que ainda falta produzir para esta figura sair do estado de marcador.",
+    },
+  },
+  {
+    tipo: "texto",
+    titulo: "Título do slide 4 — fecha sem laço",
+    paragrafos: [
+      "Último parágrafo — excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.",
+      "Aqui o botão “Próximo” não existe, e é assim que o leitor sabe que o deck acabou em vez de recomeçar sem perceber.",
+    ],
+  },
+];
+
 
 export const social = {
   embed: {

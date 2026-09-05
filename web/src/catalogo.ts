@@ -16,7 +16,7 @@
 export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
-  | 26 | 27 | 28
+  | 26 | 27 | 28 | 29
   | "N1" | "N2" | "N3" | "N4" | "N5"
   | "A1" | "A2" | "A3";
 
@@ -108,6 +108,10 @@ export const CATALOGO: readonly Bloco[] = [
   { id: 27, estado: "ativo", nome: "Passos com detalhe", regra: "O detalhe mora sempre no HTML, nunca injetado por JS. Revela no hover e no foco em tela larga; sempre visível em tela estreita — celular não tem hover, crawler não roda JS. Cada passo é alcançável só de teclado." },
   // 28 é ATIVO: HTML e dados fornecidos pelo esqueleto, sem endpoint nenhum.
   { id: 28, estado: "ativo", nome: "Verificação", regra: "Introduz, nunca recapitula: auditoria contra um critério, distinta do Checklist. Três estados (atendido, parcial, não atendido) e um nível de importância, os dois em texto — ícone e cor nunca carregam o significado sozinhos. Cada item diz contra qual critério foi avaliado; o bloco não soma nem emite selo, a mesma trava do bloco 12 contra AggregateRating." },
+  // 29 é ATIVO: HTML e CSS puros. Os controles são âncoras — `<a href="#s3">` —,
+  // e é o navegador que rola o trilho, sem um script sequer. O JS do arquivo é
+  // enriquecimento declarado, não dependência.
+  { id: 29, estado: "ativo", nome: "Slides", regra: "Um slide por vez esconde conteúdo por desenho, então todos nascem no HTML e cada um funciona sozinho: título próprio e a posição em texto (\"2 de 5\"), nunca só um ponto aceso. Avança e retrocede só por gesto do leitor — sem autoplay, e sem laço: o último não volta ao primeiro. Slide é texto OU imagem, nunca os dois; o texto usa a tipografia base e nada mais. Teto de 10, e acima disso é artigo escondido dentro de um carrossel." },
   { id: "N1", estado: "navegacao", nome: "Paginação", regra: "URL própria por página, canônica apontando para ela mesma, sem noindex, e link é <a href>." },
   { id: "N2", estado: "navegacao", nome: "Card de artigo", regra: "Título de feed, description do meta.md, dateModified visível. O que está no grid não conta como link tecido." },
   { id: "N3", estado: "navegacao", nome: "Toast de aviso", regra: "Resposta a uma ação do leitor, nada mais. Toast com número não existe. Erro se diz por inteiro e não some sozinho." },

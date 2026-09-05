@@ -13,6 +13,7 @@ import type { Celula } from "../components/blocos/_Tabela.astro";
 import type { ItemCheck } from "../components/blocos/Checklist.astro";
 import type { Pergunta } from "../components/blocos/Faq.astro";
 import type { Slide } from "../components/blocos/Carrossel.astro";
+import type { Slide as SlideDeDeck } from "../components/blocos/Slides.astro";
 import type { Props as CamposFigura } from "../components/blocos/Figura.astro";
 import type { Props as DadosDiagrama } from "../components/blocos/_DiagramaDemo.astro";
 import type { Props as CamposCodigo } from "../components/blocos/Codigo.astro";
@@ -167,6 +168,77 @@ export const carrossel: Slide[] = [
   { titulo: "2. Modo tráfego em tempo real", legenda: "A escala tem que cobrir 500 Mbps, senão o pico satura a leitura.", fig: "foto 2" },
   { titulo: "3. Ligue o maior aparelho", legenda: "Anote o valor de sincronização, que dura poucos segundos.", fig: "foto 3" },
   { titulo: "4. Multiplique pelo plano", legenda: "300 Mbps no link deste exemplo, não os 100 Mbps do plano antigo.", fig: "foto 4" },
+];
+
+/**
+ * Bloco 29 — o deck.
+ *
+ * Cinco slides, e eles exercitam as travas em vez de só desenhar bonito:
+ *
+ *   · Todo slide tem TÍTULO, porque cada um funciona sozinho — o de número 4
+ *     é o teste disso, já que ele é o único que carrega o número que fecha o
+ *     argumento e precisa fazer sentido para quem caiu direto nele.
+ *   · Os dois tipos aparecem, nunca no mesmo slide: três de texto (um deles
+ *     com lista) e dois de imagem.
+ *   · Nos de imagem, TÍTULO, ALT e LEGENDA são três frases diferentes, de
+ *     propósito: é exatamente o par que `Figura` quebra a build se coincidir,
+ *     agora com o título do slide no meio. O slide 2 é `prova` e por isso traz
+ *     fonte e data; o 5 é `spot`, que não prova nada e por isso não traz.
+ *   · Cinco está abaixo do teto de 10, e é para ficar: o mock não é o lugar de
+ *     demonstrar o estouro, e sim o de mostrar a forma aprovada. O estouro tem
+ *     teste próprio.
+ */
+export const slides: SlideDeDeck[] = [
+  {
+    tipo: "texto",
+    titulo: "O pico não é a média",
+    paragrafos: [
+      "O plano é vendido em velocidade máxima, e é por ela que quase todo mundo compara. O que derruba a chamada, porém, é o instante — o segundo em que três aparelhos pedem banda ao mesmo tempo.",
+      "É por isso que trocar de plano resolve tão pouco: o problema mora na simultaneidade, e ela não muda de tamanho quando o número do contrato muda.",
+    ],
+  },
+  {
+    tipo: "imagem",
+    titulo: "Onde a chamada caiu",
+    figura: {
+      papel: "prova",
+      alt: "Gráfico do monitor de rede com uma linha subindo até 340 Mbps às 6h18 e cruzando a linha tracejada de 300 Mbps",
+      legenda:
+        "O backup entrou com o notebook já em chamada. O pico passou 40 Mbps acima do que o link entrega, e a chamada caiu no mesmo minuto.",
+      fonte:
+        "Registro do monitor da própria casa, 09/08/2026. O log amostra a cada 5 s, então o pico real é igual ou maior.",
+      pendencia: "Recorte da tela entre 6h10 e 6h30, com o rótulo do eixo legível.",
+    },
+  },
+  {
+    tipo: "texto",
+    titulo: "Os três que competem de manhã",
+    paragrafos: [
+      "Numa casa comum, o pico da manhã quase sempre é a soma dos mesmos três hábitos — e dois deles são automáticos, quer dizer, ninguém escolheu que fossem naquela hora.",
+    ],
+    lista: [
+      "O backup em nuvem, que acorda com o computador e sobe o que mudou na véspera.",
+      "A atualização do sistema, que baixa em segundo plano sem avisar.",
+      "A chamada de vídeo, a única das três que a pessoa realmente está usando.",
+    ],
+  },
+  {
+    tipo: "texto",
+    titulo: "Reordenar devolve 120 Mbps",
+    paragrafos: [
+      "Adiar o backup em duas horas derruba o pico simultâneo de 340 Mbps para 180 Mbps, e devolve 120 Mbps de folga no link de 300 Mbps — sem contratar nada.",
+      "A ressalva viaja junto com o número: isso vale para esta casa, medida por uma semana. O que se repete em qualquer casa não é o valor, é o método.",
+    ],
+  },
+  {
+    tipo: "imagem",
+    titulo: "A hora em que a rede decide",
+    figura: {
+      papel: "spot",
+      alt: "Uma pessoa de lanterna diante do roteador de madrugada, com a tela do notebook aberta ao fundo",
+      legenda: "Toda rede tem um horário em que ninguém está olhando, e é nele que ela decide.",
+    },
+  },
 ];
 
 /**
@@ -519,3 +591,4 @@ export const verificacao: ItemVerificacao[] = [
     nota: "O QoS existe, mas só é configurável pelo aplicativo do fabricante — não há essa opção na interface web do roteador.",
   },
 ];
+

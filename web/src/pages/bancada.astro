@@ -49,6 +49,7 @@ import Newsletter from "../components/blocos/Newsletter.astro";
 import Compartilhar from "../components/blocos/Compartilhar.astro";
 import Passos from "../components/blocos/Passos.astro";
 import Verificacao from "../components/blocos/Verificacao.astro";
+import Slides from "../components/blocos/Slides.astro";
 
 import * as m from "../mock/artigo";
 
@@ -229,6 +230,12 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
         </Fragment>
         <Fragment slot="b27"><Passos itens={m.passos} /></Fragment>
         <Fragment slot="b28"><Verificacao itens={m.verificacao} /></Fragment>
+        <Fragment slot="b29">
+          {/* os dois tipos de slide no mesmo deck, que é o único jeito de
+              conferir de um olhar que o de texto e o de imagem têm a mesma
+              altura, os mesmos controles e a mesma posição escrita */}
+          <Slides rotulo="Por que o pico derruba a chamada" slides={m.slides} />
+        </Fragment>
         <Fragment slot="bn1">
           <Paginacao total={9} atual={2} href={(p) => `#p${p}`} />
         </Fragment>

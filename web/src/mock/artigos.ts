@@ -32,6 +32,7 @@ import type { Pergunta } from "../components/blocos/Faq.astro";
 import type { Props as CamposFigura } from "../components/blocos/Figura.astro";
 import type { Props as CamposCodigo } from "../components/blocos/Codigo.astro";
 import type { Props as CamposAviso } from "../components/blocos/Aviso.astro";
+import type { Slide as SlideDeDeck } from "../components/blocos/Slides.astro";
 
 export { autor } from "./artigo";
 
@@ -55,6 +56,10 @@ export type Slot =
   | { tipo: "aviso"; dados: CamposAviso }
   | { tipo: "checklist"; rotulo: string; itens: ItemCheck[] }
   | { tipo: "faq"; itens: Pergunta[] }
+  /** Bloco 29 — o deck de um slide por vez. Só o artigo-1 monta: os três
+   *  artigos existem para mostrar repertório diferente, não a mesma página
+   *  três vezes. */
+  | { tipo: "slides"; rotulo?: string; slides: SlideDeDeck[] }
   | { tipo: "fechamento"; paragrafos: string[] };
 
 export interface DadosArtigo {
@@ -74,7 +79,8 @@ export interface DadosArtigo {
 
 export const ARTIGOS: DadosArtigo[] = [
   // ---------------------------------------------------------------------
-  // artigo-1 — tabela de panorama, citação destacada, prosa com átomos.
+  // artigo-1 — tabela de panorama, citação destacada, prosa com átomos e o
+  // deck do bloco 29.
   // Sem aviso e sem bloco de código.
   // ---------------------------------------------------------------------
   {
@@ -148,6 +154,53 @@ export const ARTIGOS: DadosArtigo[] = [
         tipo: "paragrafo",
         texto:
           "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      },
+      {
+        /* O deck entra ANTES da citação destacada de propósito: ele percorre o
+           passo a passo, e a citação é a conclusão que vem depois de ter
+           percorrido. Deck no fim da seção seria o leitor clicando quatro
+           vezes para chegar onde o parágrafo seguinte já o levaria. */
+        tipo: "slides",
+        rotulo: "A reordenação, passo a passo",
+        slides: [
+          {
+            tipo: "texto",
+            titulo: "1. Descubra quem acorda junto",
+            paragrafos: [
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            ],
+          },
+          {
+            tipo: "texto",
+            titulo: "2. Separe o automático do que você usa",
+            paragrafos: [
+              "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+            ],
+            lista: [
+              "Primeiro item da lista dentro do slide — lorem ipsum dolor.",
+              "Segundo item — consectetur adipiscing elit, sed do eiusmod.",
+            ],
+          },
+          {
+            tipo: "imagem",
+            titulo: "3. Confira no monitor",
+            figura: {
+              papel: "prova",
+              alt: "Alt da figura dentro do slide — descreve o que está na imagem para quem não a vê, e nunca repete a legenda nem o título do slide.",
+              legenda: "Legenda — diz por que a imagem está aqui, e funciona sozinha para quem só viu este slide.",
+              fonte: "Fonte e data — obrigatórias em prova, 09/08/2026.",
+              pendencia: "Pendência — o recorte da tela que ainda falta produzir.",
+            },
+          },
+          {
+            tipo: "texto",
+            titulo: "4. Repita na semana seguinte",
+            paragrafos: [
+              "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+              "Neste último slide o botão “Próximo” não existe: sem laço, o leitor sabe que acabou em vez de recomeçar sem perceber.",
+            ],
+          },
+        ],
       },
       {
         tipo: "citacaoDestacada",

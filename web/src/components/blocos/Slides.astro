@@ -1,0 +1,321 @@
+---
+/** Bloco 29 — Slides.
+ *
+ * O deck: um slide por vez, avançando e retrocedendo por gesto do leitor. É o
+ * carrossel de rede social, e é o vizinho mais próximo do bloco 13 — mas as
+ * regras não se misturam, e por isso são dois. O 13 é PRATELEIRA: vários à
+ * vista ao mesmo tempo, rolando de lado, "só para sequência visual". Este é
+ * DECK: um por vez, o slide inteiro na tela, e cada slide é texto formatado
+ * OU uma figura.
+ *
+ * Mostrar um por vez é esconder conteúdo por desenho, que é o risco que o 13
+ * já anotava e que aqui fica maior — lá o leitor vê que existe mais coisa à
+ * direita; aqui não vê nada além do slide da vez. As quatro travas abaixo
+ * existem por causa disso:
+ *
+ *   1. TODOS os slides nascem no HTML inicial. Nenhum chega por JS, nenhum
+ *      sai do fluxo: `display:none` mataria o slide para leitor de tela e
+ *      para o crawler, que não executa JavaScript (`output: "static"` é
+ *      restrição real). O que os slides fora da vez têm é posição — estão
+ *      ao lado, fora da janela de rolagem —, nunca supressão. É a mesma
+ *      escolha do bloco 27, onde o detalhe recolhe por `max-height` e nunca
+ *      por `display`.
+ *   2. CADA slide funciona sozinho. Título obrigatório em todos, porque quem
+ *      cai no slide 3 por um link não leu o 1 e o 2.
+ *   3. A POSIÇÃO É TEXTO. "2 de 5" vive dentro de cada slide, escrito. O
+ *      ponto aceso lá embaixo é reforço, e reforço que só existe com JS —
+ *      cor e forma nunca carregam sozinhas o significado (a regra do 28).
+ *   4. SEM AUTOPLAY E SEM LAÇO. Nada avança sozinho, e o último slide não
+ *      volta ao primeiro: laço é o desenho que faz o leitor não perceber que
+ *      chegou ao fim e recomeçar sem saber. No último slide o "Próximo"
+ *      simplesmente não existe, e no primeiro não existe o "Anterior".
+ *
+ * COMO ISSO ANDA SEM JAVASCRIPT — a decisão de desenho que define o bloco.
+ * Os controles não são `<button>`: são âncoras, `<a href="#deck-3">`, e quem
+ * rola o trilho é o navegador, resolvendo o alvo dentro do contêiner de
+ * rolagem. Zero script. Como uma âncora sozinha não sabe onde o leitor está,
+ * cada slide carrega o PRÓPRIO par de controles, apontando para os vizinhos
+ * dele — o par visível é sempre o do slide da vez, que é o único na janela.
+ * `scroll-snap` faz o resto, e no dedo o arrasto já é nativo.
+ *
+ * Isso é o oposto de "botão que só funciona com JS": aqui o JS do fim deste
+ * arquivo é enriquecimento declarado, e o que ele acrescenta é pequeno —
+ * rolar sem escrever `#deck-3` na URL (e sem o pulinho vertical que o
+ * navegador dá para trazer o alvo ao campo de visão), e acender o ponto do
+ * slide atual. Sem ele: todo slide continua alcançável, o deck continua
+ * andando pelos mesmos controles, a posição continua escrita em texto dentro
+ * do slide, e só o ponto não acende.
+ */
+import Figura from "./Figura.astro";
+import { conferirSlides } from "../../slides";
+import type { Slide } from "../../slides";
+
+/* Os tipos e as travas moram em `src/slides.ts`, puros, e o motivo está
+   escrito lá: trava presa no frontmatter de um `.astro` não tem como falhar
+   num teste, e trava sem teste que discrimina é confiança falsa. Reexportados
+   aqui porque é deste nome que os mocks e os artigos importam. */
+export type { Slide, SlideTexto, SlideImagem } from "../../slides";
+
+export interface Props {
+  rotulo?: string;
+  slides: Slide[];
+  /** Identifica este deck quando a página tem mais de um: é o prefixo dos
+   *  `id` que as âncoras dos controles perseguem. Dois decks com o mesmo
+   *  prefixo na mesma página fariam os controles de um rolar o outro. */
+  id?: string;
+}
+
+const { rotulo, slides, id = "slides" } = Astro.props;
+
+conferirSlides(slides);
+---
+
+<section
+  class="slides"
+  data-slides={id}
+  role="group"
+  aria-roledescription="carrossel"
+  aria-label={rotulo ?? "Slides"}
+>
+  {rotulo && <p class="b-rotulo">{rotulo}</p>}
+
+  {/* A janela é o contêiner de rolagem, e é ela que a âncora move. Não leva
+      `tabindex`: todo slide tem link dentro (os controles), então a região já
+      é alcançável por teclado — e um Tab a mais por deck, sem nada novo do
+      outro lado, é custo sem troco. */}
+  <div class="janela">
+    <div class="trilho">
+      {slides.map((s, i) => (
+        <div
+          class="slide b-card"
+          id={`${id}-${i + 1}`}
+          tabindex="-1"
+          role="group"
+          aria-roledescription="slide"
+          aria-label={`${i + 1} de ${slides.length}: ${s.titulo}`}
+        >
+          <div class="corpo">
+            <h3 class="b-h3 titulo-slide">{s.titulo}</h3>
+
+            {s.tipo === "texto" ? (
+              <>
+                {s.paragrafos.map((p) => <p class="b-p">{p}</p>)}
+                {s.lista && (
+                  <ul class="b-lista">{s.lista.map((li) => <li>{li}</li>)}</ul>
+                )}
+              </>
+            ) : (
+              <Figura {...s.figura} />
+            )}
+          </div>
+
+          {/* O par de controles DESTE slide. É o que faz o deck andar sem uma
+              linha de JavaScript: a âncora aponta para o id do vizinho, e o
+              navegador rola o trilho até ele. Grade de três colunas para que a
+              posição fique centrada mesmo quando falta o "Anterior" (primeiro
+              slide) ou o "Próximo" (último) — a ausência é a trava contra o
+              laço, não um descuido de alinhamento. */}
+          <nav class="passar" aria-label={`Navegar a partir do slide ${i + 1}`}>
+            {i > 0 ? (
+              <a class="b-btn ponta ponta--tras" data-vai href={`#${id}-${i}`}>
+                <span aria-hidden="true">‹</span>Anterior
+              </a>
+            ) : (
+              <span></span>
+            )}
+
+            <p class="posicao">{i + 1} de {slides.length}</p>
+
+            {i < slides.length - 1 ? (
+              <a class="b-btn ponta ponta--frente" data-vai href={`#${id}-${i + 2}`}>
+                Próximo<span aria-hidden="true">›</span>
+              </a>
+            ) : (
+              <span></span>
+            )}
+          </nav>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Os pontos são atalho, nunca a única navegação — e nunca a única forma de
+      saber onde se está, porque isso é o "2 de 5" escrito lá em cima. Cada um
+      leva o título do slide em texto para leitor de tela. */}
+  <ul class="atalhos" aria-label="Ir para um slide">
+    {slides.map((s, i) => (
+      <li>
+        <a class="atalho" data-vai data-atalho href={`#${id}-${i + 1}`}>
+          <span class="b-sr">Slide {i + 1}: {s.titulo}</span>
+          <span class="marca" aria-hidden="true"></span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  /* OS NOMES DE CLASSE AQUI NÃO SÃO LIVRES, e a razão foi medida no
+     navegador, não deduzida. `chrome.css` — a folha da bancada — declara
+     `.titulo`, `.ponto` e `.controles` GLOBAIS, sem camada. O escopo do Astro
+     protege as propriedades que ESTE arquivo declara (a classe escopada tem
+     especificidade maior), mas não as que ele não declara: elas vazam. Com
+     `.titulo`, o vazamento era `font-size: clamp(28px, 4vw, 40px)` do título
+     da página caindo em cima do `.b-h3` de cada slide; com `.ponto`, era
+     `width: 9px; height: 9px` mais um anel `inset` do seletor de estilo
+     esmagando o alvo de toque dos atalhos.
+
+     O sintoma é o pior possível: o bloco fica errado SÓ na bancada, que é
+     justamente onde ele é julgado, e certo no artigo. Por isso os nomes daqui
+     são `titulo-slide`, `atalho` e `passar` — e um bloco novo confere os
+     nomes dele contra `chrome.css` antes de escrever o CSS. */
+  .slides { max-width: var(--b-medida); }
+
+  .janela {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* a rolagem suave é o que dá ao clique na âncora a cara de "avançou um
+       slide" em vez de "pulou". `base.css` já a desliga inteira sob
+       prefers-reduced-motion, então ela não precisa de guarda aqui. */
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    /* A barra some porque três afordâncias redundantes já dizem que há mais:
+       os controles em texto, a posição "2 de 5" e a fileira de pontos. Sumir
+       com a barra SEM elas seria esconder o caminho. */
+    scrollbar-width: none;
+  }
+  .janela::-webkit-scrollbar { display: none; }
+
+  /* `align-items: stretch` é o padrão do flex, e é ele que dá a todos os
+     slides a altura do mais alto — sem isso o deck saltaria de tamanho a cada
+     avanço. É também por que este bloco não inventa token de altura: quem
+     define a altura é o conteúdo, não um número escolhido aqui. */
+  .trilho { display: flex; gap: 14px; }
+
+  .slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 20px 22px;
+    margin: 0;
+  }
+  /* O foco chega aqui pelo `tabindex="-1"` quando a âncora resolve, e por
+     programa quando o script assume — em nenhum dos dois casos é foco de
+     teclado, então o anel do contrato não deve piscar. */
+  .slide:focus { outline: none; }
+
+  .corpo { flex: 1; }
+  .titulo-slide { margin-bottom: 10px; }
+
+  .passar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+  }
+  .ponta--tras { justify-self: start; }
+  .ponta--frente { justify-self: end; }
+  .ponta { gap: 6px; padding: 8px 13px; }
+
+  .posicao {
+    margin: 0;
+    text-align: center;
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    color: var(--b-tinta-2);
+  }
+
+  .atalhos {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Alvo de toque com folga: a marca desenhada tem 8px, a área clicável tem
+     24x24 — medido no navegador, não estimado. Um alvo de 8px é o tamanho do
+     desenho, nunca o tamanho do que o dedo acerta. */
+  .atalho { display: block; padding: 8px; }
+  .marca {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--b-tinta-2);
+    opacity: .3;
+    transition: width .18s, opacity .18s, background .18s;
+  }
+  .atalho:hover .marca { opacity: .7; }
+  /* O ponto da vez muda de FORMA, não só de cor: vira um traço. É a mesma
+     regra do bloco 28 — cor sozinha não chega a quem não a separa, nem ao
+     print em preto e branco. Aqui ela pesa menos, porque a posição já está
+     escrita em texto dentro do slide; ainda assim, forma é de graça. */
+  .atalho[aria-current="true"] .marca {
+    width: 20px;
+    opacity: 1;
+    background: var(--b-acento);
+  }
+</style>
+
+<script>
+  /* Melhoria progressiva, e o que ela acrescenta é medido:
+   *
+   *   SEM JS  — os controles são âncoras de verdade. O navegador rola o trilho
+   *             até o slide vizinho sozinho, o deck anda inteiro, todo slide é
+   *             alcançável e a posição continua escrita ("2 de 5") dentro de
+   *             cada slide. O que se perde são duas coisas cosméticas: a URL
+   *             ganha `#slides-3` a cada avanço, e a página pode dar um pulo
+   *             vertical para trazer o alvo ao campo de visão. E o ponto da
+   *             fileira de baixo nunca acende.
+   *   COM JS  — o clique vira `scrollIntoView` (mesma rolagem, sem hash e sem
+   *             pulo) e um IntersectionObserver acende o ponto do slide na
+   *             janela.
+   *
+   * Nada aqui monta slide, esconde slide ou avança sozinho: se este arquivo
+   * falhar de carregar, o bloco não perde nenhuma função.
+   */
+  for (const deck of document.querySelectorAll<HTMLElement>("[data-slides]")) {
+    const janela = deck.querySelector<HTMLElement>(".janela");
+    if (!janela) continue;
+
+    deck.addEventListener("click", (ev) => {
+      const gatilho = (ev.target as HTMLElement).closest<HTMLAnchorElement>("a[data-vai]");
+      if (!gatilho) return;
+      /* getElementById, e não querySelector(href): o prefixo vem de fora
+         (prop `id`) e um valor começando com dígito faria um seletor inválido
+         estourar bem no meio do clique. */
+      const alvo = document.getElementById(gatilho.getAttribute("href")!.slice(1));
+      if (!alvo) return;
+
+      ev.preventDefault();
+      alvo.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+      /* preventScroll porque a rolagem certa já é a de cima: sem isso o foco
+         puxaria o alvo para o meio da tela, desfazendo o `block: "nearest"`. */
+      alvo.focus({ preventScroll: true });
+    });
+
+    const pontos = [...deck.querySelectorAll<HTMLElement>("[data-atalho]")];
+    const slides = [...deck.querySelectorAll<HTMLElement>(".slide")];
+    if (!pontos.length || pontos.length !== slides.length) continue;
+
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        for (const entrada of entradas) {
+          if (!entrada.isIntersecting) continue;
+          const i = slides.indexOf(entrada.target as HTMLElement);
+          if (i < 0) continue;
+          pontos.forEach((p, j) => {
+            if (j === i) p.setAttribute("aria-current", "true");
+            else p.removeAttribute("aria-current");
+          });
+        }
+      },
+      { root: janela, threshold: 0.6 }
+    );
+    for (const s of slides) observador.observe(s);
+  }
+</script>
