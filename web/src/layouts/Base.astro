@@ -4,6 +4,7 @@ import "../styles/base.css";
 import "../styles/estilos/index";
 import "../styles/atomos.css";
 import Analytics from "../components/Analytics.astro";
+import BarraAviso from "../components/BarraAviso.astro";
 import Cabecalho from "../components/Cabecalho.astro";
 import Rodape from "../components/Rodape.astro";
 import Consentimento from "../components/Consentimento.astro";
@@ -49,7 +50,14 @@ const { titulo, descricao, lang = LANG_HTML, noindex = false, site } = Astro.pro
       Bancada e vitrine de estilo não passam `site` pra `Base` — de propósito,
       ver o comentário de `Cabecalho.astro` — e por isso nascem sem chrome de
       navegação nenhum.
+
+      `<BarraAviso>` vem ANTES do `<Cabecalho>`, de propósito: ela é
+      `position: sticky` e nasce no topo do documento, então precisa ser o
+      primeiro elemento do `<body>` pra grudar ali. Ela mesma decide se
+      renderiza algo (gate em `site.avisoBarra`), então isto é inofensivo
+      quando nenhum site declara o campo.
     */}
+    {site && <BarraAviso site={site} />}
     {site && <Cabecalho site={site} />}
     <slot />
     {site && (

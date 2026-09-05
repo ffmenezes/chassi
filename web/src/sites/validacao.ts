@@ -34,6 +34,23 @@ export function validar(sites: Site[], estilosConhecidos: string[]): void {
       );
     }
 
+    if (site.avisoBarra) {
+      if (!site.avisoBarra.texto.trim()) {
+        throw new Error(
+          `[sites] ${site.slug} declara avisoBarra sem texto. Sem texto não há recado: ` +
+            `ou o campo leva o aviso, ou o campo nem existe — apague avisoBarra em vez ` +
+            `de deixar texto vazio.`
+        );
+      }
+      if (Boolean(site.avisoBarra.linkHref) !== Boolean(site.avisoBarra.linkTexto)) {
+        throw new Error(
+          `[sites] ${site.slug} declara avisoBarra com linkHref ou linkTexto sem o outro. ` +
+            `Os dois juntos, ou nenhum: destino sem rótulo visível não navega, e rótulo ` +
+            `sem destino não é link.`
+        );
+      }
+    }
+
     if (!site.tokens) continue;
     const usados = new Set<string>();
     for (const modo of Object.keys(site.tokens) as Modo[]) {

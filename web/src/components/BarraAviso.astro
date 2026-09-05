@@ -1,0 +1,194 @@
+---
+/**
+ * Barra de aviso: recado curto e passageiro no topo de toda página — evento,
+ * promoção, mudança de regra. Fixa, e fechável.
+ *
+ * NASCE DESLIGADA. O gate é `site.avisoBarra`, igual ao gate de `adsenseId`
+ * pra `<Anuncio>`: sem o campo preenchido, nada deste componente entra no
+ * HTML. Clonar o chassi não pode herdar propaganda de ninguém por engano.
+ *
+ * É CHROME DE SITE, não bloco de artigo — o par certo é `Cabecalho.astro`,
+ * `Rodape.astro` e `Consentimento.astro`: aparece em toda página do site
+ * (home, institucional, artigo), não é algo que um artigo escolhe montar, e
+ * por isso mora aqui e não em `components/blocos/`. Também por isso NÃO
+ * entra em `catalogo.ts`: aquele arquivo cataloga peças que uma ARQUITETURA
+ * de artigo (ou a navegação em torno de um artigo/listagem, `N1`–`N5`)
+ * escolhe montar — Toast, Overlay, Paginação são desse tipo, cada um com
+ * dado próprio por instância, todos demonstráveis lado a lado na bancada.
+ * Esta barra não tem instância: é uma decisão de site, uma vez, como
+ * cabeçalho ou rodapé, e por isso a bancada também não a monta (`Base` só
+ * recebe `site` fora da bancada — mesmo gate de `Cabecalho`/`Rodape`).
+ *
+ * FIXA SEM EMPURRAR CONTEÚDO: `position: sticky` no próprio elemento, não
+ * `fixed` com um espaçador calculado à parte. Sticky continua no fluxo
+ * normal — reserva sozinho o espaço que ocupa, em qualquer altura (o texto
+ * pode quebrar em duas linhas no celular) — e gruda no topo porque já
+ * nasce no topo do documento, antes do `Cabecalho`. Fechar é `display:none`
+ * no próprio elemento: o espaço reservado desaparece junto, sem JS nenhum
+ * pra recalcular nada.
+ *
+ * FECHÁVEL SEM JS: o `X` é um `<label>` associado a um `<input
+ * type="checkbox">` oculto só visualmente (não por `display:none` — ele
+ * continua alcançável por Tab e aciona por Espaço, teclado incluso). CSS
+ * puro (`:checked ~ .barra-aviso`) esconde a barra: quem tem JavaScript
+ * desligado fecha do mesmo jeito. O que falta sem JS é só lembrar da
+ * escolha na próxima página — ver o `<script>` no fim do arquivo.
+ *
+ * FECHOU, FICA FECHADO: `avisoBarra.ts` guarda o TEXTO fechado (não um
+ * booleano) em `localStorage`. Trocar `texto` no site publica um aviso
+ * novo — quem tinha fechado o antigo volta a ver este, porque fechar um
+ * recado não é fechar todos que vierem depois. Sem essa régua, um site
+ * ficaria com a barra "gasta" pra sempre depois do primeiro fechamento,
+ * mesmo anunciando outra coisa meses depois.
+ */
+import type { Site } from "../sites/tipos";
+
+interface Props { site: Site }
+const { site } = Astro.props;
+const aviso = site.avisoBarra;
+---
+
+{aviso && (
+  <>
+    <input type="checkbox" id="fecha-barra-aviso" class="ba-check" />
+    <div
+      class="barra-aviso"
+      data-estilo={site.estilo}
+      data-modo={site.modoPadrao}
+      data-site={site.slug}
+      data-aviso-texto={aviso.texto}
+    >
+      <div class="ba-in">
+        <p class="ba-texto">
+          {aviso.texto}
+          {aviso.linkHref && aviso.linkTexto && (
+            <a class="ba-link" href={aviso.linkHref}>{aviso.linkTexto}</a>
+          )}
+        </p>
+        <label for="fecha-barra-aviso" class="ba-fechar">
+          <span aria-hidden="true">✕</span>
+          <span class="ba-sr-so">Fechar aviso</span>
+        </label>
+      </div>
+    </div>
+  </>
+)}
+
+<style>
+  /* Oculto visualmente, não por `display:none`/`hidden`: continua no DOM,
+     focável por Tab, e Espaço o alterna — é essa presença que faz o `label`
+     abaixo funcionar como fechar sem uma linha de JS. */
+  .ba-check {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .barra-aviso {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--b-acento);
+    color: var(--b-sobre-acento);
+  }
+  /* A régua toda mora nesta linha: marcar o checkbox tira a barra do fluxo,
+     e o espaço que ela reservava (por ser `sticky`, não `fixed`) some junto,
+     sem espaçador nenhum pra sincronizar à mão. */
+  .ba-check:checked ~ .barra-aviso { display: none; }
+
+  /* Foco vive no checkbox (é ele que o Tab alcança), mas quem o vê é o
+     label — por isso o anel de foco mora aqui, não lá. */
+  .ba-check:focus-visible ~ .barra-aviso .ba-fechar {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .ba-in {
+    max-width: var(--b-medida);
+    margin-inline: auto;
+    padding: 10px 44px 10px 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .ba-texto {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .ba-link {
+    margin-left: 8px;
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .ba-fechar {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .ba-fechar:hover {
+    background: color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  /* Igual ao padrão de `A1` (prosa) pra texto só de leitor de tela: some da
+     tela, continua no HTML — o ícone sozinho não carrega o significado. */
+  .ba-sr-so {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+
+{aviso && (
+  <script>
+    /* Melhoria progressiva: sem JS, a barra já é fechável (CSS puro acima) —
+       só não sobrevive a uma navegação, porque não existe onde guardar a
+       escolha sem JavaScript. O que este script acrescenta é só a memória:
+       ler o que foi fechado antes e, se for o mesmo aviso de hoje, já
+       nascer marcada; e gravar a escolha quando alguém marca agora.
+
+       Dentro de `{aviso && (...)}`, igual ao `<script>` de
+       `Consentimento.astro`: sem `avisoBarra` configurado, nem o HTML nem
+       este script entram na página — não é só um `if` inerte em tempo de
+       execução, o bundle deste componente nem é gerado para quem não usa
+       a barra. */
+    import { foiFechada, lerRegistro, gravarRegistro } from "../avisoBarra";
+
+    const check = document.querySelector<HTMLInputElement>("#fecha-barra-aviso");
+    const barra = document.querySelector<HTMLElement>(".barra-aviso[data-aviso-texto]");
+    if (check && barra) {
+      const texto = barra.dataset.avisoTexto ?? "";
+      if (foiFechada(lerRegistro(), texto)) check.checked = true;
+
+      check.addEventListener("change", () => {
+        if (check.checked) gravarRegistro(texto);
+      });
+    }
+  </script>
+)}

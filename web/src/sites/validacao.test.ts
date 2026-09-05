@@ -57,6 +57,34 @@ describe("validar", () => {
   it("recusa dois sites com o mesmo slug", () => {
     expect(() => validar([base(), base()], ["linho"])).toThrow(/slug repetido/);
   });
+
+  it("aceita site sem avisoBarra", () => {
+    expect(() => validar([base()], ["linho"])).not.toThrow();
+  });
+
+  it("aceita avisoBarra completo, com e sem link", () => {
+    expect(() =>
+      validar([base({ avisoBarra: { texto: "Fechado no feriado" } })], ["linho"])
+    ).not.toThrow();
+    expect(() =>
+      validar(
+        [base({ avisoBarra: { texto: "Promoção", linkHref: "/promo/", linkTexto: "Ver oferta" } })],
+        ["linho"]
+      )
+    ).not.toThrow();
+  });
+
+  it("recusa avisoBarra com texto vazio", () => {
+    expect(() => validar([base({ avisoBarra: { texto: "   " } })], ["linho"]))
+      .toThrow(/avisoBarra sem texto/);
+  });
+
+  it("recusa avisoBarra com link pela metade", () => {
+    expect(() => validar([base({ avisoBarra: { texto: "Aviso", linkHref: "/x/" } })], ["linho"]))
+      .toThrow(/sem o outro/);
+    expect(() => validar([base({ avisoBarra: { texto: "Aviso", linkTexto: "Ver" } })], ["linho"]))
+      .toThrow(/sem o outro/);
+  });
 });
 
 describe("cssDoSite", () => {

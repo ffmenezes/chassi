@@ -99,6 +99,22 @@ export interface Site {
   analyticsId?: string;
   /** Conta do AdSense. Ausente = o slot de anúncio não renderiza nada. */
   adsenseId?: string;
+  /**
+   * Recado curto e passageiro no topo de toda página: aviso, evento,
+   * promoção, mudança de regra. Ausente = a barra não existe no HTML —
+   * clonar o chassi não pode herdar propaganda de ninguém por engano.
+   *
+   * Quem fecha não vê de novo o MESMO texto (guardado no navegador de quem
+   * fechou — ver `avisoBarra.ts`). Trocar `texto` é publicar um aviso novo:
+   * quem já tinha fechado o anterior volta a ver este, porque fechar um
+   * recado não é fechar todos os que vierem depois dele.
+   */
+  avisoBarra?: {
+    texto: string;
+    /** Os dois juntos, ou nenhum: link sem texto não tem o que o leitor vê. */
+    linkHref?: string;
+    linkTexto?: string;
+  };
 }
 
 export type { BlocoId } from "../catalogo";
