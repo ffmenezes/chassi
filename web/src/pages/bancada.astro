@@ -52,7 +52,12 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro", suportado: 
 
 /* mapa estilo -> blocos previstos, lido pelo script da barra */
 const previstos = {
-  linho: SITES.exemplo.blocos.map(String),
+  // `exemplo` é o único arquivo que o próprio upstream instrui o
+  // participante a apagar (scripts/instalar, passo 4). Sem essa guarda, o
+  // caminho de entrada documentado — criar seu site e apagar exemplo.ts —
+  // quebra a build da bancada. Some `exemplo`, cai no mesmo catálogo
+  // inteiro que os estilos ainda não adotados usam abaixo.
+  linho: (SITES.exemplo?.blocos ?? CATALOGO.map((b) => b.id)).map(String),
   /* nenhum site do chassi adotou `concreto` ainda: mostra o catálogo inteiro */
   concreto: CATALOGO.map((b) => String(b.id)),
   vidro: CATALOGO.map((b) => String(b.id)),
