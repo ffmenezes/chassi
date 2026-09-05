@@ -1,0 +1,147 @@
+---
+/**
+ * A página de um artigo publicado.
+ *
+ * A JUNTA do chassi vive no `getStaticPaths` abaixo: hoje ele lê os três
+ * artigos de exemplo de `mock/artigos.ts`, e é só isso que muda quando a
+ * renderização a partir de markdown chegar (a próxima aula do workshop) — a
+ * fonte troca para a coleção de markdown, os `params` continuam sendo
+ * `{ artigo: <slug> }`, e a ROTA NÃO MUDA. Quem editar este arquivo depois
+ * para ligar o markdown deve trocar só a função abaixo, nunca o caminho do
+ * arquivo nem a forma da URL.
+ *
+ * Os slugs são deliberadamente mock (`artigo-1`, `artigo-2`, `artigo-3`) e a
+ * URL fica na raiz (`/artigo-1/`), porque é essa a forma que o artigo de
+ * verdade vai ter quando existir.
+ *
+ * A composição do corpo é dirigida por dados: cada artigo em `mock/artigos.ts`
+ * é uma lista de SLOTS, e este arquivo só sabe desenhar cada tipo de slot —
+ * quem decide a ordem e quais blocos aparecem é o mock, artigo por artigo.
+ * É por isso que os três artigos podem montar um repertório de blocos
+ * diferente sem este arquivo crescer um `if` por artigo.
+ *
+ * Os blocos usados aqui são exatamente os que `sites/exemplo.ts` declara em
+ * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, A1, A2) — bloco fora dali não é montado
+ * nesta página, pela mesma regra que vale para qualquer site do chassi.
+ */
+import Artigo from "../layouts/Artigo.astro";
+import { siteInstitucional } from "../institucional/dados";
+import { ARTIGOS, autor } from "../mock/artigos";
+import type { DadosArtigo, Slot } from "../mock/artigos";
+
+import CabecalhoArtigo from "../components/CabecalhoArtigo.astro";
+import Titulo from "../components/Titulo.astro";
+import Sumario from "../components/blocos/Sumario.astro";
+import Abertura from "../components/blocos/Abertura.astro";
+import CaixaConclusoes from "../components/blocos/CaixaConclusoes.astro";
+import TabelaPanorama from "../components/blocos/TabelaPanorama.astro";
+import TabelaContraste from "../components/blocos/TabelaContraste.astro";
+import Figura from "../components/blocos/Figura.astro";
+import CitacaoDestacada from "../components/blocos/CitacaoDestacada.astro";
+import CitacaoFonte from "../components/blocos/CitacaoFonte.astro";
+import Codigo from "../components/blocos/Codigo.astro";
+import Aviso from "../components/blocos/Aviso.astro";
+import Checklist from "../components/blocos/Checklist.astro";
+import Faq from "../components/blocos/Faq.astro";
+import Fechamento from "../components/blocos/Fechamento.astro";
+import AutorBloco from "../components/blocos/Autor.astro";
+
+export function getStaticPaths() {
+  return ARTIGOS.map((artigo) => ({
+    params: { artigo: artigo.slug },
+    props: { artigo },
+  }));
+}
+
+const { artigo } = Astro.props as { artigo: DadosArtigo };
+const site = siteInstitucional();
+
+/* O sumário é derivado dos slots do tipo "titulo", nunca digitado à parte —
+   mesma regra de `mock/lorem.ts`, aqui aplicada a três roteiros diferentes. */
+const ehTitulo = (s: Slot): s is Extract<Slot, { tipo: "titulo" }> => s.tipo === "titulo";
+const sumario = artigo.slots.filter(ehTitulo).map((s) => ({
+  texto: s.texto,
+  href: `#${s.id}`,
+  nivel: s.nivel,
+}));
+---
+
+<Artigo site={site} titulo={`${artigo.titulo} — ${site.nome}`} descricao={artigo.descricao}>
+  <div class="colunas">
+    <article class="artigo b-regua-lados">
+      <CabecalhoArtigo
+        selo={artigo.selo}
+        titulo={artigo.titulo}
+        atualizado={artigo.atualizado}
+        minutos={artigo.minutos}
+        autor={autor}
+      />
+
+      <Abertura {...artigo.abertura} />
+
+      {artigo.conclusoes && (
+        <CaixaConclusoes rotulo={artigo.conclusoes.rotulo} itens={artigo.conclusoes.itens} />
+      )}
+
+      <div class="sumario-inline"><Sumario itens={sumario} /></div>
+
+      {artigo.slots.map((s) => (
+        <>
+          {s.tipo === "titulo" && <Titulo nivel={s.nivel} id={s.id}>{s.texto}</Titulo>}
+          {s.tipo === "paragrafo" && <p class="b-p">{s.texto}</p>}
+          {s.tipo === "prosa" && <p class="b-p" set:html={s.html} />}
+          {s.tipo === "lista" && (
+            <ol class="b-lista-num">{s.itens.map((item) => <li>{item}</li>)}</ol>
+          )}
+          {s.tipo === "tabelaPanorama" && (
+            <TabelaPanorama colunas={s.colunas} linhas={s.linhas} fonte={s.fonte} />
+          )}
+          {s.tipo === "tabelaContraste" && (
+            <TabelaContraste colunas={s.colunas} linhas={s.linhas} fonte={s.fonte} />
+          )}
+          {s.tipo === "figura" && <Figura {...s.dados} />}
+          {s.tipo === "citacaoDestacada" && <CitacaoDestacada texto={s.texto} />}
+          {s.tipo === "citacaoFonte" && (
+            <CitacaoFonte texto={s.texto} nome={s.nome} papel={s.papel} conflito={s.conflito} />
+          )}
+          {s.tipo === "codigo" && <Codigo {...s.dados} />}
+          {s.tipo === "aviso" && <Aviso {...s.dados} />}
+          {s.tipo === "checklist" && <Checklist rotulo={s.rotulo} itens={s.itens} />}
+          {s.tipo === "faq" && <Faq itens={s.itens} />}
+          {s.tipo === "fechamento" && <Fechamento paragrafos={s.paragrafos} />}
+        </>
+      ))}
+
+      <AutorBloco autor={autor} variante="card" />
+    </article>
+  </div>
+</Artigo>
+
+<style>
+  .colunas {
+    display: grid;
+    justify-content: center;
+    max-width: 892px;
+    margin-inline: auto;
+    padding: 0 clamp(18px, 4vw, 28px);
+  }
+
+  /* A moldura mora aqui, colada na coluna de leitura — mesma decisão de
+     `/exemplo/[estilo]`, documentada lá: é essa largura que dá às réguas
+     (verticais, sangria) um lugar próprio para desenhar. */
+  .artigo {
+    --b-sangria: clamp(28px, 4.5vw, 40px);
+    max-width: 836px;
+    min-width: 0;
+    padding: clamp(24px, 5vw, 56px) var(--b-sangria) 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  /* Inline é o mínimo que o bloco 3 exige, e aqui é também o único: sem
+     trilho fixo de desktop, porque esta página não é a bancada e uma coluna
+     de leitura só já cumpre a regra ("nunca só no desktop" não proíbe never
+     ter o trilho — proíbe ter SÓ o trilho). */
+  .sumario-inline { display: block; }
+</style>

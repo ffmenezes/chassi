@@ -14,8 +14,27 @@
  */
 import Artigo from "../layouts/Artigo.astro";
 import { siteInstitucional } from "../institucional/dados";
+import GradeArtigos from "../components/blocos/GradeArtigos.astro";
+import type { Artigo as ItemDeGrade } from "../components/blocos/GradeArtigos.astro";
+import { ARTIGOS } from "../mock/artigos";
+import { dataBR } from "../data";
 
 const site = siteInstitucional();
+
+/**
+ * Os três artigos de exemplo, na forma que o GradeArtigos (catálogo N2) espera.
+ * Isto é conteúdo real, não roteiro: ao contrário da entrevista acima, esta
+ * grade continua no build de produção, porque é ela que prova — para quem
+ * clonou o chassi — como uma home de blog fica depois de escrita. Quando os
+ * três artigos de exemplo saírem, é esta lista que passa a vir da coleção de
+ * posts de verdade.
+ */
+const artigosParaGrade: ItemDeGrade[] = ARTIGOS.map((a) => ({
+  tituloFeed: a.titulo,
+  descricao: a.descricao,
+  atualizadoEm: dataBR(a.atualizado),
+  href: `/${a.slug}/`,
+}));
 ---
 
 <!--
@@ -48,6 +67,7 @@ const site = siteInstitucional();
           <li>Para quem? (quem é o leitor que chega aqui)</li>
           <li>O que ele encontra aqui que não encontra no primeiro resultado do Google?</li>
           <li>Três links para as peças principais do site (abaixo).</li>
+          <li>Mais abaixo ainda, a grade de artigos já é código de verdade — é assim que fica uma home de blog; troque os três pelos seus.</li>
         </ul>
         <p class="exemplo">
           <strong>Exemplo</strong> (apague depois de escrever o seu): "Aqui você descobre
@@ -74,6 +94,16 @@ const site = siteInstitucional();
           <span>Troque por título e link do terceiro artigo</span>
         </a>
       </div>
+    </section>
+
+    {/* Ao contrário das seções acima, esta não é roteiro: é código real, no
+        build de produção, com o bloco GradeArtigos (catálogo N2) montando os
+        três artigos de exemplo. Fica óbvio para quem clonou o chassi como uma
+        home de blog fica depois de escrita — troque `artigosParaGrade` pelos
+        seus artigos quando eles existirem. */}
+    <section class="continue">
+      <h2 class="b-h2">Últimos artigos</h2>
+      <GradeArtigos artigos={artigosParaGrade} />
     </section>
   </div>
 </Artigo>
@@ -117,6 +147,7 @@ const site = siteInstitucional();
   .exemplo { margin: 0; font-size: 14px; color: var(--b-tinta-2); font-style: italic; }
 
   .pecas { display: flex; flex-direction: column; gap: 12px; }
+  .continue { display: flex; flex-direction: column; gap: 12px; }
   .grade { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
   .cartao {
     display: flex; flex-direction: column; gap: 5px;
