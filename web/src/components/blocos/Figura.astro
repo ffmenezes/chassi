@@ -10,6 +10,8 @@
  * fonte e data. Copiar um no outro é o defeito mais comum do bloco, e por isso
  * ele quebra a build em vez de virar aviso — igual ao teto de desvio de site.
  */
+import { otimizar, type FiguraOtimizada } from "../../imagens";
+
 export type PapelFigura = "prova" | "diagrama" | "spot";
 
 export interface Props {
@@ -17,9 +19,11 @@ export interface Props {
   papel: PapelFigura;
   /** Obrigatório. `alt=""` não existe no acervo: imagem decorativa é proibida. */
   alt: string;
-  /** Local, nunca hotlink. Ausente, sai o marcador — que é estado de prévia. */
+  /** Caminho dentro do acervo (`src/imagens/`), não caminho livre. Ausente,
+   *  sai o marcador — que é estado de prévia. */
   src?: string;
-  /** Exigidos em raster: sem eles a figura empurra o texto ao carregar (CLS). */
+  /** Opcionais: o acervo responde pelas reais. Declarados, viram checagem —
+   *  divergir do metadado do arquivo quebra a build (é o CLS que evitavam). */
   largura?: number;
   altura?: number;
   /** O que a imagem prova, ou por que ela está ali. Funciona sozinha. */
@@ -70,16 +74,14 @@ if (papel !== "spot" && !fonte) {
       `aplicada onde o número está desenhado.`
   );
 }
-const raster = !!src && !/\.svgz?$/i.test(src);
-if (raster && (!largura || !altura)) {
-  erro(
-    `raster sem width/height explícitos (${src}). Sem eles a imagem empurra o ` +
-      `texto quando termina de carregar.`
-  );
-}
 if (temDesenho && src) {
   erro(`figura com SVG inline e src ao mesmo tempo. Escolha um.`);
 }
+
+/* Figura sem `src` continua saindo como marcador: prévia é estado legítimo,
+   e o autor ainda vai produzir a imagem. O que não é legítimo é `src`
+   apontando para o que não existe — isso vira imagem quebrada na página. */
+const imagem: FiguraOtimizada | null = src ? await otimizar(src, largura, altura) : null;
 
 const ROTULO: Record<PapelFigura, string> = {
   prova: "prova",
@@ -93,13 +95,15 @@ const ROTULO: Record<PapelFigura, string> = {
 
   {!temDesenho && src && (
     <img
-      src={src}
+      src={imagem!.src}
+      srcset={imagem!.srcset}
+      sizes={imagem!.sizes}
+      width={imagem!.largura}
+      height={imagem!.altura}
       alt={alt}
-      width={largura}
-      height={altura}
-      decoding="async"
       loading={prioridade ? "eager" : "lazy"}
       fetchpriority={prioridade ? "high" : undefined}
+      decoding="async"
     />
   )}
 

@@ -142,11 +142,10 @@ export const ARTIGOS: DadosArtigo[] = [
         tipo: "figura",
         dados: {
           papel: "prova",
-          alt: "Alt fictício — tela de um monitor de rede com um pico de tráfego ultrapassando a linha do link contratado",
-          legenda:
-            "Legenda fictícia — o pico coincide com o horário em que dois aparelhos de maior consumo se encontram.",
-          fonte: "Fonte e data fictícias — registro de exemplo, 07/2026.",
-          pendencia: "Marcador — recorte de tela ainda não produzido para este exemplo.",
+          src: "exemplo/medicao.png",
+          alt: "Gráfico de barras com quatro medições crescentes de sinal por cômodo",
+          legenda: "Sinal medido em quatro pontos da casa, do mais distante ao mais próximo do roteador.",
+          fonte: "Medição própria, 2026-08-14",
         } satisfies CamposFigura,
       },
       { tipo: "titulo", nivel: 2, id: "s2", texto: "O que muda quando você reordena os aparelhos" },
