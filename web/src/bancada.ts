@@ -10,13 +10,16 @@
  * é ela que este arquivo tira das mãos de quem edita.
  *
  * A regra é uma frase: a página é o índice. Mesmo agrupamento, mesma ordem,
- * mesma fonte — `CATALOGO` para a sequência, `GRUPOS` para os cortes.
+ * mesma fonte — `CATALOGO` para a sequência, `GRUPOS` para os cortes. O corte
+ * em si mudou de eixo (`estado` → `categoria`, ver o comentário de `GRUPOS`
+ * em `catalogo.ts`), mas o mecanismo é o mesmo de sempre: cada bloco declara
+ * o que precisa, e ninguém mantém lista à parte.
  *
  * Funções puras e sem Astro, para rodarem no vitest: trava que só existe
  * dentro de um `.astro` não tem como falhar num teste, e trava sem teste que
  * discrimina é confiança falsa.
  */
-import type { Bloco, BlocoId, Estado, Grupo } from "./catalogo";
+import type { Bloco, BlocoId, Categoria, Grupo } from "./catalogo";
 
 /**
  * Os blocos de um grupo, na ordem em que o catálogo os declara.
@@ -25,7 +28,7 @@ import type { Bloco, BlocoId, Estado, Grupo } from "./catalogo";
  * 11 — e é por isso que a função não ordena nada: ela filtra e preserva.
  */
 export function idsDoGrupo(catalogo: readonly Bloco[], grupo: Grupo): BlocoId[] {
-  return catalogo.filter((b) => grupo.estados.includes(b.estado)).map((b) => b.id);
+  return catalogo.filter((b) => grupo.categorias.includes(b.categoria)).map((b) => b.id);
 }
 
 /** A sequência inteira da página: grupo a grupo, e dentro de cada um a ordem
@@ -40,13 +43,13 @@ export function ordemDaBancada(
 /**
  * A trava de cobertura, e ela guarda uma armadilha específica.
  *
- * `GRUPOS` é uma lista de estados por rótulo, escrita à mão. No dia em que
- * alguém acrescentar um `Estado` novo ao catálogo e esquecer de dar grupo a
- * ele, os blocos daquele estado somem — do índice E da página — sem nenhum
- * erro, porque some quem filtra, não quem é filtrado. O sintoma seria a
- * contagem cair sem ninguém mexer em bloco nenhum.
+ * `GRUPOS` é uma lista de categorias por rótulo, escrita à mão. No dia em que
+ * alguém acrescentar uma `Categoria` nova ao catálogo e esquecer de dar grupo
+ * a ela, os blocos daquela categoria somem — do índice E da página — sem
+ * nenhum erro, porque some quem filtra, não quem é filtrado. O sintoma seria
+ * a contagem cair sem ninguém mexer em bloco nenhum.
  *
- * O contrário também quebra a build: o mesmo estado em dois grupos faria o
+ * O contrário também quebra a build: a mesma categoria em dois grupos faria o
  * bloco aparecer duas vezes, com o mesmo `id` de âncora nos dois lugares — e
  * aí o link do índice passa a levar a um lugar arbitrário.
  */
@@ -54,29 +57,54 @@ export function conferirCobertura(
   catalogo: readonly Bloco[],
   grupos: readonly Grupo[]
 ): void {
-  const contagem = new Map<Estado, number>();
+  const contagem = new Map<Categoria, number>();
   for (const g of grupos) {
-    for (const e of g.estados) contagem.set(e, (contagem.get(e) ?? 0) + 1);
+    for (const c of g.categorias) contagem.set(c, (contagem.get(c) ?? 0) + 1);
   }
 
-  const estadosUsados = [...new Set(catalogo.map((b) => b.estado))];
+  const categoriasUsadas = [...new Set(catalogo.map((b) => b.categoria))];
 
-  const orfaos = estadosUsados.filter((e) => !contagem.has(e));
+  const orfaos = categoriasUsadas.filter((c) => !contagem.has(c));
   if (orfaos.length) {
     throw new Error(
-      `[bancada] o(s) estado(s) ${orfaos.join(", ")} não pertence(m) a nenhum grupo de ` +
-        `GRUPOS. Bloco de estado sem grupo não some com erro: ele some em silêncio, do ` +
+      `[bancada] a(s) categoria(s) ${orfaos.join(", ")} não pertence(m) a nenhum grupo de ` +
+        `GRUPOS. Bloco de categoria sem grupo não some com erro: ele some em silêncio, do ` +
         `índice e da página, e a contagem cai sem ninguém ter mexido em bloco nenhum. ` +
-        `Todo estado novo em catalogo.ts ganha um grupo no mesmo commit.`
+        `Toda categoria nova em catalogo.ts ganha um grupo no mesmo commit.`
     );
   }
 
-  const repetidos = [...contagem].filter(([, n]) => n > 1).map(([e]) => e);
+  const repetidos = [...contagem].filter(([, n]) => n > 1).map(([c]) => c);
   if (repetidos.length) {
     throw new Error(
-      `[bancada] o(s) estado(s) ${repetidos.join(", ")} aparece(m) em mais de um grupo ` +
+      `[bancada] a(s) categoria(s) ${repetidos.join(", ")} aparece(m) em mais de um grupo ` +
         `de GRUPOS. O bloco nasceria duas vezes na página, as duas com o mesmo id de ` +
         `âncora — e o link do índice passaria a levar a um lugar arbitrário.`
+    );
+  }
+}
+
+/**
+ * A trava do bloco sem categoria — a outra ponta da mesma doutrina.
+ *
+ * `conferirCobertura` pressupõe que todo bloco TEM uma `categoria` e checa se
+ * ela tem grupo; esta função checa o passo anterior, que o tipo `Bloco` já
+ * torna obrigatório em `npm run check` mas que só quebra `npm run build` de
+ * verdade se houver uma trava em tempo de execução — a build do Astro não
+ * type-checa `.ts` importado. Sem esta trava, um bloco sem `categoria`
+ * simplesmente não bate com `includes` de grupo nenhum e some da bancada em
+ * silêncio, do jeito exato que o estado sem grupo já sumia antes de
+ * `conferirCobertura` existir.
+ */
+export function conferirCategorias(catalogo: readonly Bloco[]): void {
+  const semCategoria = catalogo.filter((b) => !b.categoria);
+  if (semCategoria.length) {
+    throw new Error(
+      `[bancada] bloco(s) sem categoria: ${semCategoria
+        .map((b) => `${b.id} (${b.nome})`)
+        .join(", ")}. Toda entrada de CATALOGO precisa de uma categoria de GRUPOS — sem ` +
+        `ela o bloco não bate com o filtro de nenhum grupo e some da bancada em silêncio. ` +
+        `Declare a categoria no mesmo commit que acrescenta o bloco.`
     );
   }
 }

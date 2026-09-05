@@ -28,7 +28,7 @@
  */
 import Palco from "./Palco.astro";
 import { CATALOGO, GRUPOS } from "../catalogo";
-import { idsDoGrupo, conferirCobertura } from "../bancada";
+import { idsDoGrupo, conferirCobertura, conferirCategorias } from "../bancada";
 import type { Estilo, Modo } from "../sites";
 
 interface Props {
@@ -38,8 +38,11 @@ interface Props {
 const { estilo, modo } = Astro.props;
 const palco = { estilo, modo };
 
-/* Estado do catálogo sem grupo em GRUPOS sumiria da página e do índice sem
-   erro nenhum. Ver o porquê inteiro em `src/bancada.ts`. */
+/* Duas travas, nesta ordem: primeiro que todo bloco TEM categoria (senão a
+   segunda trava não teria o que checar e o bloco sumiria em silêncio),
+   depois que toda categoria do catálogo cai em algum grupo de GRUPOS. Ver o
+   porquê inteiro em `src/bancada.ts`. */
+conferirCategorias(CATALOGO);
 conferirCobertura(CATALOGO, GRUPOS);
 
 const nomeDoSlot = (id: (typeof CATALOGO)[number]["id"]) =>

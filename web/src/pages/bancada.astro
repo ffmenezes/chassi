@@ -9,7 +9,7 @@
  */
 import Base from "../layouts/Base.astro";
 import Blocos from "../components/Blocos.astro";
-import { CATALOGO, GRUPOS, estadoDe, numeroDe } from "../catalogo";
+import { CATALOGO, GRUPOS, categoriaDe, numeroDe } from "../catalogo";
 import { ESTILOS } from "../sites";
 import type { Estilo } from "../sites";
 import "../styles/chrome.css";
@@ -117,7 +117,7 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
           {GRUPOS.map((g) => (
             <>
               <li class="indice-grupo">{g.rotulo}</li>
-              {CATALOGO.filter((b) => g.estados.includes(estadoDe(b.id))).map((b) => (
+              {CATALOGO.filter((b) => g.categorias.includes(categoriaDe(b.id))).map((b) => (
                 <li>
                   <a href={`#b${String(b.id).toLowerCase()}`} data-indice={String(b.id)}>
                     <span class="n">{numeroDe(b.id)}</span>
