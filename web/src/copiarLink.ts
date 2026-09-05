@@ -1,5 +1,10 @@
 /**
- * O elo que o leitor copia — do título e de cada seção.
+ * O que o leitor copia com um clique — elo de título/seção, e também o texto
+ * literal de um bloco de código (bloco 20). As duas cópias têm a mesma forma
+ * (clique, retorno visual, aviso a leitor de tela, reverte sozinho depois de
+ * `ESPERA`), então dividem o mesmo ouvinte delegado e o mesmo aviso — daí
+ * `ligarCopia` servir os dois casos em vez de cada componente reimplementar
+ * a própria versão de "marcar como copiado".
  *
  * A parte que decide QUAL URL sai daqui, pura e testada. O que toca área de
  * transferência e DOM fica no <script> do componente, porque não se testa em
@@ -58,7 +63,12 @@ export function ligarCopia(): void {
     const depois = alvo.dataset.copiaDepois ?? "Copiado";
     alvo.dataset.copiado = "";
     if (rotulo) rotulo.textContent = depois;
-    aviso.textContent = "Link copiado.";
+    /* mensagem genérica por padrão ("Link copiado."), porque os dois elos
+       existentes (título e cabeçalho) copiam link. O bloco de código passa
+       `data-copia-anuncio="Código copiado."` — é o que o leitor de tela ouve,
+       e o rótulo visível não basta sozinho porque quem usa leitor de tela
+       pode não estar com o foco no botão no instante em que ele muda. */
+    aviso.textContent = alvo.dataset.copiaAnuncio ?? "Link copiado.";
 
     clearTimeout(relogios.get(alvo));
     relogios.set(
@@ -77,16 +87,24 @@ export function ligarCopia(): void {
     if (!navigator.clipboard) return;
 
     ev.preventDefault();
-    /* o botão do cabeçalho não tem href, e sem fragmento sai a página limpa */
+    /* `data-copia-texto` é o texto LITERAL a copiar (o código do bloco 20).
+       Ausente, o elemento é elo de âncora — título ou cabeçalho — e o que se
+       copia é a URL da seção; o cabeçalho não tem href, e sem fragmento sai a
+       página limpa. */
+    const textoLiteral = alvo.dataset.copiaTexto;
     const href = alvo.getAttribute("href") ?? "";
-    navigator.clipboard.writeText(urlDaAncora(href, location.href)).then(
+    const texto = textoLiteral !== undefined ? textoLiteral : urlDaAncora(href, location.href);
+
+    navigator.clipboard.writeText(texto).then(
       () => marcar(alvo),
       () => {
         /* Negado — política de empresa, Firefox travado, origem sem HTTPS. Não
            se mente que copiou; mas o `preventDefault` já saiu, e sem isto o elo
            do heading não copiaria NEM navegaria: o clique morreria calado, que
-           é pior que não ter o botão. Devolve o comportamento de <a>. */
-        if (href) location.hash = href;
+           é pior que não ter o botão. Devolve o comportamento de <a>.
+           Texto literal não tem "para onde ir" — o botão do bloco de código
+           fica calado, mesmo preço que o botão do cabeçalho já paga hoje. */
+        if (textoLiteral === undefined && href) location.hash = href;
       },
     );
   });

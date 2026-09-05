@@ -8,6 +8,19 @@
  * Sem realce de sintaxe: crawler de IA não executa JS (`infra.md`), e realce no
  * cliente entrega bloco cru para quem indexa e ainda paga em peso. Havendo
  * realce um dia, ele é gerado na build.
+ *
+ * O botão de copiar é a trava do `$` deixando de ser teoria: sem botão, colar
+ * "$ npm install" só quebra o comando de quem digitou à mão, devagar, e
+ * provavelmente já tirou o cifrão no processo. Com um botão que copia a
+ * string exata, o cifrão vai colado — é a diferença entre um comando que roda
+ * e um que o terminal rejeita, e é isso que faz a regra valer a pena de
+ * verdade, não só em revisão de PR.
+ *
+ * JS de cliente, com justificativa: `ligarCopia()` (de `../../copiarLink`) é
+ * melhoria progressiva pura — sem JS, ou sem `navigator.clipboard`, o botão
+ * não aparece (a prop é `false`) ou aparece e não faz nada ao clicar, e o
+ * código continua ali, selecionável à mão, exatamente como antes de existir
+ * o botão.
  */
 export interface Props {
   /** Onde isso é colado: `bash`, `.env`, "fórmula da planilha", "display do inversor". */
@@ -16,8 +29,15 @@ export interface Props {
   codigo: string;
   /** Obrigatório quando o trecho altera estado: o que ele faz e o que não desfaz. */
   aviso?: string;
+  /**
+   * Botão de copiar, opcional por prop. Ligado por padrão: é melhoria pura
+   * (ver comentário acima), então desligá-la por padrão privaria a maioria
+   * dos blocos de uma vantagem sem custo algum. Um bloco pensado só para
+   * leitura — nunca para colar — passa `copiar={false}`.
+   */
+  copiar?: boolean;
 }
-const { rotulo, codigo, aviso } = Astro.props;
+const { rotulo, codigo, aviso, copiar = true } = Astro.props;
 
 const erro = (m: string) => {
   throw new Error(`[bloco 20] ${m}`);
@@ -41,7 +61,26 @@ const texto = linhas.join("\n");
 ---
 
 <div class="codigo">
-  <p class="b-rotulo rot">{rotulo}</p>
+  <div class="cab">
+    <p class="b-rotulo rot">{rotulo}</p>
+    {copiar && (
+      <button
+        type="button"
+        class="copia"
+        data-copia
+        data-copia-texto={texto}
+        data-copia-antes="Copiar"
+        data-copia-depois="Copiado"
+        data-copia-anuncio="Código copiado."
+        aria-label={`Copiar o código de ${rotulo}`}
+      >
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+          <path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32Zm-8,128H176V88a8,8,0,0,0-8-8H96V48H208Z"></path>
+        </svg>
+        <span data-copia-rotulo aria-hidden="true">Copiar</span>
+      </button>
+    )}
+  </div>
   {aviso && <p class="alerta">{aviso}</p>}
   <div class="rolagem"><pre><code>{texto}</code></pre></div>
 </div>
@@ -49,6 +88,43 @@ const texto = linhas.join("\n");
 <style>
   .codigo { max-width: var(--b-medida); }
   .rot { margin-bottom: 7px; }
+
+  .cab {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 7px;
+  }
+  .cab .rot { margin-bottom: 0; }
+
+  /* Mesma linguagem visual do botão de copiar do cabeçalho do artigo e do
+     título de seção (`CabecalhoArtigo.astro`, `Titulo.astro`): texto + ícone,
+     sem fundo nem borda, muda de cor no hover e enquanto `data-copiado`
+     está presente. Não é `.b-btn`: aquele é peso de ação de tela (bloco A3),
+     este é uma utilidade discreta ao lado do rótulo — mesmo papel visual nos
+     três lugares onde "copiar" existe no chassi. */
+  .copia {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-tinta-2);
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .copia:hover,
+  .copia[data-copiado] { color: var(--b-acento-tinta); }
+  .copia svg { width: 13px; height: 13px; }
 
   /* o que o comando faz e o que ele não desfaz vem ANTES, em texto: é a
      ressalva do número, na camada em que o leitor executa */
@@ -85,3 +161,13 @@ const texto = linhas.join("\n");
     tab-size: 2;
   }
 </style>
+
+{/* Sem condicionar ao `copiar`: `ligarCopia()` é idempotente (documentado em
+    `copiarLink.ts`) e, com `copiar={false}`, este bloco não tem nenhum
+    `[data-copia]` para o ouvinte delegado encontrar — chamar de qualquer jeito
+    é mais simples e mais seguro do que arriscar um `<script>` dentro de um
+    bloco condicional do template. */}
+<script>
+  import { ligarCopia } from "../../copiarLink";
+  ligarCopia();
+</script>
