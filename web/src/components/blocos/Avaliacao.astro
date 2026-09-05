@@ -23,6 +23,25 @@
  * além do `localStorage`. A porta de dados está inerte (adaptador `nenhum`);
  * quando ela acordar, é publicar a Function no caminho certo — este
  * componente já está pronto e não muda.
+ *
+ * "Mudar resposta": ao contrário da Enquete e do Checklist — onde clicar de
+ * novo num radio ou numa caixa já é o próprio jeito de voltar atrás, sem
+ * nada extra — aqui a UI trocava a pergunta por um agradecimento permanente,
+ * sem porta de volta nenhuma. Isso é decisão, não só interface: a regra do
+ * bloco nunca emite AggregateRating, então não existe estatística pública
+ * para uma segunda resposta corromper, e "isso respondeu sua dúvida" é
+ * exatamente o tipo de resposta que muda — no reforço, depois de uma
+ * correção editorial, ou só porque a primeira resposta foi no escuro. Por
+ * isso o link "Mudar resposta" abaixo: reabre a pergunta e esquece a
+ * resposta salva, em vez de prender quem respondeu numa via de mão única.
+ *
+ * `especime`: modo vitrine, no espírito do `demo` do Toast — mas aqui a
+ * troca não é "mostrar um botão a mais", é "não guardar nada". Ligado, o
+ * bloco continua respondendo a clique (troca de tela, campo livre, botão de
+ * mudar resposta), só que sem tocar `localStorage`: nada é lido na entrada
+ * nem escrito na saída, e cada recarga da bancada volta ao estado inicial —
+ * que é exatamente o estado que se precisa ver para julgar o bloco. Ausente
+ * (o caso de qualquer artigo real), nada muda.
  */
 import { CAMINHOS, urlDaApi } from "../../api/contrato";
 
@@ -36,6 +55,9 @@ interface Props {
    *  exemplo). */
   site?: string;
   slug?: string;
+  /** Modo vitrine: o bloco funciona, mas não lê nem escreve `localStorage`.
+   *  Só a bancada liga isto. */
+  especime?: boolean;
 }
 const {
   pergunta = "Isso respondeu sua dúvida?",
@@ -43,6 +65,7 @@ const {
   id,
   site,
   slug,
+  especime = false,
 } = Astro.props;
 const idAvaliacao = id ?? "unica";
 const endpoint = urlDaApi(CAMINHOS.avaliacao);
@@ -53,6 +76,7 @@ const endpoint = urlDaApi(CAMINHOS.avaliacao);
   data-endpoint={endpoint}
   data-site={site}
   data-slug={slug}
+  data-especime={especime ? "true" : undefined}
 >
   <div class="pergunta-bloco" data-pergunta-bloco>
     <div class="txt">
@@ -74,7 +98,39 @@ const endpoint = urlDaApi(CAMINHOS.avaliacao);
   <p class="obrigado" data-obrigado aria-live="polite" hidden>
     Resposta guardada neste navegador. Ainda não há apuração.
   </p>
+  <button class="mudar" type="button" data-mudar-resposta hidden>Mudar resposta</button>
 </div>
+<script is:inline>
+  /* Aplica o estado guardado ANTES da primeira pintura, para não piscar o
+   * estado inicial e só depois trocar para o respondido. Um `<script>`
+   * comum do Astro sai como módulo adiado (`defer` implícito de
+   * `type="module"`), então corre depois que o HTML já foi pintado — é
+   * exatamente esse intervalo que pisca. Este script é `is:inline` (o Astro
+   * não o toca nem o move) e roda síncrono, no ponto exato em que aparece:
+   * bloqueia o parser aqui mesmo, antes de haver qualquer oportunidade de
+   * pintura para o restante da página. Por isso fica mínimo, sem
+   * `template literal` (concatenação com `+`, como o resto do repo) e sem
+   * nada que não seja "ler o guardado e aplicar". A leitura completa, com
+   * os manipuladores de clique, é o script de baixo. */
+  (function () {
+    var bloco = document.currentScript.previousElementSibling;
+    if (!bloco || bloco.dataset.especime === "true") return;
+    var chave = "avaliacao:" + location.pathname + ":" + bloco.dataset.avaliacao;
+    var salvo = "";
+    try {
+      salvo = localStorage.getItem(chave) || "";
+    } catch (erro) {}
+    if (!salvo) return;
+    var pergunta = bloco.querySelector("[data-pergunta-bloco]");
+    var campo = bloco.querySelector("[data-campo-livre]");
+    var obrigado = bloco.querySelector("[data-obrigado]");
+    var mudar = bloco.querySelector("[data-mudar-resposta]");
+    if (pergunta) pergunta.hidden = true;
+    if (campo) campo.hidden = true;
+    if (obrigado) obrigado.hidden = false;
+    if (mudar) mudar.hidden = false;
+  })();
+</script>
 <style>
   .avaliacao { padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; }
   .pergunta-bloco {
@@ -94,6 +150,12 @@ const endpoint = urlDaApi(CAMINHOS.avaliacao);
   }
   .campo-livre button { align-self: flex-start; }
   .obrigado { margin: 0; color: var(--b-tinta-2); font-size: 13.5px; }
+  .mudar {
+    align-self: flex-start; margin: -6px 0 0; padding: 0; border: 0;
+    background: none; cursor: pointer; font-family: inherit;
+    font-size: 13.5px; color: var(--b-acento-tinta); text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 </style>
 
 <script>
@@ -102,32 +164,52 @@ const endpoint = urlDaApi(CAMINHOS.avaliacao);
      exatamente como estavam antes deste script: presentes, inertes. É a
      mesma classe de interação do overlay (N4), e a mesma resposta. */
   for (const bloco of document.querySelectorAll<HTMLElement>(".avaliacao[data-avaliacao]")) {
+    const especime = bloco.dataset.especime === "true";
     const chave = "avaliacao:" + location.pathname + ":" + bloco.dataset.avaliacao;
     const perguntaBloco = bloco.querySelector<HTMLElement>("[data-pergunta-bloco]")!;
     const campoLivre = bloco.querySelector<HTMLElement>("[data-campo-livre]")!;
     const texto = bloco.querySelector<HTMLTextAreaElement>("[data-texto]")!;
     const obrigado = bloco.querySelector<HTMLElement>("[data-obrigado]")!;
+    const mudarResposta = bloco.querySelector<HTMLElement>("[data-mudar-resposta]")!;
 
     function concluir() {
       perguntaBloco.hidden = true;
       campoLivre.hidden = true;
       obrigado.hidden = false;
+      mudarResposta.hidden = false;
+    }
+
+    function reiniciar() {
+      if (!especime) {
+        try {
+          localStorage.removeItem(chave);
+        } catch {}
+      }
+      texto.value = "";
+      obrigado.hidden = true;
+      mudarResposta.hidden = true;
+      campoLivre.hidden = true;
+      perguntaBloco.hidden = false;
     }
 
     function enviar(resposta: "sim" | "nao", comentario?: string) {
-      try {
-        localStorage.setItem(chave, JSON.stringify({ resposta, comentario }));
-      } catch {}
+      if (!especime) {
+        try {
+          localStorage.setItem(chave, JSON.stringify({ resposta, comentario }));
+        } catch {}
+      }
       concluir();
 
       /* Guarda: sem `site`/`slug` não tenta nada além do que já aconteceu
          acima. Com os dois, é melhor esforço — a interface já concluiu
          antes de qualquer requisição sair, então falha de rede ou 404 (a
-         Function ainda não existe) não muda nada na tela. */
+         Function ainda não existe) não muda nada na tela. Espécime nunca
+         chega aqui com `site`/`slug` (a bancada não os passa), mas a guarda
+         continua valendo por clareza. */
       const site = bloco.dataset.site;
       const slug = bloco.dataset.slug;
       const endpoint = bloco.dataset.endpoint;
-      if (site && slug && endpoint) {
+      if (!especime && site && slug && endpoint) {
         fetch(endpoint, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -137,11 +219,17 @@ const endpoint = urlDaApi(CAMINHOS.avaliacao);
       }
     }
 
-    /* Se esta pessoa já respondeu neste navegador, não pergunta de novo. */
-    try {
-      const salvo = localStorage.getItem(chave);
-      if (salvo) concluir();
-    } catch {}
+    /* Se esta pessoa já respondeu neste navegador, não pergunta de novo —
+       o script `is:inline` acima já cuidou disto antes da pintura; aqui só
+       cobre o caso (raro) de este script rodar sem aquele ter encontrado o
+       elemento anterior, e é por isso que ler de novo é inofensivo: já
+       estará concluído, e marcar como concluído de novo não muda nada. */
+    if (!especime) {
+      try {
+        const salvo = localStorage.getItem(chave);
+        if (salvo) concluir();
+      } catch {}
+    }
 
     perguntaBloco.addEventListener("click", (ev) => {
       const botao = (ev.target as HTMLElement).closest<HTMLButtonElement>("[data-resposta]");
@@ -158,5 +246,7 @@ const endpoint = urlDaApi(CAMINHOS.avaliacao);
     bloco.querySelector("[data-enviar-texto]")?.addEventListener("click", () => {
       enviar("nao", texto.value.trim() || undefined);
     });
+
+    mudarResposta.addEventListener("click", reiniciar);
   }
 </script>

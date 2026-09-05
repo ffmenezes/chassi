@@ -16,12 +16,26 @@
  * mentira enquanto não existir quem registre — e é por isso que o aviso
  * abaixo nunca usa essa palavra.
  *
+ * "Voltar atrás": ao contrário da Avaliação, aqui não existe via de mão
+ * única para decidir — nenhum radio fica desabilitado depois de escolhido,
+ * então trocar de opção é só clicar em outra, o gesto nativo de sempre. Não
+ * há tela de "obrigado" que substitui a pergunta; a pergunta continua ali,
+ * editável, sempre. Por isso este bloco não ganhou controle extra de reset.
+ *
  * Também declara o contrato em `api/contrato.ts` (`CAMINHOS.enquete`), por
  * trás de uma guarda: só tenta mandar o voto adiante quando a página conhece
  * `site` e `slug` — nas vitrines (bancada, exemplo), nada sai daqui além do
  * `localStorage`. A porta de dados está inerte (adaptador `nenhum`); quando
  * ela acordar, é publicar a Function no caminho certo — este componente já
  * está pronto e não muda.
+ *
+ * `especime`: modo vitrine, no espírito do `demo` do Toast — mas aqui a
+ * troca não é "mostrar um botão a mais", é "não guardar nada". Ligado, o
+ * radio continua respondendo a clique normalmente, só que sem tocar
+ * `localStorage`: nada é lido na entrada nem escrito na saída, e cada
+ * recarga da bancada volta ao estado inicial (nenhuma opção marcada) — que é
+ * exatamente o estado que se precisa ver para julgar o bloco. Ausente (o
+ * caso de qualquer artigo real), nada muda.
  */
 import { CAMINHOS, urlDaApi } from "../../api/contrato";
 
@@ -35,8 +49,11 @@ interface Props {
    *  exemplo). */
   site?: string;
   slug?: string;
+  /** Modo vitrine: o bloco funciona, mas não lê nem escreve `localStorage`.
+   *  Só a bancada liga isto. */
+  especime?: boolean;
 }
-const { pergunta, opcoes, piso, nome = "enquete", site, slug } = Astro.props;
+const { pergunta, opcoes, piso, nome = "enquete", site, slug, especime = false } = Astro.props;
 const endpoint = urlDaApi(CAMINHOS.enquete);
 ---
 <form
@@ -45,6 +62,7 @@ const endpoint = urlDaApi(CAMINHOS.enquete);
   data-endpoint={endpoint}
   data-site={site}
   data-slug={slug}
+  data-especime={especime ? "true" : undefined}
 >
   <p class="b-rotulo">Enquete</p>
   <p class="pergunta"><b>{pergunta}</b></p>
@@ -63,6 +81,38 @@ const endpoint = urlDaApi(CAMINHOS.enquete);
     Voto guardado neste navegador. Ainda não há apuração.
   </p>
 </form>
+<script is:inline>
+  /* Aplica o voto guardado ANTES da primeira pintura, para não piscar sem
+   * opção marcada e só depois marcar a certa. Um `<script>` comum do Astro
+   * sai como módulo adiado (`defer` implícito de `type="module"`), então
+   * corre depois que o HTML já foi pintado — é exatamente esse intervalo
+   * que pisca. Este script é `is:inline` (o Astro não o toca nem o move) e
+   * roda síncrono, no ponto exato em que aparece: bloqueia o parser aqui
+   * mesmo, antes de haver qualquer oportunidade de pintura para o restante
+   * da página. Por isso fica mínimo, sem `template literal` (concatenação
+   * com `+`, como o resto do repo) e sem nada que não seja "ler o guardado
+   * e marcar o radio certo". A leitura completa, com o manipulador de
+   * troca, é o script de baixo. */
+  (function () {
+    var form = document.currentScript.previousElementSibling;
+    if (!form || form.dataset.especime === "true") return;
+    var chave = "enquete:" + location.pathname + ":" + form.dataset.enquete;
+    var salvo = "";
+    try {
+      salvo = localStorage.getItem(chave) || "";
+    } catch (erro) {}
+    if (!salvo) return;
+    var radios = form.querySelectorAll('input[type="radio"]');
+    for (var i = 0; i < radios.length; i++) {
+      if (radios[i].value === salvo) {
+        radios[i].checked = true;
+        break;
+      }
+    }
+    var status = form.querySelector("[data-status]");
+    if (status) status.hidden = false;
+  })();
+</script>
 <style>
   .enquete { padding: 20px 22px; }
   .pergunta { margin: 0; color: var(--b-tinta); }
@@ -85,19 +135,25 @@ const endpoint = urlDaApi(CAMINHOS.enquete);
      guardado além do que o próprio navegador guarda em campo de formulário
      comum, ou seja, nada entre visitas). */
   for (const form of document.querySelectorAll<HTMLFormElement>(".enquete[data-enquete]")) {
+    const especime = form.dataset.especime === "true";
     const chave = "enquete:" + location.pathname + ":" + form.dataset.enquete;
     const status = form.querySelector<HTMLElement>("[data-status]")!;
     const radios = [...form.querySelectorAll<HTMLInputElement>('input[type="radio"]')];
 
-    let salvo = "";
-    try {
-      salvo = localStorage.getItem(chave) ?? "";
-    } catch {}
-    if (salvo) {
-      const escolhido = radios.find((r) => r.value === salvo);
-      if (escolhido) {
-        escolhido.checked = true;
-        status.hidden = false;
+    /* O script `is:inline` acima já marcou o radio certo antes da pintura;
+       aqui só cobre o caso (raro) de este script rodar sem aquele ter
+       encontrado o elemento anterior — ler de novo é inofensivo. */
+    if (!especime) {
+      let salvo = "";
+      try {
+        salvo = localStorage.getItem(chave) ?? "";
+      } catch {}
+      if (salvo) {
+        const escolhido = radios.find((r) => r.value === salvo);
+        if (escolhido) {
+          escolhido.checked = true;
+          status.hidden = false;
+        }
       }
     }
 
@@ -105,9 +161,11 @@ const endpoint = urlDaApi(CAMINHOS.enquete);
       const alvo = ev.target as HTMLInputElement;
       if (alvo.type !== "radio") return;
 
-      try {
-        localStorage.setItem(chave, alvo.value);
-      } catch {}
+      if (!especime) {
+        try {
+          localStorage.setItem(chave, alvo.value);
+        } catch {}
+      }
       status.hidden = false;
 
       /* Guarda: sem `site`/`slug` não tenta nada além do que já aconteceu
@@ -117,7 +175,7 @@ const endpoint = urlDaApi(CAMINHOS.enquete);
       const site = form.dataset.site;
       const slug = form.dataset.slug;
       const endpoint = form.dataset.endpoint;
-      if (site && slug && endpoint) {
+      if (!especime && site && slug && endpoint) {
         fetch(endpoint, {
           method: "POST",
           headers: { "content-type": "application/json" },

@@ -9,12 +9,26 @@
  * ele). Bloco interativo sem interação é decoração, e é essa decoração que
  * o script no fim deste arquivo substitui por comportamento real.
  *
+ * "Voltar atrás": ao contrário da Avaliação, aqui não existe via de mão
+ * única — cada caixa continua sendo um checkbox nativo, e desmarcar é só
+ * clicar de novo nela. Não há tela final que substitui a lista; a lista
+ * inteira continua editável, item a item, para sempre. Por isso este bloco
+ * não ganhou controle extra de reset.
+ *
  * Também declara o contrato em `api/contrato.ts` (`CAMINHOS.checklist`), por
  * trás de uma guarda: só tenta mandar o clique adiante quando a página
  * conhece `site` e `slug` — nas duas vitrines (bancada e exemplo), que não
  * têm nenhum dos dois, nada sai daqui além do `localStorage`. A porta de
  * dados está inerte (adaptador `nenhum`); quando ela acordar, é publicar a
  * Function no caminho certo — este componente já está pronto e não muda.
+ *
+ * `especime`: modo vitrine, no espírito do `demo` do Toast — mas aqui a
+ * troca não é "mostrar um botão a mais", é "não guardar nada". Ligado, cada
+ * caixa continua marcando e desmarcando normalmente, só que sem tocar
+ * `localStorage`: nada é lido na entrada nem escrito na saída, e cada
+ * recarga da bancada volta ao estado inicial (nada marcado) — que é
+ * exatamente o estado que se precisa ver para julgar o bloco. Ausente (o
+ * caso de qualquer artigo real), nada muda.
  */
 import { CAMINHOS, urlDaApi } from "../../api/contrato";
 
@@ -31,8 +45,11 @@ interface Props {
    *  exemplo). */
   site?: string;
   slug?: string;
+  /** Modo vitrine: o bloco funciona, mas não lê nem escreve `localStorage`.
+   *  Só a bancada liga isto. */
+  especime?: boolean;
 }
-const { rotulo, itens, teto = 7, id, site, slug } = Astro.props;
+const { rotulo, itens, teto = 7, id, site, slug, especime = false } = Astro.props;
 const lista = itens.slice(0, teto);
 const idChecklist = id ?? rotulo ?? "unico";
 const endpoint = urlDaApi(CAMINHOS.checklist);
@@ -43,6 +60,7 @@ const endpoint = urlDaApi(CAMINHOS.checklist);
   data-endpoint={endpoint}
   data-site={site}
   data-slug={slug}
+  data-especime={especime ? "true" : undefined}
 >
   {rotulo && <p class="b-rotulo">{rotulo}</p>}
   <ul>
@@ -54,6 +72,34 @@ const endpoint = urlDaApi(CAMINHOS.checklist);
     ))}
   </ul>
 </div>
+<script is:inline>
+  /* Aplica as caixas guardadas ANTES da primeira pintura, para não piscar
+   * tudo desmarcado e só depois marcar as certas. Um `<script>` comum do
+   * Astro sai como módulo adiado (`defer` implícito de `type="module"`),
+   * então corre depois que o HTML já foi pintado — é exatamente esse
+   * intervalo que pisca. Este script é `is:inline` (o Astro não o toca nem
+   * o move) e roda síncrono, no ponto exato em que aparece: bloqueia o
+   * parser aqui mesmo, antes de haver qualquer oportunidade de pintura para
+   * o restante da página. Por isso fica mínimo, sem `template literal`
+   * (concatenação com `+`, como o resto do repo) e sem nada que não seja
+   * "ler o guardado e marcar as caixas certas". A leitura completa, com o
+   * manipulador de clique, é o script de baixo. */
+  (function () {
+    var bloco = document.currentScript.previousElementSibling;
+    if (!bloco || bloco.dataset.especime === "true") return;
+    var chave = "checklist:" + location.pathname + ":" + bloco.dataset.checklist;
+    var marcados = [];
+    try {
+      marcados = JSON.parse(localStorage.getItem(chave) || "[]");
+    } catch (erro) {}
+    if (!marcados.length) return;
+    var itens = bloco.querySelectorAll("input[type=checkbox]");
+    for (var i = 0; i < itens.length; i++) {
+      var idx = Number(itens[i].dataset.idx);
+      if (marcados.indexOf(idx) !== -1) itens[i].checked = true;
+    }
+  })();
+</script>
 <style>
   ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
   li { display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: start; color: var(--b-corpo); }
@@ -68,16 +114,23 @@ const endpoint = urlDaApi(CAMINHOS.checklist);
      `data-checklist`), nunca por site inteiro, para o mesmo checklist em
      dois posts não se misturar. */
   for (const caixa of document.querySelectorAll<HTMLElement>(".checklist[data-checklist]")) {
+    const especime = caixa.dataset.especime === "true";
     const chave = "checklist:" + location.pathname + ":" + caixa.dataset.checklist;
     const itens = [...caixa.querySelectorAll<HTMLInputElement>("input[type=checkbox]")];
 
     let marcados: number[] = [];
-    try {
-      marcados = JSON.parse(localStorage.getItem(chave) ?? "[]");
-    } catch {}
-    for (const item of itens) {
-      const idx = Number(item.dataset.idx);
-      if (marcados.includes(idx)) item.checked = true;
+    if (!especime) {
+      /* O script `is:inline` acima já marcou as caixas certas antes da
+         pintura; aqui só cobre o caso (raro) de este script rodar sem
+         aquele ter encontrado o elemento anterior — ler de novo é
+         inofensivo. */
+      try {
+        marcados = JSON.parse(localStorage.getItem(chave) ?? "[]");
+      } catch {}
+      for (const item of itens) {
+        const idx = Number(item.dataset.idx);
+        if (marcados.includes(idx)) item.checked = true;
+      }
     }
 
     caixa.addEventListener("change", (ev) => {
@@ -88,9 +141,11 @@ const endpoint = urlDaApi(CAMINHOS.checklist);
       const atuais = new Set(marcados);
       if (alvo.checked) atuais.add(idx); else atuais.delete(idx);
       marcados = [...atuais];
-      try {
-        localStorage.setItem(chave, JSON.stringify(marcados));
-      } catch {}
+      if (!especime) {
+        try {
+          localStorage.setItem(chave, JSON.stringify(marcados));
+        } catch {}
+      }
 
       /* Guarda: sem `site`/`slug` (bancada, exemplo) não tenta nada além do
          localStorage acima, que já é a fonte da verdade. Com os dois, é
@@ -100,7 +155,7 @@ const endpoint = urlDaApi(CAMINHOS.checklist);
       const site = caixa.dataset.site;
       const slug = caixa.dataset.slug;
       const endpoint = caixa.dataset.endpoint;
-      if (site && slug && endpoint) {
+      if (!especime && site && slug && endpoint) {
         fetch(endpoint, {
           method: "POST",
           headers: { "content-type": "application/json" },
