@@ -17,7 +17,7 @@ tipo `"N1"`..`"N5"`, estado `navegacao`, e nunca entra no campo `blocos` de um
 site. Se o que você vai criar é chrome, siga o mesmo procedimento abaixo, só
 pulando o passo do mock de artigo (chrome usa dado próprio, não `mock/artigo.ts`).
 
-## Os onze erros que já aconteceram aqui
+## Os doze erros que já aconteceram aqui
 
 Cada um tem commit ou comentário no código. Leia antes de escrever a primeira
 linha — é mais barato ler isto do que repetir o defeito.
@@ -43,11 +43,20 @@ linha — é mais barato ler isto do que repetir o defeito.
 
 3. **O catálogo não pode mentir.** `estado: "ativo"` significa "a dependência
    deste bloco está no ar **neste repositório**", não "o bloco está pronto".
-   Os blocos 24 (Oferta de isca) e 25 (Newsletter) são `previsto` porque cada
-   um pede um endpoint (`/api/isca`, `/api/newsletter`) que não existe aqui —
-   ver o comentário ao lado deles em `catalogo.ts`. Se o seu bloco depende de
-   infraestrutura ausente, o estado é `previsto` e o comentário diz **qual**
-   dependência falta, não só que falta uma.
+   O bloco 24 (Oferta de isca) chegou da extração como `estado: "ativo"`, com
+   um comentário afirmando textualmente que "a oferta exige um endpoint, e
+   ele existe em `functions/api/isca.ts`" — esse arquivo nunca existiu neste
+   repositório, foi herdado de outro projeto (commit `c53f33e`, "fix(sites):
+   conserta teste sem fronteira, valida SITE_DEMO e corrige catálogo"). O
+   mais grave: a doutrina do próprio campo — "bloco ativo é bloco cuja
+   dependência está no ar, não bloco sem dependência nenhuma" — já estava
+   escrita três linhas acima, no comentário do bloco vizinho, e mesmo assim
+   foi violada. Hoje 24 e 25 são `previsto`, cada um com o comentário dizendo
+   qual endpoint falta (`/api/isca`, `/api/newsletter`) — ver `catalogo.ts`.
+   Se o seu bloco depende de infraestrutura ausente, o estado é `previsto` e
+   o comentário diz **qual** dependência falta, não só que falta uma — e você
+   confere isso olhando o repositório, não copiando o que um comentário
+   vizinho disse sobre outro bloco.
 
 4. **Comentário que mente sobre o código é pior que nenhum.** `posthog.ts`
    tinha um comentário dizendo que o adaptador "ficaria pronto quando fosse
@@ -108,13 +117,19 @@ linha — é mais barato ler isto do que repetir o defeito.
     correção trocou para `exemplo`/slugs genéricos. `mock/artigo.ts` é o
     lugar certo, e ele já é sobre roteador doméstico e Wi-Fi, sem marca real.
 
-11. **Prova que não distingue os dois estados não prova nada.** Um teste que
-    passa com a implementação certa **e** com ela quebrada é decoração. Antes
-    de dar um teste do bloco novo por bom: quebre a implementação de
-    propósito, rode o teste, confira que ele falha; desfaça a quebra, rode de
-    novo, confira que passa. Vale para teste automatizado e para verificação
-    manual de CSS (item 12) — as duas formas de prova precisam do mesmo
-    tratamento.
+11. **Teste que passa com a implementação quebrada é pior que teste nenhum,
+    porque dá confiança falsa.** O caso mais didático: o teste "conta o mesmo
+    token nos dois modos uma só vez", em `web/src/sites/validacao.test.ts`,
+    usava **um** token repetido em `claro` e `escuro`. Contado certo (uma vez)
+    dava 1; contado errado, em dobro, dava 2 — e o teto era 6. O teste nunca
+    chegava perto da fronteira que dizia exercitar, então continuava verde com
+    o dedupe quebrado. Um revisor só viu o defeito quebrando o dedupe de
+    propósito e vendo o teste **continuar passando** (commit `c53f33e`). O
+    conserto usa quatro tokens distintos nos dois modos: deduplicado dá 4
+    (abaixo do teto, `not.toThrow()`), sem dedupe dá 8 (acima do teto) — agora
+    o teste tem para onde cair. A prova de que um teste seu presta é sempre a
+    mesma, automatizado ou verificação manual de CSS (item 12): quebre a
+    implementação de propósito, veja falhar; desfaça a quebra, veja passar.
 
 12. **CSS não se prova com `grep` no HTML.** Se o comportamento do seu bloco
     depende de cascata — `[hidden]`, `@layer`, um seletor que só vence por
