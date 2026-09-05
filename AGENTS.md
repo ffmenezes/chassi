@@ -83,7 +83,9 @@ componente conhece cor, fonte ou medida literal.
 - **Card social** — título vazio. Card em branco circula igual a card cheio, e
   é pior que card nenhum.
 - **Figura (bloco 19)** — `alt` vazio, `alt` igual à legenda, prova ou
-  diagrama sem legenda ou sem fonte e data, raster sem `width`/`height`, SVG
+  diagrama sem legenda ou sem fonte e data, `src` que não existe no acervo
+  (imagem quebrada na página publicada, em silêncio), `largura`/`altura`
+  que diverge do arquivo (o CLS que a declaração existia para evitar), SVG
   inline junto com `src`.
 - **Código (bloco 20)** — sem rótulo de contexto, linha abrindo com `$`, `#`
   ou `>` (não colável).

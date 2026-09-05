@@ -25,9 +25,10 @@ export interface SlideTexto {
 }
 
 /** Imagem é o bloco 19 inteiro, delegado: alt obrigatório, alt nunca igual à
- *  legenda, prova e diagrama sem legenda com fonte e data não nascem, raster
- *  sem width/height não nasce. Nenhuma dessas travas é reescrita aqui — elas
- *  chegam de graça e continuam iguais em qualquer lugar do artigo. */
+ *  legenda, prova e diagrama sem legenda com fonte e data não nascem, `src`
+ *  fora do acervo ou `largura`/`altura` divergente do arquivo quebram a
+ *  build. Nenhuma dessas travas é reescrita aqui — elas chegam de graça e
+ *  continuam iguais em qualquer lugar do artigo. */
 export interface SlideImagem {
   tipo: "imagem";
   titulo: string;

@@ -143,9 +143,9 @@ export const ARTIGOS: DadosArtigo[] = [
         dados: {
           papel: "prova",
           src: "exemplo/medicao.png",
-          alt: "Gráfico de barras com quatro medições crescentes de sinal por cômodo",
-          legenda: "Sinal medido em quatro pontos da casa, do mais distante ao mais próximo do roteador.",
-          fonte: "Medição própria, 2026-08-14",
+          alt: "Gráfico de barras com três colunas crescentes, a terceira bem mais alta que as duas primeiras",
+          legenda: "Ilustração do salto entre consumo médio e pico simultâneo, o problema desta seção.",
+          fonte: "Fonte e data fictícias — ilustração de exemplo, 07/2026.",
         } satisfies CamposFigura,
       },
       { tipo: "titulo", nivel: 2, id: "s2", texto: "O que muda quando você reordena os aparelhos" },
