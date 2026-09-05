@@ -9,7 +9,7 @@
  * `padrao` é o card das institucionais e leva o NOME DO SITE como título — não
  * uma frase inventada, porque o nome é o que a home de fato afirma.
  */
-import type { APIRoute } from "astro";
+import type { APIRoute, InferGetStaticPropsType } from "astro";
 import sharp from "sharp";
 import { siteInstitucional } from "../../institucional/dados";
 import { ARTIGOS } from "../../mock/artigos";
@@ -23,13 +23,22 @@ export function getStaticPaths() {
   ];
 }
 
-export const GET: APIRoute = async ({ props }) => {
-  const svg = svgDoCard(siteInstitucional(), (props as { titulo: string }).titulo);
+export const GET: APIRoute<InferGetStaticPropsType<typeof getStaticPaths>> = async ({ props }) => {
+  const svg = svgDoCard(siteInstitucional(), props.titulo);
   const png = await sharp(Buffer.from(svg)).png().toBuffer();
   return new Response(new Uint8Array(png), {
     headers: {
       "Content-Type": "image/png",
-      "Cache-Control": "public, max-age=31536000, immutable",
+      /*
+       * NÃO `immutable`: a URL de cada peça não é endereçada por conteúdo —
+       * `/social/<slug>.png` continua o mesmo caminho depois que o título do
+       * artigo muda. `immutable` diria a todo CDN e a toda rede social que
+       * faz scraping de OG image para nunca mais revalidar essa URL, e o
+       * card velho ficaria preso em cache por até um ano depois de o
+       * participante editar o título. Uma hora de cache é o bastante para
+       * absorver carga sem travar a correção de um título.
+       */
+      "Cache-Control": "public, max-age=3600",
     },
   });
 };
