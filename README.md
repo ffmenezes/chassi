@@ -234,7 +234,7 @@ corpo da mensagem.
 | | Do participante | Do upstream |
 |---|---|---|
 | cria e edita | `web/src/sites/<slug>.ts`, `sites/<slug>/**`, `web/src/meu/`, `web/src/pages/{index,sobre,contato}.astro` | — |
-| nunca toca | — | blocos, layouts, estilos, functions, as quatro páginas jurídicas, `web/src/sites/index.ts` |
+| nunca toca | — | blocos, layouts, estilos, functions, as quatro páginas jurídicas, `web/src/sites/index.ts`, `web/src/imagens/` (o acervo, hoje só com a imagem de exemplo) |
 
 As três páginas de identidade — `index.astro`, `sobre.astro` e `contato.astro`
 — nascem em branco, com um roteiro de perguntas embutido (comentário HTML,

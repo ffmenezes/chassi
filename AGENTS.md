@@ -15,6 +15,11 @@ O upstream edita: todo o resto, inclusive as quatro páginas jurídicas
 configuração, texto igual para todo mundo, você nunca as abre, e é por isso
 que continuam recebendo correção nossa para sempre, sem conflito.
 
+O acervo `web/src/imagens/` é do upstream hoje, e o que mora nele é a imagem de
+exemplo. Onde ficam as imagens do participante é pergunta em aberto: ela se
+decide quando chegar o pipeline de `post.md → blocos`, que ainda não existe —
+e sem ele ninguém publica figura própria de qualquer jeito.
+
 Cara própria sai de **até 6 tokens** em `web/src/sites/<slug>.ts`, nunca de
 editar um `.astro`. É essa regra que faz `scripts/atualizar` nunca conflitar:
 no minuto em que você editar um bloco `.astro`, aquele arquivo para de receber
@@ -41,6 +46,7 @@ web/src/sites/exemplo.ts               ← o modelo. Único arquivo do upstream 
 web/src/api/contrato.ts                ← a porta de transporte: caminhos + tipos
 web/src/url.ts                         ← URL absoluta a partir do domínio do site. Só formatação
 web/src/social/                        ← o card social: fonte, quebra de linha, SVG e tags de <head>
+web/src/imagens/                       ← o acervo: o `src` do bloco 19 é o caminho a partir daqui
 web/src/{components,layouts,styles,mock,pages}/
 web/src/meu/                           ← estilo próprio, blocos próprios. Upstream nunca escreve
 web/functions/{api,_lib}/              ← Pages Functions: adaptador fino + lógica pura em _lib
@@ -86,7 +92,8 @@ componente conhece cor, fonte ou medida literal.
   diagrama sem legenda ou sem fonte e data, `src` que não existe no acervo
   (imagem quebrada na página publicada, em silêncio), `largura`/`altura`
   que diverge do arquivo (o CLS que a declaração existia para evitar), SVG
-  inline junto com `src`.
+  inline junto com `src`, SVG apontado por `src` (desenho é código: entra
+  inline pelo slot, nunca pelo acervo).
 - **Código (bloco 20)** — sem rótulo de contexto, linha abrindo com `$`, `#`
   ou `>` (não colável).
 - **Aviso (bloco 21)** — tipo `atencao` sem `fonte`.
