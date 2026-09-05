@@ -1,0 +1,135 @@
+/* ============================================================
+   CADERNO — papel morno, tinta carvão, roxo só na ação
+   ------------------------------------------------------------
+   Tokens do Notion (VoltAgent/awesome-design-md). Três marcas do
+   sistema deles:
+
+   1. O neutro é QUENTE. O carvão do corpo é #37352f, não um cinza
+      frio, e a folha é #f6f5f4 — é isso que separa este tema do
+      `ceu`, que é o mesmo hairline no eixo azul-acinzentado.
+   2. O roxo é UM só e chama UMA coisa. A referência é explícita:
+      "não use o roxo em texto corrido nem em superfície grande".
+      Aqui ele é o preenchimento do botão forte e a tinta de link,
+      e nada mais.
+   3. Geometria sóbria e retangular: 12px nos cards, e a própria
+      referência marca que os botões NÃO são pílula. Com um
+      `--b-radius` só, o 12px dos cards é quem manda — num botão
+      de 38px de altura ele ainda lê como retângulo, longe dos
+      19px que virariam pílula.
+
+   O escuro é derivação declarada: a referência publica só o modo
+   claro ("dark-mode token values not surfaced beyond hero bands").
+   O que ela publica é a FAIXA de capa em navy, com o botão roxo
+   em cima — e é essa faixa, esticada até virar página, que é o
+   modo escuro deste tema. Os três degraus de fundo são os três
+   navys do sistema deles.
+   ============================================================ */
+@layer estilo {
+[data-estilo="caderno"] {
+  /* uma família só, em toda superfície — é regra explícita da referência.
+     "Notion Sans" é a variável deles, baseada em Inter; o Inter é o degrau
+     seguinte, e não um substituto genérico. */
+  --b-fonte-titulo: "Notion Sans", InterVariable, Inter, -apple-system, system-ui, "Segoe UI", Helvetica, sans-serif;
+  --b-fonte-corpo: "Notion Sans", InterVariable, Inter, -apple-system, system-ui, "Segoe UI", Helvetica, sans-serif;
+  /* meta em sans, e não em mono: aqui a fonte é a mesma em todo lugar.
+     Código segue mono por `--b-fonte-codigo`, que é semântica e não gosto. */
+  --b-fonte-meta: "Notion Sans", InterVariable, Inter, -apple-system, system-ui, "Segoe UI", Helvetica, sans-serif;
+
+  /* 600 nos títulos, 400 no corpo: a referência não usa 700 em lugar nenhum */
+  --b-peso-titulo: 600;
+  /* -0,5px sobre os títulos de 36–48px da referência, convertido para em */
+  --b-titulo-track: -.014em;
+
+  /* 12px é o `rounded.lg`, o raio de TODA a família de cards de lá */
+  --b-radius: 12px;
+  /* leitura de documentação: a referência pede entrelinha e coluna generosas */
+  --b-medida: 70ch;
+
+  /* o rótulo é o `micro-uppercase` deles: 11px, 600, 1px de tracking — e
+     `.b-rotulo` já é 11px, então 1px sai exatamente .09em */
+  --b-track-rotulo: .09em;
+
+  /* elevação: nível 1 em repouso, nível 2 no hover — os dois valores de
+     geometria da tabela de elevação da referência. O nível 0 (chapado, só
+     hairline) é o que ela reserva para linha de tabela e card denso de
+     documentação; `.b-card` aqui é card de destaque, e é o nível 2 que a
+     referência dá a esses. A cor sai de `--b-sombra-cor`, que é do modo. */
+  --b-sombra: 0 1px 2px var(--b-sombra-cor);
+  --b-sombra-hover: 0 4px 12px var(--b-sombra-cor);
+  --b-lift: translateY(-1px);
+
+  /* divisor hairline sólido, sem cruz: é toda a marcenaria que o sistema
+     admite entre seções */
+  --b-regua-peso: 1px;
+  --b-regua-vao: 0px;
+  --b-esquina: 0px;
+
+  /* lista é a peça nativa deste sistema — disco cheio, decimal simples, nada
+     de enfeite. O vão curto vem da densidade do produto de origem, onde cada
+     item é um bloco encostado no seguinte. E o recuo aninhado IGUAL ao de
+     primeiro nível é comportamento de lá: cada nível recua o mesmo tanto,
+     em vez de encolher. */
+  --b-lista-marcador: disc;
+  --b-lista-marcador-num: decimal;
+  --b-lista-recuo: 1.4em;
+  --b-lista-vao: 5px;
+  --b-lista-recuo-aninhado: 1.4em;
+}
+}
+
+@layer modo {
+[data-estilo="caderno"][data-modo="claro"] {
+  /* a folha é o `surface` (#f6f5f4) e o card é o `canvas` (#ffffff): o card
+     fica MAIS claro que a página, que é como o sistema de origem separa
+     conteúdo de fundo de seção */
+  --b-fundo: #f6f5f4;
+  --b-superficie: #ffffff;
+  --b-tinta: #1a1a1a;
+  /* o carvão morno #37352f é a assinatura de texto deles */
+  --b-corpo: #37352f;
+  --b-tinta-2: #5d5b54;
+  --b-linha: #e5e3df;
+  --b-linha-forte: #c8c4be;
+  --b-acento: #5645d4;
+  --b-acento-tinta: #4534b3;
+  --b-acento-forte: #3a2a99;
+  /* `card-tint-lavender` com o roxo por cima é o par de tag documentado lá —
+     e é exatamente o que `.b-code` monta aqui: fundo fraco, tinta de acento */
+  --b-acento-fraco: #e6e0f5;
+  --b-sobre-acento: #ffffff;
+  /* o #e03131 do sistema dá 4,14:1 sobre a folha, abaixo dos 4,5:1 de texto
+     normal. Desce no mesmo matiz até 4,98:1, sem trocar a família de cor. */
+  --b-erro: #cc2626;
+  /* rgba(15,15,15,.08) é a cor de elevação da referência, tal como está lá */
+  --b-sombra-cor: rgba(15, 15, 15, .08);
+}
+}
+
+@layer modo {
+[data-estilo="caderno"][data-modo="escuro"] {
+  /* os três navys do sistema, em escada: `brand-navy-deep` é a página,
+     `brand-navy` (a faixa de capa) é o card, `brand-navy-mid` é o hairline */
+  --b-fundo: #070f24;
+  --b-superficie: #0a1530;
+  --b-tinta: #ffffff;
+  /* off-white MORNO, entre o `on-dark` branco e o `on-dark-muted`: o navy é
+     frio, mas os neutros deste sistema são quentes dos dois lados */
+  --b-corpo: #d8d5cf;
+  --b-tinta-2: #a4a097;
+  --b-linha: #1a2a52;
+  --b-linha-forte: #33477e;
+  /* o roxo primário #5645d4 fica em 2,9:1 contra o navy e some como peça.
+     O `brand-purple` do mesmo sistema sobe para 3,48:1 e segura o branco em
+     5,48:1 — e o hover volta ao primário, que é a direção de "pressed" que a
+     referência documenta: mais fundo, não mais claro. */
+  --b-acento: #7b3ff2;
+  --b-acento-forte: #5645d4;
+  /* `brand-purple-300` sobre `brand-purple-800`: o mesmo par de tag do modo
+     claro, invertido — como está no sistema de origem */
+  --b-acento-tinta: #d6b6f6;
+  --b-acento-fraco: #391c57;
+  --b-sobre-acento: #ffffff;
+  --b-erro: #ff8a8a;
+  --b-sombra-cor: rgba(0, 0, 0, .45);
+}
+}
