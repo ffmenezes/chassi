@@ -50,6 +50,17 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
 
 ul[class], ol[class] { list-style: none; margin: 0; padding: 0; }
 
+/* `hidden` é declaração de intenção do autor do markup — nenhuma regra de
+   apresentação deveria poder contradizê-la. Sem o `!important` aqui,
+   `[hidden]` (especificidade 0,1,0) apenas empataria com uma classe de
+   componente como `.toast` (também 0,1,0), e quem vencesse passaria a
+   depender da ordem em que o Astro injeta os estilos escopados — o
+   comportamento correto viraria coincidência. É sistêmico: qualquer
+   componente que use `hidden` e tenha `display:` na própria classe tem
+   esse mesmo risco, então a regra vive uma vez aqui, no contrato, e não
+   remendada em cada componente. */
+[hidden] { display: none !important; }
+
 :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
