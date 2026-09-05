@@ -10,6 +10,10 @@
  * barra de progresso é o lugar preferido do mercado para pendurar um gatilho de
  * rolagem, e gatilho de rolagem é exatamente o que o N4 proíbe. Não haver
  * callback aqui é a forma mais forte de manter a proibição.
+ *
+ * A barra em si é `aria-hidden`: a largura muda a cada rolagem, e anunciar
+ * isso em tempo real seria ruído, não informação. O texto fixo abaixo (`.b-sr`,
+ * lido uma vez só) é o que avisa que o recurso existe, sem repetir o número.
  */
 interface Props {
   /** Seletor do elemento medido. O padrão é o artigo, nunca o documento. */
@@ -20,6 +24,7 @@ interface Props {
 const { alvo = "article", topo = "0" } = Astro.props;
 ---
 
+<p class="b-sr">Barra de progresso de leitura deste artigo.</p>
 <div class="barra" aria-hidden="true" data-alvo={alvo} style={`--topo:${topo}`}>
   <span class="preenche"></span>
 </div>

@@ -17,13 +17,47 @@ import type { Site, BlocoId } from "./tipos";
  *  não se escolhe usá-los — a prosa usa. */
 const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, "A1", "A2", "A3"];
 
+/**
+ * Navegação (N1–N5) é chrome de site, não conteúdo de artigo — por isso nunca
+ * entra em ARQUITETURA (ver `catalogo.ts`) e por isso mesmo pede a mesma
+ * decisão dos outros: bloco a bloco, com o porquê de cada exclusão. Nenhum
+ * dos cinco entra por entrar; cada um só monta se `[artigo].astro` tiver de
+ * fato o que ele serve.
+ *
+ *   N1 Paginação    — FORA. Serve URL própria por página de uma LISTAGEM
+ *                     (a página de índice do blog, que este chassi ainda não
+ *                     tem). Um artigo é uma página só; não existe "página 2"
+ *                     dele para paginar.
+ *   N2 Card de artigo — DENTRO. "Continue por aqui" ao final do artigo: a
+ *                     mesma peça que a home usa (GradeArtigos), aqui com as
+ *                     irmãs do artigo atual. Não depende de nenhum outro
+ *                     bloco existir, e é o que mantém o leitor no site
+ *                     depois do fechamento.
+ *   N3 Toast        — FORA. É resposta a uma ação do leitor — envio de
+ *                     formulário, erro de validação. Nenhum bloco montado
+ *                     aqui hoje pede essa resposta: Comentários (18) e
+ *                     Newsletter (25) são PREVISTOS, e o botão de copiar do
+ *                     bloco de código já tem o próprio retorno visual (rótulo
+ *                     que vira "Copiado", em `copiarLink.ts`), sem Toast.
+ *                     Entra no dia em que um desses formulários entrar.
+ *   N4 Overlay      — FORA. É o recipiente de uma ação que o leitor começou
+ *                     clicando em algo. Os dois gatilhos do catálogo — Baixe
+ *                     em PDF (17) com muro de e-mail, e Oferta de isca (24) —
+ *                     não estão montados aqui. Overlay sem gatilho é elemento
+ *                     morto no HTML.
+ *   N5 Barra de progresso — DENTRO. Mede o <article>, não o documento, e não
+ *                     dispara nada — só informa. Não depende de mais nada:
+ *                     todo artigo tem começo, meio e fim para medir.
+ */
+const NAVEGACAO_DE_ARTIGO: BlocoId[] = ["N2", "N5"];
+
 const site: Site = {
   slug: "exemplo",
   nome: "Blog de Exemplo",
   dominio: "exemplo.com.br",
   estilo: "linho",
   modoPadrao: "claro",
-  blocos: [...TODOS_DE_ARTIGO],
+  blocos: [...TODOS_DE_ARTIGO, ...NAVEGACAO_DE_ARTIGO],
   muroDeEmail: false,
 
   emailContato: "contato@exemplo.com.br",

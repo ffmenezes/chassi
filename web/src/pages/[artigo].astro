@@ -21,14 +21,18 @@
  * diferente sem este arquivo crescer um `if` por artigo.
  *
  * Os blocos usados aqui são exatamente os que `sites/exemplo.ts` declara em
- * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, A1, A2, A3) — bloco fora dali não é
- * montado nesta página, pela mesma regra que vale para qualquer site do
- * chassi.
+ * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, A1, A2, A3) mais a navegação que o site
+ * escolheu em `NAVEGACAO_DE_ARTIGO` (N2 e N5, com o porquê de cada um dos
+ * cinco comentado lá) — bloco fora da lista do site não é montado nesta
+ * página, pela mesma regra que vale para qualquer site do chassi. Por isso
+ * os dois blocos de navegação abaixo checam `site.blocos.includes(...)`
+ * antes de montar, em vez de nascerem incondicionais.
  */
 import Artigo from "../layouts/Artigo.astro";
 import { siteInstitucional } from "../institucional/dados";
 import { ARTIGOS, autor } from "../mock/artigos";
 import type { DadosArtigo, Slot } from "../mock/artigos";
+import { dataBR } from "../data";
 
 import CabecalhoArtigo from "../components/CabecalhoArtigo.astro";
 import Titulo from "../components/Titulo.astro";
@@ -46,6 +50,9 @@ import Checklist from "../components/blocos/Checklist.astro";
 import Faq from "../components/blocos/Faq.astro";
 import Fechamento from "../components/blocos/Fechamento.astro";
 import AutorBloco from "../components/blocos/Autor.astro";
+import BarraProgresso from "../components/blocos/BarraProgresso.astro";
+import GradeArtigos from "../components/blocos/GradeArtigos.astro";
+import type { Artigo as ItemDeGrade } from "../components/blocos/GradeArtigos.astro";
 
 export function getStaticPaths() {
   return ARTIGOS.map((artigo) => ({
@@ -56,6 +63,16 @@ export function getStaticPaths() {
 
 const { artigo } = Astro.props as { artigo: DadosArtigo };
 const site = siteInstitucional();
+
+/* N2 — as irmãs deste artigo, no mesmo formato que a home (`index.astro`)
+   já usa para a grade. "Continue por aqui" só faz sentido com quem NÃO é o
+   artigo que o leitor já está lendo. */
+const irmas: ItemDeGrade[] = ARTIGOS.filter((a) => a.slug !== artigo.slug).map((a) => ({
+  tituloFeed: a.titulo,
+  descricao: a.descricao,
+  atualizadoEm: dataBR(a.atualizado),
+  href: `/${a.slug}/`,
+}));
 
 /* O sumário é derivado dos slots do tipo "titulo", nunca digitado à parte —
    mesma regra de `mock/lorem.ts`, aqui aplicada a três roteiros diferentes. */
@@ -77,6 +94,14 @@ const temSumario = h2DoSumario >= 4;
 <Artigo site={site} titulo={`${artigo.titulo} — ${site.nome}`} descricao={artigo.descricao}>
   <div class="colunas">
     <article class="artigo b-regua-lados">
+      {/* N5 — mede este <article>, nunca o documento inteiro. É por isso que
+          o "continue por aqui" (N2, abaixo) fica DEPOIS de fechar esta tag:
+          a regra do bloco é literal — "barra que fica em 70% quando o que
+          sobra é rodapé e grade de cards mente sobre quanto falta" — e uma
+          grade de cards é exatamente o que o N2 é. Não dispara nada: só
+          informa. */}
+      {site.blocos.includes("N5") && <BarraProgresso alvo="article.artigo" />}
+
       <CabecalhoArtigo
         selo={artigo.selo}
         titulo={artigo.titulo}
@@ -132,6 +157,16 @@ const temSumario = h2DoSumario >= 4;
         </div>
       </div>
     </article>
+
+    {/* N2, DE PROPÓSITO fora de <article>: é chrome de navegação, não corpo
+        do artigo (ver `catalogo.ts`, estado "navegacao"), e ficar fora é o
+        que garante que a barra de progresso acima — que mede exatamente
+        "article.artigo" — nunca conte esta grade como se fosse leitura. */}
+    {site.blocos.includes("N2") && (
+      <section class="fecho b-regua-topo b-esquinas-topo" aria-label="Continue por aqui">
+        <GradeArtigos rotulo="Continue por aqui" artigos={irmas} />
+      </section>
+    )}
   </div>
 </Artigo>
 
@@ -155,6 +190,20 @@ const temSumario = h2DoSumario >= 4;
     display: flex;
     flex-direction: column;
     gap: 26px;
+  }
+
+  /* N2, fora de <article> (ver o comentário no template): sem o padding de
+     `.artigo` ao redor para herdar, repete aqui só a largura da coluna de
+     leitura e a mesma sangria, para a régua/cruz do topo (que desenha na
+     largura do PRÓPRIO elemento) fechar exatamente onde o texto fechava.
+     `justify-self: start` é explícito porque, ao contrário de `.artigo`, este
+     item não é o único filho de `.colunas` — sem isto o alinhamento de um
+     item mais estreito que o irmão ficaria a critério do navegador. */
+  .fecho {
+    --b-sangria: clamp(28px, 4.5vw, 40px);
+    max-width: 836px;
+    justify-self: start;
+    padding: 30px var(--b-sangria) 0;
   }
 
   /* No celular o sumário é só mais um item desta coluna, no fluxo — o mínimo
