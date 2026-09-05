@@ -1,0 +1,154 @@
+---
+/** Bloco 26 — Compartilhar.
+ *
+ * WhatsApp primeiro, porque o público é brasileiro. Os outros destinos vêm
+ * depois, na mesma lista.
+ *
+ * ZERO script de terceiro. Nenhum SDK do Facebook, do X ou botão oficial de
+ * rede nenhuma — são rastreadores, e a doutrina deste repositório proíbe JS de
+ * terceiro sem justificativa (ver `infra.md`). Compartilhar é montar uma URL:
+ * cada destino aqui é um `<a href>` comum, com a mensagem já codificada na
+ * query string, sem biblioteca nenhuma.
+ *
+ * `navigator.share()` é o caminho do celular — entrega o menu nativo do
+ * sistema, que já inclui WhatsApp e qualquer outro app instalado — e por isso
+ * é preferido ONDE EXISTIR. Onde não existir (a maioria dos desktops), os
+ * destinos explícitos abaixo são o que o leitor vê e usa.
+ *
+ * Melhoria progressiva, sem exceção: a lista de links nasce visível no HTML,
+ * funciona clicada sem JS nenhum, e é isso que o script no fim do arquivo
+ * respeita — ele só ESCONDE a lista e mostra um botão único quando confirma
+ * que `navigator.share` existe. Sem JS, ou em navegador sem a API, a lista
+ * continua ali, cada item um link de verdade.
+ *
+ * "Copiar link" reusa `ligarCopia()` (de `../../copiarLink`), o mesmo botão
+ * do cabeçalho e do título de seção: mesmo ouvinte delegado, mesmo aviso a
+ * leitor de tela, e o mesmo comportamento sem `navigator.clipboard` — o botão
+ * aparece e não faz nada ao clicar, e o leitor ainda tem os outros destinos.
+ */
+export interface Props {
+  /** URL absoluta e canônica do que está sendo compartilhado. */
+  url: string;
+  /** Frase curta que acompanha o link — o título do artigo, ou um gancho de uma linha. */
+  texto: string;
+}
+const { url, texto } = Astro.props;
+
+const urlCodificada = encodeURIComponent(url);
+const textoCodificado = encodeURIComponent(texto);
+const mensagemCodificada = encodeURIComponent(`${texto} ${url}`);
+
+/* WhatsApp primeiro, sempre — o resto entra na ordem em que faz sentido para
+   o público brasileiro: o que roda em app instalado, depois o que só abre
+   página web, e o e-mail por último, por ser o destino mais formal. */
+const DESTINOS = [
+  { nome: "WhatsApp", href: `https://wa.me/?text=${mensagemCodificada}` },
+  { nome: "Telegram", href: `https://t.me/share/url?url=${urlCodificada}&text=${textoCodificado}` },
+  { nome: "X", href: `https://twitter.com/intent/tweet?text=${textoCodificado}&url=${urlCodificada}` },
+  { nome: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${urlCodificada}` },
+  { nome: "E-mail", href: `mailto:?subject=${textoCodificado}&body=${mensagemCodificada}` },
+] as const;
+---
+
+<div class="compartilhar" data-compartilhar data-url={url} data-texto={texto}>
+  <p class="b-rotulo">Compartilhar</p>
+
+  <ul class="destinos" data-destinos>
+    {DESTINOS.map((d) => (
+      <li>
+        <a class="dest" href={d.href} target="_blank" rel="noopener noreferrer">{d.nome}</a>
+      </li>
+    ))}
+    <li>
+      <button
+        type="button"
+        class="dest copia"
+        data-copia
+        data-copia-antes="Copiar link"
+        data-copia-depois="Copiado"
+      >
+        <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+          <path d="M240,88.23a54.43,54.43,0,0,1-16,37L189.25,160a54.27,54.27,0,0,1-38.63,16h-.05A54.63,54.63,0,0,1,96,119.84a8,8,0,0,1,16,.45A38.62,38.62,0,0,0,150.58,160h0a38.39,38.39,0,0,0,27.31-11.31l34.75-34.75a38.63,38.63,0,0,0-54.63-54.63l-11,11A8,8,0,0,1,135.7,59l11-11A54.65,54.65,0,0,1,224,48,54.86,54.86,0,0,1,240,88.23ZM109,185.66l-11,11A38.41,38.41,0,0,1,70.6,208h0a38.63,38.63,0,0,1-27.29-65.94L78,107.31A38.63,38.63,0,0,1,144,135.71a8,8,0,0,0,16,.45A54.86,54.86,0,0,0,144,96a54.65,54.65,0,0,0-77.27,0L32,130.75A54.62,54.62,0,0,0,70.56,224h0a54.28,54.28,0,0,0,38.64-16l11-11A8,8,0,0,0,109,185.66Z"></path>
+        </svg>
+        <span data-copia-rotulo>Copiar link</span>
+      </button>
+    </li>
+  </ul>
+
+  {/* Escondido por padrão: só aparece quando o script confirma navigator.share.
+      É o botão que entrega o menu nativo do sistema no celular. */}
+  <button type="button" class="dest nativo" data-compartilhar-nativo hidden>
+    Compartilhar
+  </button>
+</div>
+
+<style>
+  .compartilhar { max-width: var(--b-medida); }
+
+  .destinos, .destinos li { list-style: none; margin: 0; padding: 0; }
+  .destinos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+
+  .dest {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--b-radius);
+    border: var(--b-borda);
+    background: var(--b-superficie);
+    color: var(--b-tinta);
+    font-family: var(--b-fonte-meta);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .dest:hover,
+  .dest[data-copiado] { border-color: var(--b-acento-tinta); color: var(--b-acento-tinta); }
+  .dest svg { width: 14px; height: 14px; }
+
+  .nativo {
+    padding: 10px 18px;
+    border-radius: var(--b-radius);
+    border: 0;
+    background: var(--b-acento);
+    color: var(--b-sobre-acento);
+    font-family: var(--b-fonte-meta);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  import { ligarCopia } from "../../copiarLink";
+  ligarCopia();
+
+  /* `navigator.share` é o único jeito de saber se o sistema tem menu nativo,
+     e só existe descobrindo em runtime — daí o `<script>`, com a mesma régua
+     de melhoria progressiva do resto do catálogo: a lista de links já
+     funciona sozinha, isto só troca a apresentação quando há algo melhor. */
+  for (const raiz of document.querySelectorAll<HTMLElement>("[data-compartilhar]")) {
+    if (!("share" in navigator)) continue;
+
+    const destinos = raiz.querySelector<HTMLElement>("[data-destinos]");
+    const nativo = raiz.querySelector<HTMLButtonElement>("[data-compartilhar-nativo]");
+    if (!destinos || !nativo) continue;
+
+    destinos.hidden = true;
+    nativo.hidden = false;
+
+    nativo.addEventListener("click", () => {
+      const dados = { title: raiz.dataset.texto, url: raiz.dataset.url };
+      /* Recusa do leitor (fechou o menu) ou API indisponível no momento: os
+         dois caem aqui, e não há o que fazer além de não quebrar a página —
+         o botão continua onde estava, pronto para um novo clique. */
+      navigator.share(dados).catch(() => {});
+    });
+  }
+</script>

@@ -16,6 +16,7 @@
 export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
+  | 26
   | "N1" | "N2" | "N3" | "N4" | "N5"
   | "A1" | "A2" | "A3";
 
@@ -90,6 +91,9 @@ export const CATALOGO: readonly Bloco[] = [
   { id: 16, estado: "derivado", nome: "Baixe o mapa mental", regra: "Gerado dos headings e do esqueleto. Número não entra em nó de mapa, porque nó não tem lugar para a ressalva." },
   { id: 17, estado: "derivado", nome: "Baixe em PDF", regra: "O artigo inteiro, com fontes e disclosure. O muro de e-mail fica aqui, nunca no artigo, e o botão fica no fim." },
   { id: 18, estado: "previsto", nome: "Comentários", regra: "Comentário não é fonte. Separado do artigo, link com rel=\"nofollow ugc\", e moderação antes de publicar ou o bloco não nasce." },
+  // 26 é ATIVO: nenhum endpoint por trás, só navigator.share() e
+  // navigator.clipboard, os dois já funcionando com a infra de hoje.
+  { id: 26, estado: "ativo", nome: "Compartilhar", regra: "navigator.share() no celular onde existir; senão, destinos explícitos com WhatsApp primeiro. Copiar link reusa copiarLink.ts. Zero script de terceiro: cada destino é URL montada, nunca SDK de rede social. Sem JS, todo destino continua um link que funciona." },
   { id: "N1", estado: "navegacao", nome: "Paginação", regra: "URL própria por página, canônica apontando para ela mesma, sem noindex, e link é <a href>." },
   { id: "N2", estado: "navegacao", nome: "Card de artigo", regra: "Título de feed, description do meta.md, dateModified visível. O que está no grid não conta como link tecido." },
   { id: "N3", estado: "navegacao", nome: "Toast de aviso", regra: "Resposta a uma ação do leitor, nada mais. Toast com número não existe. Erro se diz por inteiro e não some sozinho." },

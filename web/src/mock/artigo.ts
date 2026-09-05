@@ -21,6 +21,7 @@ import type { Artigo } from "../components/blocos/GradeArtigos.astro";
 import type { Comentario } from "../components/blocos/Comentarios.astro";
 import type { Props as CamposCalculadora } from "../components/blocos/Calculadora.astro";
 import type { Props as CamposOfertaIsca } from "../components/blocos/OfertaIsca.astro";
+import type { Props as CamposCompartilhar } from "../components/blocos/Compartilhar.astro";
 import type { Autor } from "../autor";
 
 export const abertura = {
@@ -457,4 +458,10 @@ export const ofertaIsca: CamposOfertaIsca = {
   titulo: "Checklist de 5 passos para medir seu pico",
   promessa: "PDF de 1 página, chega em até 5 minutos por e-mail.",
   ancora: "Quero o checklist",
+};
+
+/** Bloco 26 — Compartilhar. */
+export const compartilhar: CamposCompartilhar = {
+  url: "https://exemplo.com.br/por-que-sua-internet-cai-no-pico/",
+  texto: "Por que sua internet cai só na hora do pico — e como medir isso em casa",
 };
