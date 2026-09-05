@@ -71,8 +71,7 @@ export function quebrar(
        grudar outra elipse por cima dobraria o glifo e nunca teve a largura
        revalidada. Nesse caso ela ja e a representacao certa do corte. */
     if (!ultima.endsWith(ELIPSE)) {
-      const semUltimaPalavra = ultima.replace(/\s+\S*$/, "");
-      const base = semUltimaPalavra || ultima;
+      const base = ultima.replace(/\s+\S*$/, "");
       visiveis[indice] = medir(fonte, base + ELIPSE, tamanho) <= larguraMax
         ? base + ELIPSE
         : cortar(fonte, base, tamanho, larguraMax);
