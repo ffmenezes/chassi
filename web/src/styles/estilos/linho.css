@@ -38,7 +38,10 @@
   --b-linha: #e6dfd8;
   --b-linha-forte: #d8cfc0;
   --b-acento: #cc785c;
-  --b-acento-tinta: #a9583e;
+  /* #a9583e (o coral original) dava 4,19:1 sobre `--b-superficie`: abaixo dos
+     4,5:1 de texto normal, é o que aparecia no hover de Compartilhar. Mais
+     escuro no mesmo matiz, sem trocar a família de cor. */
+  --b-acento-tinta: #904b35;
   --b-acento-forte: #a9583e;
   --b-acento-fraco: #f2e5dd;
   --b-sobre-acento: #ffffff;
