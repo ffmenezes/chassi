@@ -19,7 +19,7 @@
 export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
-  | 26 | 27 | 28 | 29 | 30 | 31
+  | 26 | 27 | 28 | 29 | 30 | 31 | 32
   | "N1" | "N2" | "N3" | "N4" | "N5"
   | "A1" | "A2" | "A3";
 
@@ -136,6 +136,18 @@ export const CATALOGO: readonly Bloco[] = [
   // do bloco — o texto citado vive no NOSSO HTML, fora do embed — que o deixa
   // sem dependência externa. Marcação estática, entregue por qualquer build.
   { id: 14, estado: "ativo", categoria: "midia", nome: "Card de rede social", regra: "O embed é fonte, e o texto citado vive no nosso HTML fora do iframe. O card de perfil não conta seguidores." },
+  // 32 entre 14 e 15 porque a ordem aqui é a de leitura, e o número é
+  // histórico: o vídeo nasceu depois. Ele lê ao lado do áudio, que é o outro
+  // bloco que traz um meio de fora para dentro da página.
+  //
+  // É ATIVO pela mesma régua que separou 23 de 24: bloco ativo é bloco cuja
+  // dependência está no ar NESTE repositório. A variante `arquivo` é um
+  // `<video>` nativo com uma URL, sem endpoint, conta ou env var; a variante
+  // `youtube` é fachada, e o `<iframe>` que ela cria no clique é montado no
+  // cliente, a partir de um id que o autor digita. Não existe acervo de vídeo
+  // aqui — o `src` é URL livre, e isso está declarado no tipo `Origem`, em
+  // `src/video.ts`, junto com o motivo.
+  { id: 32, estado: "ativo", categoria: "midia", nome: "Vídeo", regra: "Vídeo é ilustração em movimento, nunca origem de fato: o artigo continua inteiro sem ele. Legenda e duração obrigatórias, legenda nunca igual ao título. Sem autoplay e sem laço. Embed de YouTube nasce como fachada — nada do Google carrega antes do play, e a capa avisa por escrito o que acontece no clique. Um player tocando pausa os outros da página." },
   { id: 15, estado: "derivado", categoria: "midia", nome: "Escute em áudio", regra: "Locução da prosa, sem autoplay, sem transcrição embaixo. Voz sintética se declara, e este bloco nunca tem muro." },
   { id: 16, estado: "derivado", categoria: "conversao", nome: "Baixe o mapa mental", regra: "Gerado dos headings e do esqueleto. Número não entra em nó de mapa, porque nó não tem lugar para a ressalva." },
   { id: 17, estado: "derivado", categoria: "conversao", nome: "Baixe em PDF", regra: "O artigo inteiro, com fontes e disclosure. O muro de e-mail fica aqui, nunca no artigo, e o botão fica no fim." },
@@ -246,7 +258,7 @@ export const GRUPOS: readonly Grupo[] = [
   {
     rotulo: "Mídia e sequência",
     categorias: ["midia"],
-    nota: "Conteúdo que se consome em sequência ou em outro formato: carrossel e slides avançam por gesto do leitor, os passos revelam detalhe, o áudio e o card de rede social trazem outro meio para dentro da página.",
+    nota: "Conteúdo que se consome em sequência ou em outro formato: carrossel e slides avançam por gesto do leitor, os passos revelam detalhe, e o vídeo, o áudio e o card de rede social trazem outro meio para dentro da página — sempre sem autoplay, e sempre com o artigo continuando inteiro para quem não assiste nem escuta.",
   },
   {
     rotulo: "Perguntar ao leitor",

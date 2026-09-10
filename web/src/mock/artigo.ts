@@ -27,6 +27,7 @@ import type { Passo } from "../components/blocos/Passos.astro";
 import type { ItemVerificacao } from "../components/blocos/Verificacao.astro";
 import type { Autor } from "../autor";
 import type { Props as CamposQuiz } from "../components/blocos/Quiz.astro";
+import type { DadosVideo } from "../video";
 
 export const abertura = {
   cena: "Às seis e vinte da manhã a chamada de vídeo travou sozinha e o roteador piscou três vezes na sala.",
@@ -411,6 +412,47 @@ export const social = {
     motivo: "É o único lugar onde a ficha técnica com a duração do burst é publicada.",
     ancora: "Ver as fichas técnicas por modelo",
     href: "#n2",
+  },
+};
+
+/**
+ * Bloco 32 — os dois vídeos, um por origem.
+ *
+ * O que estes dados testam é o par título/legenda, que é o mesmo par
+ * alt/legenda do bloco 19 com outros nomes: o título diz o que o vídeo mostra,
+ * a legenda diz por que ele está no artigo, e o componente quebra a build se
+ * forem o mesmo texto. A duração é obrigatória nos dois.
+ *
+ * `arquivo` aponta para `public/exemplo/medicao.mp4` — 6 segundos gerados,
+ * com "vídeo fictício do inventário" escrito na tela. `youtube` usa o Big
+ * Buck Bunny da Blender Foundation, que é CC-BY, está no ar há mais de quinze
+ * anos e não é persona, nicho nem marca de site nenhum — a régua do erro 10.
+ * Ele existe aqui para que a fachada tenha um id de verdade para tocar; nada
+ * do Google carrega até alguém clicar.
+ */
+export const videos: { arquivo: DadosVideo; youtube: DadosVideo } = {
+  arquivo: {
+    titulo: "O monitor registrando o pico das 6h18, em tempo real",
+    legenda:
+      "O traço passa dos 300 Mbps no segundo em que o backup entra. É o mesmo pico da tabela de contraste, visto acontecendo em vez de somado depois.",
+    duracao: "6 s",
+    origem: {
+      tipo: "arquivo",
+      src: "/exemplo/medicao.mp4",
+      largura: 640,
+      altura: 360,
+    },
+    poster: "exemplo/video-capa.png",
+    credito: "Gravação da tela do próprio monitor, 09/08/2026",
+  },
+  youtube: {
+    titulo: "Como ler o gráfico do monitor sem confundir pico com média",
+    legenda:
+      "A leitura passo a passo do mesmo gráfico. Quem preferir ler: os três passos estão escritos logo acima, e o vídeo não traz número que o texto não traga.",
+    duracao: "9 min 56 s",
+    origem: { tipo: "youtube", id: "aqz-KE-bpKQ" },
+    poster: "exemplo/video-capa.png",
+    credito: "Big Buck Bunny, Blender Foundation, CC-BY — vídeo de exemplo",
   },
 };
 

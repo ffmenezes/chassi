@@ -34,6 +34,7 @@ import type { Props as CamposFigura } from "../components/blocos/Figura.astro";
 import type { Props as CamposCodigo } from "../components/blocos/Codigo.astro";
 import type { Props as CamposAviso } from "../components/blocos/Aviso.astro";
 import type { Slide as SlideDeDeck } from "../components/blocos/Slides.astro";
+import type { DadosVideo } from "../video";
 
 export { autor } from "./artigo";
 
@@ -54,6 +55,11 @@ export type Slot =
    *  mesmo artigo, nunca outros. */
   | { tipo: "grafico"; dados: DadosGrafico }
   | { tipo: "figura"; dados: CamposFigura }
+  /** Bloco 32 — o vídeo com legenda. Só o artigo-2 monta, e monta DOIS: é o
+   *  único jeito de a regra "um toca, os outros param" existir fora do
+   *  inventário, porque ela não tem como aparecer com um player só na
+   *  página. Os dois são de origem diferente de propósito. */
+  | { tipo: "video"; dados: DadosVideo }
   | { tipo: "citacaoDestacada"; texto: string }
   | { tipo: "citacaoFonte"; texto: string; nome: string; papel: string; conflito: string }
   | { tipo: "codigo"; dados: CamposCodigo }
@@ -342,6 +348,30 @@ export const ARTIGOS: DadosArtigo[] = [
           fonte: "Fonte e data fictícias — comparação de exemplo, 06/2026.",
           pendencia: "Marcador — diagrama ainda não produzido para este exemplo.",
         } satisfies CamposFigura,
+      },
+      {
+        tipo: "video",
+        dados: {
+          titulo: "Título fictício — a tela do medidor durante um teste de velocidade",
+          legenda:
+            "Legenda fictícia — o vídeo mostra o mesmo número que o parágrafo acima traz por escrito; ele ilustra, não prova.",
+          duracao: "6 s",
+          origem: { tipo: "arquivo", src: "/exemplo/medicao.mp4", largura: 640, altura: 360 },
+          poster: "exemplo/video-capa.png",
+          credito: "Crédito fictício — gravação de exemplo, 06/2026.",
+        } satisfies DadosVideo,
+      },
+      {
+        tipo: "video",
+        dados: {
+          titulo: "Título fictício — a leitura do contrato, cláusula por cláusula",
+          legenda:
+            "Legenda fictícia — o segundo player existe para mostrar a regra do bloco: dê play num, e o outro para sozinho.",
+          duracao: "9 min 56 s",
+          origem: { tipo: "youtube", id: "aqz-KE-bpKQ" },
+          poster: "exemplo/video-capa.png",
+          credito: "Big Buck Bunny, Blender Foundation, CC-BY — vídeo de exemplo.",
+        } satisfies DadosVideo,
       },
       { tipo: "titulo", nivel: 2, id: "s3", texto: "O que ler no contrato antes de assinar" },
       {

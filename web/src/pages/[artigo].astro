@@ -42,6 +42,7 @@ import CaixaConclusoes from "../components/blocos/CaixaConclusoes.astro";
 import TabelaPanorama from "../components/blocos/TabelaPanorama.astro";
 import TabelaContraste from "../components/blocos/TabelaContraste.astro";
 import Figura from "../components/blocos/Figura.astro";
+import Video from "../components/blocos/Video.astro";
 import Grafico from "../components/blocos/Grafico.astro";
 import Slides from "../components/blocos/Slides.astro";
 import CitacaoDestacada from "../components/blocos/CitacaoDestacada.astro";
@@ -162,6 +163,7 @@ const urlDoArtigo = `https://${site.dominio}/${artigo.slug}/`;
               )}
               {s.tipo === "grafico" && <Grafico {...s.dados} id={`g-${artigo.slug}`} />}
               {s.tipo === "figura" && <Figura {...s.dados} />}
+              {s.tipo === "video" && <Video {...s.dados} />}
               {s.tipo === "citacaoDestacada" && <CitacaoDestacada texto={s.texto} />}
               {s.tipo === "citacaoFonte" && (
                 <CitacaoFonte texto={s.texto} nome={s.nome} papel={s.papel} conflito={s.conflito} />

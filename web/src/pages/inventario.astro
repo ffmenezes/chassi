@@ -36,6 +36,7 @@ import Enquete from "../components/blocos/Enquete.astro";
 import Avaliacao from "../components/blocos/Avaliacao.astro";
 import Carrossel from "../components/blocos/Carrossel.astro";
 import CardRedeSocial from "../components/blocos/CardRedeSocial.astro";
+import Video from "../components/blocos/Video.astro";
 import Audio from "../components/blocos/Audio.astro";
 import Download from "../components/blocos/Download.astro";
 import Paginacao from "../components/blocos/Paginacao.astro";
@@ -219,6 +220,24 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
           <Carrossel rotulo="Como medir o pico, passo a passo" slides={m.carrossel} />
         </Fragment>
         <Fragment slot="b14"><CardRedeSocial {...m.social} /></Fragment>
+        <Fragment slot="b32">
+          {/* as duas origens no mesmo palco, que é o único lugar onde dá para
+              comparar de um olhar o que muda entre elas: o arquivo nasce com
+              os controles nativos à vista, a fachada do YouTube nasce sem uma
+              requisição sequer para o Google e com o aviso do que acontece no
+              clique. Lado a lado eles também provam a outra regra do bloco —
+              dê play num, e o outro para. */}
+          <div style="display:flex;flex-direction:column;gap:26px">
+            <div>
+              <p class="b-rotulo">Origem `arquivo` — nosso, zero terceiro</p>
+              <Video {...m.videos.arquivo} />
+            </div>
+            <div>
+              <p class="b-rotulo">Origem `youtube` — fachada, nada carrega antes do play</p>
+              <Video {...m.videos.youtube} />
+            </div>
+          </div>
+        </Fragment>
         <Fragment slot="b15"><Audio duracao={m.derivados.audio.duracao} /></Fragment>
         <Fragment slot="b16"><Download {...m.derivados.mapa} muro /></Fragment>
         <Fragment slot="b17"><Download {...m.derivados.pdf} muro /></Fragment>

@@ -1,0 +1,464 @@
+---
+/** Bloco 32 — Vídeo.
+ *
+ * O player de vídeo com legenda. A doutrina inteira — o que um vídeo é neste
+ * chassi, por que existem duas origens, e o que dá e o que não dá para tirar
+ * do YouTube — está no topo de `src/video.ts`, junto das travas, porque trava
+ * que só vive no frontmatter de um `.astro` não tem teste que discrimina.
+ * Aqui fica a marcação e o comportamento.
+ *
+ * A FACHADA, que é a decisão de desenho que define a variante `youtube`.
+ * Nenhum `<iframe>` nasce no HTML. O que nasce é uma CAPA que é um `<a>` de
+ * verdade, apontando para o vídeo no YouTube. Isso resolve três coisas de uma
+ * vez:
+ *
+ *   1. PRIVACIDADE. Sem clique, zero requisição para o Google — nem script,
+ *      nem cookie, nem conexão. O embed padrão faz as três em toda visita,
+ *      inclusive nas em que ninguém assiste.
+ *   2. PESO. O embed do YouTube custa mais de um megabyte por instância,
+ *      pago por todo leitor. A capa custa a imagem que já estaria ali.
+ *   3. MELHORIA PROGRESSIVA. Sem JavaScript a capa continua sendo um link
+ *      que leva ao vídeo. Com JavaScript, o clique é interceptado e o
+ *      `<iframe>` nasce no lugar da capa, tocando na hora. O que se perde sem
+ *      script é assistir SEM SAIR da página — não é assistir.
+ *
+ * O AVISO DE PRIVACIDADE não é rodapé nem letra miúda: ele é o
+ * `aria-describedby` do próprio link. Quem chega de teclado ou de leitor de
+ * tela ouve o que vai acontecer ANTES de acionar, que é a mesma doutrina de
+ * `consentimento.ts` — a frase aparece antes da ação que tem consequência, e
+ * mora numa constante só (`AVISO_YOUTUBE`), revisável num lugar.
+ *
+ * UM TOCA, OS OUTROS PARAM. Dois vídeos tocando ao mesmo tempo na mesma
+ * página é defeito, não escolha, e nenhum navegador resolve isso sozinho. O
+ * `<script>` do fim do arquivo é o único lugar que sabe disso — ver lá o que
+ * quebra sem ele.
+ *
+ * O QUE ESTE BLOCO NÃO TEM, e não por esquecimento: `autoplay`, `loop` e
+ * `muted` não são props. É a mesma escolha do bloco 29 ("não estar
+ * implementado é a forma mais forte de proibir") e a mesma regra do bloco 15:
+ * nada começa sozinho, nada recomeça sozinho. O `autoplay=1` que vai na URL
+ * do embed é outra coisa, e está explicado em `video.ts`: ele existe para o
+ * leitor não precisar clicar duas vezes no mesmo play.
+ */
+import { otimizar } from "../../imagens";
+import {
+  AVISO_YOUTUBE,
+  ROTULO_SEM_JS,
+  conferirVideo,
+  idDoYoutube,
+  proporcaoDe,
+  proximaMarca,
+  urlDeAssistir,
+} from "../../video";
+import type { DadosVideo } from "../../video";
+
+export type Props = DadosVideo;
+
+const { titulo, legenda, duracao, origem, poster, credito } = Astro.props;
+
+conferirVideo(Astro.props);
+
+/* Um id por instância, para o `aria-describedby` do aviso não colidir quando
+   a mesma página monta dois vídeos. O contador mora em `video.ts` e não aqui:
+   este frontmatter roda inteiro a cada instância, então `let n = 0` nesta
+   linha voltaria a zero toda vez — e voltava. Ver o comentário de
+   `proximaMarca`, que tem o defeito por extenso. */
+const marca = proximaMarca();
+
+const capa = poster ? await otimizar(poster) : null;
+const proporcao = proporcaoDe(origem);
+const idYt = origem.tipo === "youtube" ? idDoYoutube(origem.id) : null;
+
+/* A origem, escrita. É meta, e não decoração: quem lê "vídeo no YouTube"
+   antes de clicar já sabe que vai sair do nosso domínio de rede. */
+const ondeMora = origem.tipo === "youtube" ? "vídeo no YouTube" : "vídeo neste site";
+---
+
+<figure class="video">
+  <div class="quadro" style={`--v-proporcao:${proporcao}`}>
+    {origem.tipo === "arquivo" && (
+      <video
+        data-video-arquivo
+        controls
+        playsinline
+        preload="metadata"
+        poster={capa?.src}
+        aria-label={titulo}
+      >
+        <source src={origem.src} />
+        {/* Quem cai aqui é o navegador que não sabe tocar o arquivo. Ele
+            recebe um link, não uma frase de erro: o vídeo continua acessível,
+            só que fora da página. */}
+        <p class="sem-suporte">
+          Seu navegador não toca este vídeo.
+          <a href={origem.src} download>Baixar o arquivo</a>.
+        </p>
+      </video>
+    )}
+
+    {origem.tipo === "youtube" && idYt && (
+      <a
+        class="capa"
+        href={urlDeAssistir(idYt)}
+        data-video-fachada={idYt}
+        data-video-titulo={titulo}
+        aria-describedby={`${marca}-aviso`}
+        rel="noopener"
+      >
+        {/* `alt=""` de propósito, e é a exceção que o bloco 19 não tem: ali a
+            imagem É o conteúdo, aqui ela é a moldura de um vídeo cujo título
+            está escrito em texto no mesmo link, logo abaixo. Alt aqui seria a
+            terceira leitura da mesma frase. */}
+        {capa && (
+          <img
+            src={capa.src}
+            srcset={capa.srcset}
+            sizes={capa.sizes}
+            width={capa.largura}
+            height={capa.altura}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+        <span class="play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+            <path d="M8 5.5v13l11-6.5z" />
+          </svg>
+        </span>
+        {/* O rótulo é o do caminho SEM script — é ele que está no HTML, e é
+            ele que vale se o JS não chegar. O script troca por "Tocar aqui",
+            que é o que passa a ser verdade depois que ele roda. */}
+        <span class="capa-rotulo" data-video-rotulo>{ROTULO_SEM_JS}</span>
+      </a>
+    )}
+  </div>
+
+  <p class="meta">
+    <span class="dur">{duracao}</span>
+    <span aria-hidden="true">·</span>
+    <span>{ondeMora}</span>
+  </p>
+
+  {origem.tipo === "youtube" && (
+    <p class="privacidade" id={`${marca}-aviso`}>{AVISO_YOUTUBE}</p>
+  )}
+
+  <figcaption>
+    <span class="tit">{titulo}</span>
+    <span class="leg">{legenda}</span>
+    {credito && <span class="credito">{credito}</span>}
+  </figcaption>
+</figure>
+
+<style>
+  .video { margin: 0; }
+
+  /* O quadro reserva o espaço do vídeo ANTES de qualquer byte chegar, e é a
+     `aspect-ratio` que faz isso: ela vem do conteúdo (`proporcaoDe`), não do
+     estilo — a mesma razão de width/height virem do metadado no bloco 19. */
+  .quadro {
+    aspect-ratio: var(--v-proporcao);
+    width: 100%;
+    overflow: hidden;
+    border: var(--b-borda);
+    border-radius: var(--b-radius);
+    box-shadow: var(--b-sombra);
+    background: var(--b-acento-fraco);
+    position: relative;
+  }
+
+  .quadro :global(video),
+  .quadro :global(iframe) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  /* `contain` e não `cover`: o quadro tem a proporção que o autor declarou,
+     mas a capa pode ter outra. Cortar a capa esconderia parte de um quadro do
+     próprio vídeo; a tarja é honesta e some assim que o play começa. */
+  .quadro :global(video) { object-fit: contain; }
+
+  .sem-suporte {
+    padding: 18px;
+    font-family: var(--b-fonte-meta);
+    font-size: 12.5px;
+    color: var(--b-tinta-2);
+  }
+
+  /* A CAPA. Sem véu escuro por cima da imagem de propósito: véu é cor
+     literal, e cor literal em bloco é o erro 7. Nada de texto pousa sobre a
+     foto — só o play, que é o par `--b-acento`/`--b-sobre-acento`, o único
+     par do contrato com contraste garantido em todo estilo e nos dois modos. */
+  .capa {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .capa img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--b-acento);
+    color: var(--b-sobre-acento);
+    /* A borda do contrato, e não sombra: `--b-sombra` é `none` em `linho` e em
+       `concreto`, e sem ela o círculo some quando a capa tem a mesma cor do
+       acento — medido no navegador com a capa de exemplo, que é justamente
+       esse caso. O fio de `--b-borda` acompanha estilo e modo sozinho. */
+    border: var(--b-borda);
+    box-shadow: var(--b-sombra);
+    padding-left: 3px;
+  }
+  .capa-rotulo {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    padding: 5px 9px;
+    border-radius: var(--b-radius);
+    background: var(--b-fundo);
+    color: var(--b-tinta);
+    border: var(--b-borda);
+    font-family: var(--b-fonte-meta);
+    font-size: 11px;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+  }
+  /* O foco é o que o teclado enxerga, e some sem ninguém notar: o anel do
+     contrato mora no elemento inteiro, não só no play. */
+  .capa:focus-visible { outline-offset: -4px; }
+
+  .meta {
+    display: flex;
+    gap: 7px;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-top: 9px;
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    color: var(--b-tinta-2);
+  }
+  .dur { color: var(--b-tinta); }
+
+  /* `.privacidade`, e não `.aviso`: `chrome.css` — a folha do inventário —
+     tem uma regra global `.aviso` com fundo, borda e `display:flex`, e o
+     escopo do Astro não protege contra ela, só empata em especificidade
+     propriedade a propriedade. Com o nome `.aviso` este parágrafo saía com
+     caixa azul no inventário e sem caixa nenhuma no artigo — o mesmo bloco,
+     duas caras, que é exatamente o que o inventário existe para impedir.
+     Visto na tela antes de virar este comentário; é a advertência que
+     `Slides.astro` já deixa escrita. */
+  .privacidade {
+    margin-top: 7px;
+    max-width: var(--b-medida);
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--b-tinta-2);
+  }
+
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+    max-width: var(--b-medida);
+  }
+  .tit {
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--b-tinta);
+    font-weight: 600;
+  }
+  /* a legenda é texto de leitura: ela precisa funcionar para quem leu só ela —
+     o mesmo parágrafo do bloco 19 */
+  .leg {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--b-corpo);
+  }
+  .credito {
+    font-family: var(--b-fonte-meta);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--b-tinta-2);
+  }
+</style>
+
+<script>
+  /* O JavaScript deste bloco faz DUAS coisas, e as duas são enriquecimento.
+   *
+   * 1. TROCA A CAPA PELO EMBED. Sem ele, a capa continua sendo um `<a>` que
+   *    leva ao vídeo no YouTube: o leitor assiste, só que fora da página.
+   * 2. PAUSA OS OUTROS. Sem ele, dois vídeos podem tocar ao mesmo tempo — o
+   *    que é o comportamento padrão de qualquer navegador, e o defeito que
+   *    este arquivo existe para corrigir.
+   *
+   * Nada mais depende dele: o `<video>` da variante `arquivo` toca, pausa,
+   * busca e vai a tela cheia com os controles nativos, sem uma linha de
+   * script. O `figcaption`, o aviso e a duração estão no HTML inicial.
+   *
+   * Guarda de módulo pela mesma razão de `ligarCopia()`: o Astro içá este
+   * script uma vez por página, mas a guarda deixa a intenção escrita.
+   */
+  import { ORIGEM_DO_EMBED, urlDoEmbed } from "../../video";
+
+  let ligado = false;
+
+  function ligarVideos() {
+    if (ligado) return;
+    ligado = true;
+
+    /* Os embeds que já nasceram nesta página. É `Set` e não `querySelectorAll`
+       porque precisamos casar `event.source` com um `contentWindow`, e isso só
+       funciona com a referência viva do elemento. */
+    const embeds = new Set<HTMLIFrameElement>();
+
+    const comandar = (f: HTMLIFrameElement, func: string) => {
+      f.contentWindow?.postMessage(
+        JSON.stringify({ event: "command", func, args: [] }),
+        ORIGEM_DO_EMBED,
+      );
+    };
+
+    /** Um toca, os outros param — os dois tipos de player juntos. */
+    const pausarOutros = (quemComecou: Element | null) => {
+      document
+        .querySelectorAll<HTMLVideoElement>("video[data-video-arquivo]")
+        .forEach((v) => {
+          if (v !== quemComecou && !v.paused) v.pause();
+        });
+      embeds.forEach((f) => {
+        if (f !== quemComecou) comandar(f, "pauseVideo");
+      });
+    };
+
+    /* `play` não borbulha, então o ouvinte delegado precisa da fase de
+       captura. É isso que permite um ouvinte só para a página inteira, em vez
+       de um por `<video>` — e faz vídeo que chegue depois já entrar coberto. */
+    document.addEventListener(
+      "play",
+      (ev) => pausarOutros(ev.target as Element),
+      true,
+    );
+
+    /* A troca da capa pelo embed. Delegado no documento pela mesma razão. */
+    document.addEventListener("click", (ev) => {
+      const alvo = ev.target as HTMLElement | null;
+      const capa = alvo?.closest?.<HTMLAnchorElement>("[data-video-fachada]");
+      if (!capa) return;
+
+      /* Ctrl/Cmd/meio: o leitor pediu para abrir em outra aba, e o link é de
+         verdade. Interceptar isso seria transformar um `<a>` em botão pela
+         metade. */
+      const ev2 = ev as MouseEvent;
+      if (ev2.metaKey || ev2.ctrlKey || ev2.shiftKey || ev2.button !== 0) return;
+
+      ev.preventDefault();
+
+      const id = capa.getAttribute("data-video-fachada");
+      const quadro = capa.parentElement;
+      if (!id || !quadro) return;
+
+      /* `origin` só vai quando a página tem uma de verdade: aberto do disco
+         (`file://`) `location.origin` é a string "null", e mandá-la faz o
+         player recusar todo comando — inclusive o `pauseVideo` acima. */
+      const origem = location.origin.startsWith("http") ? location.origin : undefined;
+
+      const f = document.createElement("iframe");
+      f.src = urlDoEmbed(id, origem);
+      f.title = capa.getAttribute("data-video-titulo") ?? "Vídeo";
+      f.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+      f.allowFullscreen = true;
+      f.referrerPolicy = "strict-origin-when-cross-origin";
+
+      quadro.replaceChildren(f);
+      embeds.add(f);
+
+      /* O embed nasce tocando (`autoplay=1`), então ele é quem começou. */
+      pausarOutros(f);
+
+      /* Abre o canal de eventos do player. Ver o ouvinte de `message` abaixo. */
+      f.addEventListener("load", () => {
+        f.contentWindow?.postMessage(
+          JSON.stringify({ event: "listening", id: 1, channel: "widget" }),
+          ORIGEM_DO_EMBED,
+        );
+      });
+    });
+
+    /* Play dado DENTRO de um embed já aberto — nos controles do próprio
+     * YouTube — também pausa os outros.
+     *
+     * COM QUANTA CONFIANÇA: `enablejsapi=1` e o comando `pauseVideo` acima
+     * são API pública e documentada. Já o `infoDelivery` que este ouvinte lê
+     * é o canal interno que a IFrame API usa por baixo, e não está na
+     * documentação. Está aqui de propósito, porque a alternativa é carregar
+     * `iframe_api.js` do Google em toda página que tenha um vídeo — e isso
+     * desfaz a fachada inteira, que existe para que nada do Google carregue
+     * antes do play.
+     *
+     * O QUE ACONTECE SE O YOUTUBE MUDAR ESSE FORMATO: este ouvinte para de
+     * casar e nada mais. Some só a pausa cruzada disparada de dentro do
+     * embed; a pausa disparada por um `<video>` nosso, pela troca de capa e
+     * por qualquer outro embed continua funcionando, porque ela sai de
+     * `pauseVideo`, que é a parte documentada.
+     *
+     * O QUE FOI MEDIDO, E O QUE NÃO FOI (10/09/2026, Chromium via CDP contra
+     * o dev server). VERIFICADO: a carga da página não faz uma requisição
+     * sequer a domínio do Google; o clique na capa cria o `<iframe>` com a
+     * URL desta função e pausa o `<video>` que estava tocando; o handshake
+     * `listening` chega ao player e é aceito (as repetições passam a
+     * responder `alreadyInitialized`, o que só acontece depois de a primeira
+     * registrar). NÃO VERIFICADO: `infoDelivery` com `playerState`, porque o
+     * YouTube barra navegador automatizado com "Sign in to confirm you're not
+     * a bot" e o vídeo nunca chega a tocar — nenhum estado é emitido, e não
+     * há como distinguir daqui "o canal mudou" de "o vídeo não tocou". Fica
+     * declarado em vez de prometido, que é a régua do erro 4.
+     */
+    window.addEventListener("message", (ev) => {
+      if (ev.origin !== ORIGEM_DO_EMBED) return;
+      let dados: any;
+      try {
+        dados = typeof ev.data === "string" ? JSON.parse(ev.data) : ev.data;
+      } catch {
+        return;
+      }
+      if (dados?.event !== "infoDelivery") return;
+      /* 1 é "tocando" na tabela de estados do player. */
+      if (dados?.info?.playerState !== 1) return;
+      for (const f of embeds) {
+        if (f.contentWindow === ev.source) {
+          pausarOutros(f);
+          return;
+        }
+      }
+    });
+
+    /* O rótulo da capa nasce dizendo "Assistir no YouTube", que é o que vale
+       sem script. Daqui para baixo passa a valer outra coisa, e o texto
+       acompanha — rótulo que promete o que não vai acontecer é o erro 4. */
+    document
+      .querySelectorAll<HTMLElement>("[data-video-fachada] [data-video-rotulo]")
+      .forEach((r) => {
+        r.textContent = "Tocar aqui";
+      });
+  }
+
+  ligarVideos();
+</script>
