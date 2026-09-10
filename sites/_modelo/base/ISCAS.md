@@ -14,5 +14,10 @@
    por e-mail)?
 4. O que a isca promete que o site precisa cumprir de fato — o que
    quebraria a confiança se fosse só chamariz?
+5. A isca tem um número na promessa ("a planilha com os 12 custos da
+   caneca") ou promete resultado ("lucre mais")? O bloco de isca recusa
+   promessa sem número e qualquer palavra de faturamento ou escassez.
+6. Que peça publicada a isca complementa, e o que ela entrega que a peça
+   não podia entregar de graça na página?
 
 <!-- Responda abaixo. Apague as perguntas quando as respostas estiverem de pé. -->

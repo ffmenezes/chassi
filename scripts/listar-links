@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""Lista todo link de um post.md numa tabela para o dono decidir.
+
+Uso:
+    scripts/listar-links sites/<slug>/posts/<peça>/post.md > sites/<slug>/posts/<peça>/links.md
+
+Cada link (externo, interno, pendente) sai com o capítulo em que está, o
+texto da âncora, a URL, um tipo deduzido e a coluna "decisão do dono" vazia.
+A etapa 7 da skill `artigo` gera este arquivo; a peça só vai a `publicado`
+depois que toda linha tem decisão. O tipo é palpite por domínio e contexto,
+para orientar a leitura; quem classifica de verdade é o dono.
+"""
+import re, sys
+from urllib.parse import urlparse
+
+LOJA = ("mercadolivre", "amazon", "magazineluiza", "magalu", "americanas", "shopee", "casasbahia", "kabum",
+        "aliexpress", "loja", "shop", "store", "produto", "/p/", "/dp/")
+OFICIAL = ("gov.br", "planalto", "aneel", "inmetro", "receita", "senado", "camara", "jus.br", "anvisa", "bcb.gov",
+           "ibge", "abnt", "contran", "denatran", "senatran", "prefeitura")
+FABRICANTE = ("consul", "brastemp", "springer", "midea", "lg.com", "samsung", "electrolux", "philco", "sawgrass", "epson")
+
+def tipo(url, ancora, contexto):
+    u = url.lower(); c = (ancora + " " + contexto).lower()
+    if url.startswith("/"): return "interno"
+    if "LINK PENDENTE" in contexto: return "interno pendente"
+    if any(k in u for k in OFICIAL): return "fonte oficial"
+    if any(k in u for k in FABRICANTE): return "fabricante"
+    if any(k in u for k in LOJA) or re.search(r"r\$|preço|preco|à vista|pix|parcel", c): return "loja ou preço (candidato a afiliado)"
+    return "terceiro"
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__); sys.exit(2)
+    texto = open(sys.argv[1], encoding="utf-8").read()
+    corpo = "---".join(texto.split("---")[2:]) if texto.startswith("---") else texto
+    linhas = []
+    capitulo = "abertura"
+    n = 0
+    for ln in corpo.splitlines():
+        m = re.match(r"^## (.+)$", ln)
+        if m:
+            capitulo = m.group(1).strip()
+            continue
+        for a, u in re.findall(r"\[([^\]]+)\]\(([^)\s]+)\)", ln):
+            n += 1
+            linhas.append((n, capitulo, a, u, tipo(u, a, ln)))
+        for a, slug in re.findall(r"\[([^\]]+)\]\[LINK PENDENTE: ([^\]]+)\]", ln):
+            n += 1
+            linhas.append((n, capitulo, a, f"/{slug}/ (pendente)", "interno pendente"))
+    print("# Links — decisão do dono\n")
+    print("Gerado por `scripts/listar-links` na entrega. Preencha a última coluna de")
+    print("toda linha antes de marcar a peça como `publicado`: **manter**, **trocar")
+    print("por afiliado** (e a declaração de `base/DECLARACOES.md` entra na peça),")
+    print("**trocar a fonte** (diga qual), **remover** (diga o que fica no lugar).")
+    print("Link de loja ou de produto é onde o programa de afiliado de")
+    print("`base/MONETIZACAO.md` costuma caber; link de fonte oficial não se troca.\n")
+    print("| # | capítulo | âncora | URL | tipo (palpite) | decisão do dono |")
+    print("|---|---|---|---|---|---|")
+    for n, cap, a, u, t in linhas:
+        print(f"| {n} | {cap[:60]} | {a[:60]} | {u} | {t} | |")
+    if not linhas:
+        print("| | (nenhum link no corpo) | | | | |")
+    print(f"\nTotal: {len(linhas)} links. Fontes listadas no rodapé sem link no corpo não aparecem aqui;")
+    print("a etapa 6 já cobra que a fonte mais forte esteja linkada onde é usada.")
+
+if __name__ == "__main__":
+    main()

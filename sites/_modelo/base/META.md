@@ -11,5 +11,10 @@
 3. Em uma frase, o que seria fracasso — o sinal que diz "isso não vai vingar"?
 4. Quanto tempo você dá antes de reavaliar essa aposta?
 5. O que você faria diferente hoje se já soubesse que vai fracassar?
+6. Quantas peças por semana o site aguenta produzir com apuração de verdade,
+   sem inventar número? Esse é o ritmo, não o que o concorrente publica.
+7. Que sinal fora do Google diz que o site existe para alguém (busca pelo
+   nome, alguém citando, e-mail chegando)? É o que sustenta o site numa
+   atualização de algoritmo.
 
 <!-- Responda abaixo. Apague as perguntas quando as respostas estiverem de pé. -->

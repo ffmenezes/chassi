@@ -15,5 +15,12 @@
    concorrência — mesma régua?
 4. O que fazer quando a evidência é fraca ou dividida — o site toma
    partido, ou expõe a divergência?
+5. Quando não há dado com fonte, o que a peça faz: declara a lacuna, usa
+   uma premissa de exemplo rotulada, ou não publica? Em que assunto cada
+   uma vale?
+6. Preço, tarifa e prazo saem como faixa com mês e ano, ou como valor do
+   dia? Depois de quanto tempo um número desses vence e a peça reabre?
+7. Que afirmação de terceiro (fabricante, loja, influenciador) o site
+   repete só com atribuição, e qual ele nem repete?
 
 <!-- Responda abaixo. Apague as perguntas quando as respostas estiverem de pé. -->

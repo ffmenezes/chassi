@@ -94,12 +94,25 @@ silenciosa.
 
 ## O resto da peça
 
-O encanamento `post.md → blocos` **ainda não existe**. Enquanto ele não
-chegar, o texto do artigo não tem forma definida aqui: escreva onde preferir
-e não invente um formato que o upstream vai ter que contradizer depois.
+O encanamento `post.md → blocos` **ainda não existe**: nenhum código lê o
+texto daqui. O formato, porém, já está decidido, e é o que a skill
+`artigo` (`.claude/skills/artigo/`) produz e o parser vai honrar quando
+chegar:
 
-O que já dá para deixar pronto neste diretório, e que nenhum código lê:
-imagens da peça, prints da apuração que viraram figura, e o rascunho. Lembre
-que toda figura de prova precisa de legenda, fonte e data (bloco 19), e é
-mais barato anotar isso agora, do lado do arquivo, do que reencontrar seis
-meses depois.
+```
+posts/<slug-da-peça>/
+  esqueleto.md        etapa 3: capítulos, números fechados, congela
+  capitulos/NN-*.md   etapa 4: um arquivo por H2
+  post.md             etapa 5: a peça costurada, corrigida na etapa 6
+  revisao.md          etapa 6: veredito por rodada, pendências da entrega
+  comentarios.json    a moderação escreve; a build lê
+```
+
+A sintaxe de bloco dentro do `post.md` (`:::figura{...}`, `:::aviso{...}`)
+está em `.claude/skills/artigo/referencias/blocos.md`. Escrever nela hoje é
+o que evita reescrever a peça depois.
+
+Imagens da peça e prints da apuração ficam em `pesquisa/<slug-da-peça>/`,
+ao lado do dossiê, com legenda, fonte e data anotadas num `.md` do lado:
+toda figura de prova precisa disso (bloco 19), e é mais barato anotar agora
+do que reencontrar seis meses depois.

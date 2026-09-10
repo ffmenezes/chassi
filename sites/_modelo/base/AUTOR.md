@@ -22,6 +22,11 @@
    funcionária de uma marca do nicho)?
 4. Se um leitor cético procurar essa assinatura, o que ele precisa encontrar
    para confiar?
+5. O que o autor faz com as próprias mãos neste nicho, hoje (opera a prensa,
+   paga a conta, dirige a bike)? É isso que decide de que lugar o texto
+   pode falar (`POSTURAS.md`).
+6. Que resultado negativo ou erro próprio o autor está disposto a contar? A
+   credencial que chega sem o preço dela é a que menos convence.
 
 <!-- Responda abaixo. Apague as perguntas quando as respostas estiverem de pé. -->
 

@@ -18,10 +18,13 @@ termos, direitos autorais).
   e está inerte (mesmo comportamento de qualquer porta sem chave configurada);
   D1, schema e fila de moderação chegam depois, junto com a aula em que
   comentário for o assunto.
-- **As ferramentas de conteúdo** — geração de pauta, redação de artigo,
-  auditoria de voz — que fazem parte do workshop não vêm neste repositório.
-  Este repo é o chassi: a casa onde o conteúdo mora, não quem escreve o
-  conteúdo.
+- **O método de artigo vem; o encanamento, ainda não.** A skill `artigo`
+  (`.claude/skills/artigo/`) conduz da ideia à peça revisada em oito etapas,
+  com estado em `sites/<slug>/`, e é o que escreve o `post.md`. O que não
+  existe é o parser que transforma esse `post.md` na página: a sintaxe de
+  bloco em `referencias/blocos.md` é o contrato dele, e até ele chegar a
+  peça fica pronta em disco. Auditoria de voz e manutenção de peça
+  publicada ficam para depois.
 
 Prometer o que não tem é a pior coisa que este README podia fazer, então está
 dito sem rodeio.

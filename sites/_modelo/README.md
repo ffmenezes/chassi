@@ -113,6 +113,8 @@ o dono dela.
 | "quem assina" × "o que declarar" | `AUTOR.md` é sobre a pessoa; `DECLARACOES.md` é sobre o conteúdo |
 | "que peças" × "por que essas" | `CLUSTER.md` manda em slug e query; `TESE.md` é insumo |
 | "que imagens" × "que estilo visual" | `ILUSTRACAO.md` é a imagem dentro do artigo; `DESIGN.md` é o tema da página |
+| "de onde o texto fala" × "o que o autor faz de verdade" | `POSTURAS.md` lista as posturas; `AUTOR.md` diz quais delas a pessoa sustenta. Postura que o autor não sustenta não entra |
+| "como ganha dinheiro" × "que link entra na peça" | `MONETIZACAO.md` lista os programas e as lojas preferidas; a decisão por link fica no `links.md` de cada peça, e o aviso ao leitor em `DECLARACOES.md` |
 
 ## Os quatro que não se comportam como os outros
 

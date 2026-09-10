@@ -35,11 +35,16 @@ foram desenhadas para puxada arquivo por arquivo (`git checkout upstream/main
 AGENTS.md                              arquivo real
 CLAUDE.md               → symlink →    AGENTS.md
 .agents/skills/atualizar-template/     arquivos reais
+.agents/skills/artigo/                 o método de artigo: oito etapas, estado em sites/<slug>/
+.agents/skills/pitaco/                 o toque do autor numa peça pronta, sem mexer em número
 .claude/skills          → symlink →    ../.agents/skills
 LICENSE                                MIT
 README.md
 scripts/instalar                       roda uma vez, após o clone
 scripts/atualizar                      puxada por arquivo, nunca merge
+scripts/higiene-texto                  tira caractere invisível de post.md e conta travessão
+scripts/medir-texto                    legibilidade (Flesch-PT, frases) e SEO on-page de post.md
+scripts/listar-links                   todo link de post.md numa tabela para o dono decidir
 web/src/sites/<slug>.ts                ← o site do participante (só este)
 web/src/sites/index.ts                 ← varre e valida. Nunca editado à mão.
 web/src/sites/exemplo.ts               ← o modelo. Único arquivo do upstream que se apaga
@@ -97,6 +102,10 @@ componente conhece cor, fonte ou medida literal.
 - **Código (bloco 20)** — sem rótulo de contexto, linha abrindo com `$`, `#`
   ou `>` (não colável).
 - **Aviso (bloco 21)** — tipo `atencao` sem `fonte`.
+- **Gráfico (bloco 31)** — sem título ou sem fonte, série com contagem
+  diferente das categorias, valor que não é número, mais de 12 categorias
+  ou 4 séries, linha com menos de 3 pontos, pizza com mais de uma série,
+  mais de 6 fatias, lacuna ou negativo. As travas estão em `web/src/grafico.ts`.
 
 ## A regra das portas
 

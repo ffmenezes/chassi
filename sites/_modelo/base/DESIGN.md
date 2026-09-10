@@ -20,5 +20,11 @@
 4. Se você precisar de um token que o estilo não tem, isso é um desvio
    (`web/src/sites/<slug>.ts`, teto de 6) ou sinal de que o estilo errado
    foi escolhido?
+5. Que bloco do catálogo o site declara e qual ele deixa fora de
+   propósito (quiz, slides, carrossel)? Bloco fora da lista de
+   `web/src/sites/<slug>.ts` não nasce na página, mesmo que a peça peça.
+6. Como a página deve se comportar sem JavaScript e no celular: o que precisa
+   estar visível sem hover nem clique? (É restrição do chassi, não
+   preferência; a pergunta é o que o site acrescenta a ela.)
 
 <!-- Responda abaixo. Apague as perguntas quando as respostas estiverem de pé. -->

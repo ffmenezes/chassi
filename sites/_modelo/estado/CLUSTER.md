@@ -15,8 +15,10 @@
 1. Que peças (posts) este site pretende publicar, e em que slug cada uma
    vive?
 2. Para cada peça, qual é a query-alvo — a busca real que ela quer ganhar?
-3. Em que status está cada peça (pauta, rascunho, publicado, precisa
-   revisão)?
+3. Em que status está cada peça? A skill `artigo` usa, nesta ordem:
+   `pauta`, `dossie`, `esqueleto`, `rascunho`, `revisado`, `pronto` (peça
+   entregue, sem página) e `publicado` (página no ar); e `descartada`, com
+   o motivo na prosa.
 4. Existe sobreposição de query-alvo entre duas peças? Qual delas é dona
    daquela busca?
 

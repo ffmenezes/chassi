@@ -16,5 +16,13 @@
 3. Existe algum dado que todo mundo cita de segunda mão, sem que ninguém
    tenha achado a fonte original? Vale o esforço de achar?
 4. Que fonte você consultaria de novo a cada trimestre, porque o dado muda?
+5. Onde o site apura preço: quais lojas, marketplaces ou tabelas oficiais,
+   com URL, e em que condição (à vista, Pix, sem cupom)? Duas fontes na
+   mesma data é o mínimo do dado próprio.
+6. Que ferramenta o site tem para gerar dado próprio (medidor de tomada,
+   simulador oficial, planilha de custo, balança)? O que custa até duas
+   horas por peça, e o que custa dias (e por isso só vale em pilar)?
+7. Que fonte oficial chega em PDF ou trava o acesso automático, e como se lê
+   mesmo assim (baixar e extrair, protocolo, biblioteca)?
 
 <!-- Responda abaixo. Apague as perguntas quando as respostas estiverem de pé. -->

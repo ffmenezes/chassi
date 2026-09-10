@@ -15,5 +15,14 @@
    tipo de prova visual este nicho tem para mostrar?
 4. Existe um personagem recorrente, ou as imagens são sempre funcionais
    (gráfico, print, diagrama)?
+5. Que prova visual o site consegue produzir sozinho, com data (print do
+   painel, foto do medidor, foto da peça pronta), e de onde vem a que ele
+   não produz? Imagem gerada por IA é declarada ou não entra?
+6. Onde a imagem do site vive hoje (a pasta da peça em `pesquisa/`, um
+   acervo próprio), e quem cuida do alt, da legenda e da fonte antes de a
+   figura entrar na peça?
+7. Que dado do nicho lê melhor em gráfico do que em tabela (série no tempo,
+   três ou mais itens na mesma unidade, partes de um todo), e qual nunca
+   vira gráfico?
 
 <!-- Responda abaixo. Apague as perguntas quando as respostas estiverem de pé. -->

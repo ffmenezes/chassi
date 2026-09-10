@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Higiene de texto para post.md: remove caractere invisível que sobra de
+# colar de chat ou de editor (zero-width, soft hyphen, controle bidi, tag
+# character, espaço exótico) e conta o que a etapa 6 trata como defeito
+# (travessão, meia-risca, hífen duplo).
+#
+# Uso:
+#   scripts/higiene-texto sites/<slug>/posts/<peça>/post.md        # limpa no lugar e relata
+#   scripts/higiene-texto --so-relatar <arquivo>                   # só relata, não escreve
+#
+# Por que só isto: "watermark" de texto tem três sentidos, e só este (o
+# caractere invisível) é determinístico e vale limpar. A marca estatística
+# de amostragem só sai reescrevendo, e reescrever para esconder origem não
+# é o que este método faz. O que se declara sobre IA está em
+# base/DECLARACOES.md.
+
+set -euo pipefail
+
+so_relatar=0
+if [ "${1:-}" = "--so-relatar" ]; then so_relatar=1; shift; fi
+arquivo="${1:-}"
+if [ -z "$arquivo" ] || [ ! -f "$arquivo" ]; then
+  echo "uso: scripts/higiene-texto [--so-relatar] <arquivo.md>" >&2
+  exit 2
+fi
+
+# Classe de caractere invisível. Preserva ZWJ (U+200D) porque emoji e
+# escritas indianas/árabes dependem dele; emoji é defeito editorial, não
+# de higiene, e a etapa 6 pega por grep próprio.
+invisiveis='\x{200B}\x{200C}\x{2060}\x{FEFF}\x{00AD}\x{180E}\x{202A}-\x{202E}\x{2066}-\x{2069}\x{2061}-\x{2065}\x{FFF0}-\x{FFF8}\x{E0000}-\x{E007F}\x{E0080}-\x{E00FF}\x{FDD0}-\x{FDEF}\x{FFFE}\x{FFFF}'
+# Espaço exótico que vira espaço comum.
+espacos='\x{00A0}\x{2000}-\x{200A}\x{202F}\x{205F}\x{3000}\x{180F}\x{3164}\x{FFA0}'
+
+n_inv=$(perl -CSD -ne "\$c += () = /[$invisiveis]/g; END { print \$c || 0 }" "$arquivo")
+n_esp=$(perl -CSD -ne "\$c += () = /[$espacos]/g; END { print \$c || 0 }" "$arquivo")
+n_trav=$(perl -CSD -Mutf8 -ne '$c += () = /—|–| -- /g; END { print $c || 0 }' "$arquivo")
+
+if [ "$so_relatar" -eq 0 ] && { [ "$n_inv" -gt 0 ] || [ "$n_esp" -gt 0 ]; }; then
+  perl -CSD -i -pe "s/[$invisiveis]//g; s/[$espacos]/ /g" "$arquivo"
+  acao="removidos"
+else
+  acao="encontrados"
+fi
+
+echo "higiene-texto: $arquivo"
+echo "  caracteres invisíveis $acao: $n_inv"
+echo "  espaços exóticos $acao: $n_esp"
+echo "  travessões / meia-risca / hífen duplo (não removidos, corrigir na revisão): $n_trav"
+
+if [ "$n_trav" -gt 0 ]; then
+  perl -CSD -Mutf8 -ne 'print "  linha $.: $_" if /—|–| -- /' "$arquivo"
+fi

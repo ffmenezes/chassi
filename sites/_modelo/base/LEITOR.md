@@ -15,5 +15,15 @@
 5. O que ela precisa ter em mãos (decisão, número, próximo passo) ao
    terminar de ler?
 6. Quem parecido com ela este site explicitamente **não** serve?
+7. Que palavras ela usa e que o nicho técnico não usaria ("gasta muita
+   luz" em vez de "consumo em kWh"; "caneca de sublimar" em vez de
+   "caneca AAA revestida")? É esse vocabulário que vai para o título e
+   para a FAQ.
+8. O que ela já sabe e não precisa que expliquem? O que ela acha que sabe e
+   está errado (a crença que a peça de veredito vai atacar)?
+9. Que número ela tem em mãos quando chega (a conta de luz, o preço que
+   viu, a etiqueta)? É ele que a calculadora pede.
+10. Depois de resolver o problema, o que ela procura na sequência? (É de
+   onde saem as peças satélite.)
 
 <!-- Responda abaixo. Apague as perguntas quando as respostas estiverem de pé. -->
