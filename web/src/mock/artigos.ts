@@ -27,6 +27,7 @@
  */
 import type { Conclusao } from "../components/blocos/CaixaConclusoes.astro";
 import type { Celula } from "../components/blocos/_Tabela.astro";
+import type { DadosGrafico } from "../grafico";
 import type { ItemCheck } from "../components/blocos/Checklist.astro";
 import type { Pergunta } from "../components/blocos/Faq.astro";
 import type { Props as CamposFigura } from "../components/blocos/Figura.astro";
@@ -49,6 +50,9 @@ export type Slot =
   | { tipo: "lista"; itens: string[] }
   | { tipo: "tabelaPanorama"; colunas: string[]; linhas: Celula[][]; fonte: string }
   | { tipo: "tabelaContraste"; colunas: string[]; linhas: Celula[][]; fonte: string }
+  /** Bloco 31 — a tabela desenhada. Os números são os de uma tabela do
+   *  mesmo artigo, nunca outros. */
+  | { tipo: "grafico"; dados: DadosGrafico }
   | { tipo: "figura"; dados: CamposFigura }
   | { tipo: "citacaoDestacada"; texto: string }
   | { tipo: "citacaoFonte"; texto: string; nome: string; papel: string; conflito: string }
@@ -137,6 +141,19 @@ export const ARTIGOS: DadosArtigo[] = [
           ["Smart TV", "—", "amet", { vazio: "[sem dado confiável]" }],
         ] as Celula[][],
         fonte: "Fonte e data fictícias — lorem ipsum, 07/2026. A linha da Smart TV declara a lacuna em vez de estimar.",
+      },
+      {
+        /* bloco 31: a mesma tabela de panorama, desenhada. Só o artigo-1 monta,
+           pela mesma razão do deck: repertório diferente por artigo. */
+        tipo: "grafico",
+        dados: {
+          tipo: "barra",
+          titulo: "Consumo no pico por aparelho, Mbps (lorem)",
+          categorias: ["Notebook do home office", "Backup na nuvem", "Streaming em 4K", "Câmera de segurança", "Smart TV"],
+          series: [{ nome: "Consumo", valores: [15, 40, 25, 2, null] }],
+          unidade: "Mbps",
+          fonte: "Fonte e data fictícias — lorem ipsum, 07/2026. A Smart TV fica sem barra: lacuna declarada, não estimada.",
+        },
       },
       {
         tipo: "figura",

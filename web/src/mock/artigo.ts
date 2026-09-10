@@ -114,6 +114,41 @@ export const contraste = {
     "As duas colunas vêm da mesma casa, mesmo roteador e mesma semana. Sem isso a tabela não nasce.",
 };
 
+/* Bloco 31 — três gráficos, um por forma, com os números fictícios das
+   tabelas acima: o gráfico é a tabela desenhada, então o mock reaproveita o
+   que já existe em vez de inventar uma segunda verdade. A lacuna (null) no
+   de barra e a série dupla no de linha exercitam as travas e a hachura. */
+import type { DadosGrafico } from "../grafico";
+export const graficos: Record<"barra" | "linha" | "pizza", DadosGrafico> = {
+  barra: {
+    tipo: "barra",
+    titulo: "Consumo de banda por aparelho no pico, Mbps",
+    categorias: ["TV da sala", "Notebook", "Celular 1", "Celular 2", "Câmera"],
+    series: [
+      { nome: "Medido", valores: [120, 90, 60, 45, null] },
+      { nome: "Declarado pelo fabricante", valores: [80, 60, 40, 40, 25] },
+    ],
+    unidade: "Mbps",
+    fonte: "Medição própria no painel do roteador, semana de 4 a 10 de agosto de 2026; câmera sem medição.",
+  },
+  linha: {
+    tipo: "linha",
+    titulo: "Quedas de conexão por semana, antes e depois de reordenar",
+    categorias: ["sem 1", "sem 2", "sem 3", "sem 4", "sem 5", "sem 6"],
+    series: [{ nome: "Quedas", valores: [4, 5, 3, 0, 1, 0] }],
+    unidade: "quedas",
+    fonte: "Registro do próprio roteador, seis semanas de julho e agosto de 2026.",
+  },
+  pizza: {
+    tipo: "pizza",
+    titulo: "Quem usa a banda no pico das 20h",
+    categorias: ["TV da sala", "Notebook", "Celulares", "Resto"],
+    series: [{ nome: "Parte do consumo", valores: [120, 90, 105, 25] }],
+    unidade: "Mbps",
+    fonte: "Medição própria, mesma semana da tabela de panorama.",
+  },
+};
+
 export const destaque =
   "Chamada de vídeo que trava quase nunca é problema do provedor. É problema de dois aparelhos que puxam banda ao mesmo tempo.";
 

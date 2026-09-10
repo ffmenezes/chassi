@@ -19,7 +19,7 @@
 export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
-  | 26 | 27 | 28 | 29 | 30
+  | 26 | 27 | 28 | 29 | 30 | 31
   | "N1" | "N2" | "N3" | "N4" | "N5"
   | "A1" | "A2" | "A3";
 
@@ -83,6 +83,10 @@ export const CATALOGO: readonly Bloco[] = [
   { id: 3, estado: "ativo", categoria: "estrutura", nome: "Sumário", regra: "Gerado dos headings. Inline no celular é o mínimo; o trilho fixo no desktop é o extra. Nunca só no desktop." },
   { id: 4, estado: "ativo", categoria: "dados", nome: "Tabela de panorama", regra: "A coluna existe se todas as células saírem do esqueleto congelado. Célula sem dado derruba a coluna." },
   { id: 5, estado: "ativo", categoria: "dados", nome: "Tabela de contraste", regra: "As duas colunas precisam ser apuradas na mesma base. Lado medido contra lado imaginado é defeito." },
+  // 31 entre 5 e 6 porque a ordem aqui é a de leitura: o gráfico é a tabela
+  // desenhada, e lê ao lado das duas tabelas. É ATIVO: SVG gerado na build,
+  // sem um script sequer; as travas moram em `src/grafico.ts`.
+  { id: 31, estado: "ativo", categoria: "dados", nome: "Gráfico", regra: "Barra, linha ou pizza, escolhido pela pergunta que responde. Todo número vem do esqueleto e a tabela com os mesmos números viaja dentro do bloco. Fonte com data obrigatória; hachura além da cor." },
   { id: 6, estado: "ativo", categoria: "texto", nome: "Citação destacada", regra: "Conclusão nossa, no máximo duas por artigo. Nunca aforismo, nunca frase de terceiro." },
   { id: 7, estado: "ativo", categoria: "texto", nome: "Citação de fonte nomeada", regra: "Literal, com quem é a pessoa na mesma respiração e o conflito ao lado do nome. Citação não é origem de número." },
   { id: 8, estado: "ativo", categoria: "pergunta", nome: "Checklist", regra: "Item verificável com sim ou não. Recapitula, nunca introduz. Caixa desabilitada enquanto não houver estado." },

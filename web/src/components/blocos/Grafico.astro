@@ -1,0 +1,330 @@
+---
+/** Bloco 31 — Gráfico.
+ *
+ * Uma tabela desenhada, e nada além disso. Três formas (barra, linha, pizza),
+ * escolhidas pela pergunta que respondem, e os números vindos do esqueleto:
+ * o gráfico nunca é origem de número, é apresentação de número que já existe
+ * no texto. As travas moram em `src/grafico.ts`, puras e testadas; aqui só
+ * se chama `conferirGrafico` e se desenha.
+ *
+ * O que sobrevive sem o desenho, porque crawler, leitor de tela e print em
+ * preto e branco não recebem SVG colorido:
+ *   - `<title>` e `<desc>` do SVG dizem os NÚMEROS, não a forma;
+ *   - a tabela com os mesmos números viaja dentro do bloco, em `<details>`;
+ *   - cada série tem hachura própria além da cor (erro 9 da skill: ícone e
+ *     cor nunca carregam significado sozinhos), e todo valor está escrito
+ *     ao lado da barra ou da fatia;
+ *   - a fonte, com data, fica embaixo, como na figura de prova.
+ *
+ * Interatividade: só CSS. Passar o mouse ou levar o foco (Tab) a uma barra,
+ * ponto ou fatia realça o item e apaga um pouco os outros; o `<title>`
+ * interno vira a dica nativa do navegador. Não há `<script>`: nada aqui
+ * depende de JavaScript, e é por isso que o bloco é ATIVO sem infra nenhuma.
+ *
+ * Cor entra por CSS, nunca por atributo de apresentação: `fill="var(...)"`
+ * não resolve a variável, e o defeito aparece como preto chapado no tema
+ * escuro (a lição de `_DiagramaDemo.astro`). Os tokens `--b-grafico-1..4`
+ * são derivados no contrato (`base.css`), então nenhum estilo precisa
+ * declará-los para o gráfico acompanhar o modo.
+ */
+import type { DadosGrafico } from "../../grafico";
+import { conferirGrafico, descrever, escala, fatias, formatar } from "../../grafico";
+
+export type Props = DadosGrafico & {
+  /** Prefixo dos ids internos (padrões de hachura, title, desc). Dois
+   *  gráficos na mesma página precisam de prefixos diferentes. */
+  id?: string;
+};
+const { id = "graf", tipo, titulo, categorias, series, unidade = "", decimais = 0, fonte } = Astro.props;
+const dados: DadosGrafico = { tipo, titulo, categorias, series, unidade, decimais, fonte };
+conferirGrafico(dados);
+
+const fmt = (v: number | null) => formatar(v, unidade, decimais);
+const desc = descrever(dados);
+const HACHURAS = ["solida", "diagonal", "pontos", "cruzada"] as const;
+const hachura = (i: number) => `url(#${id}-h${i % HACHURAS.length})`;
+
+/* Geometria em viewBox, nunca em pixel: `width="100%"` deixa o navegador
+   escalar, e a fonte mínima de 18 unidades em 600 de largura é a mesma régua
+   do diagrama de exemplo. */
+const L = 600;
+const FONTE = 18;
+
+/* barra: horizontal, uma linha por categoria; com N séries, N barras finas
+   por categoria. Rótulo de categoria à esquerda, valor na ponta da barra. */
+const barra = (() => {
+  if (tipo !== "barra") return null;
+  const x0 = 190, xFim = L - 90, yTopo = 16;
+  const alturaBarra = series.length > 1 ? 16 : 24;
+  const vao = 6, blocoAlt = series.length * alturaBarra + (series.length - 1) * vao;
+  const passo = blocoAlt + 18;
+  const H = yTopo + categorias.length * passo + 34;
+  const todos = series.flatMap((s) => s.valores);
+  const e = escala(todos);
+  const x = (v: number) => x0 + ((v - e.min) / (e.max - e.min)) * (xFim - x0);
+  return { x0, xFim, yTopo, alturaBarra, vao, blocoAlt, passo, H, e, x };
+})();
+
+/* linha: categorias no eixo X, valores no Y; um ponto por categoria. */
+const linha = (() => {
+  if (tipo !== "linha") return null;
+  const x0 = 124, xFim = L - 70, yTopo = 28, H = 320, yBase = H - 58;
+  const todos = series.flatMap((s) => s.valores);
+  const e = escala(todos);
+  const x = (i: number) => x0 + (i / Math.max(1, categorias.length - 1)) * (xFim - x0);
+  const y = (v: number) => yBase - ((v - e.min) / (e.max - e.min)) * (yBase - yTopo);
+  const caminhos = series.map((s) => {
+    let d = "", aberto = false;
+    s.valores.forEach((v, i) => {
+      if (v === null) { aberto = false; return; }
+      d += `${aberto ? "L" : "M"} ${x(i).toFixed(1)} ${y(v).toFixed(1)} `;
+      aberto = true;
+    });
+    return d.trim();
+  });
+  return { x0, xFim, yTopo, H, yBase, e, x, y, caminhos };
+})();
+
+/* pizza: círculo à esquerda, legenda com valor e porcentagem à direita. */
+const pizza = (() => {
+  if (tipo !== "pizza") return null;
+  const vals = series[0].valores as number[];
+  const total = vals.reduce((a, b) => a + b, 0);
+  const H = 300, cx = 150, cy = 150, r = 120;
+  return { H, cx, cy, r, total, fatias: fatias(vals, cx, cy, r) };
+})();
+const altura = barra?.H ?? linha?.H ?? pizza?.H ?? 300;
+---
+
+<figure class="b-card grafico" data-tipo={tipo}>
+  <figcaption class="cab">
+    <span class="chip">gráfico</span>
+    <b class="titulo">{titulo}</b>
+  </figcaption>
+
+  <div class="palco">
+    <svg
+      viewBox={`0 0 ${L} ${altura}`}
+      width="100%"
+      role="img"
+      aria-labelledby={`${id}-t ${id}-d`}
+      class="desenho"
+    >
+      <title id={`${id}-t`}>{titulo}</title>
+      <desc id={`${id}-d`}>{desc}. Fonte: {fonte}.</desc>
+      <defs>
+        {/* a hachura é a segunda pele de cada série: distingue sem cor. A cor
+            vem por `fill` no CSS, sobre o `.pincel` de cada padrão. */}
+        <pattern id={`${id}-h0`} patternUnits="userSpaceOnUse" width="6" height="6">
+          <rect class="pincel s0" width="6" height="6" />
+        </pattern>
+        <pattern id={`${id}-h1`} patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+          <rect class="pincel s1" width="8" height="8" />
+          <rect class="furo" width="8" height="3" />
+        </pattern>
+        <pattern id={`${id}-h2`} patternUnits="userSpaceOnUse" width="7" height="7">
+          <rect class="pincel s2" width="7" height="7" />
+          <circle class="furo" cx="3.5" cy="3.5" r="1.6" />
+        </pattern>
+        <pattern id={`${id}-h3`} patternUnits="userSpaceOnUse" width="8" height="8">
+          <rect class="pincel s3" width="8" height="8" />
+          <rect class="furo" width="8" height="2" />
+          <rect class="furo" width="2" height="8" />
+        </pattern>
+      </defs>
+
+      {barra && (
+        <g>
+          {barra.e.marcas.map((m) => (
+            <g class="grade">
+              <line x1={barra.x(m)} x2={barra.x(m)} y1={barra.yTopo - 6} y2={barra.H - 30} />
+              <text x={barra.x(m)} y={barra.H - 12} text-anchor="middle" font-size={FONTE - 2}>{fmt(m)}</text>
+            </g>
+          ))}
+          {categorias.map((c, ci) => (
+            <g>
+              <text x={barra.x0 - 10} y={barra.yTopo + ci * barra.passo + barra.blocoAlt / 2 + 6} text-anchor="end" font-size={FONTE} class="rotulo">{c}</text>
+              {series.map((s, si) => {
+                const v = s.valores[ci];
+                const y = barra.yTopo + ci * barra.passo + si * (barra.alturaBarra + barra.vao);
+                const xi = barra.x(Math.min(0, v ?? 0)), xf = barra.x(Math.max(0, v ?? 0));
+                return (
+                  <g class="item" tabindex="0">
+                    <title>{s.nome}: {c}, {fmt(v)}</title>
+                    {v === null ? (
+                      <text x={barra.x(0) + 8} y={y + barra.alturaBarra - 4} font-size={FONTE - 2} class="lacuna">[sem dado]</text>
+                    ) : (
+                      <>
+                        <rect x={xi} y={y} width={Math.max(1, xf - xi)} height={barra.alturaBarra} fill={hachura(si)} class="forma" rx="2" />
+                        <text x={xf + 8} y={y + barra.alturaBarra - 5} font-size={FONTE - 2} class="valor">{fmt(v)}</text>
+                      </>
+                    )}
+                  </g>
+                );
+              })}
+            </g>
+          ))}
+        </g>
+      )}
+
+      {linha && (
+        <g>
+          {linha.e.marcas.map((m) => (
+            <g class="grade">
+              <line x1={linha.x0} x2={linha.xFim} y1={linha.y(m)} y2={linha.y(m)} />
+              <text x={linha.x0 - 8} y={linha.y(m) + 6} text-anchor="end" font-size={FONTE - 2}>{fmt(m)}</text>
+            </g>
+          ))}
+          {categorias.map((c, i) => (
+            <text x={linha.x(i)} y={linha.H - 30} text-anchor={i === 0 ? "start" : i === categorias.length - 1 ? "end" : "middle"} font-size={FONTE - 2} class="rotulo">{c}</text>
+          ))}
+          {series.map((s, si) => (
+            <g class={`serie s${si}`}>
+              <path d={linha.caminhos[si]} class={`traco t${si % 4}`} />
+              {s.valores.map((v, i) =>
+                v === null ? null : (
+                  <g class="item" tabindex="0">
+                    <title>{s.nome}: {categorias[i]}, {fmt(v)}</title>
+                    <circle cx={linha.x(i)} cy={linha.y(v)} r="6" class="ponto" />
+                    <text x={linha.x(i)} y={linha.y(v) - 12} text-anchor={i === s.valores.length - 1 ? "end" : "middle"} font-size={FONTE - 2} class={`valor ${i === s.valores.length - 1 ? "fixo" : ""}`}>{fmt(v)}</text>
+                  </g>
+                )
+              )}
+            </g>
+          ))}
+        </g>
+      )}
+
+      {pizza && (
+        <g>
+          {pizza.fatias.map((f) => (
+            <g class="item" tabindex="0">
+              <title>{categorias[f.indice]}: {fmt(f.valor)} ({formatar(100 * f.fracao, "%", 0)})</title>
+              <path d={f.caminho} fill={hachura(f.indice)} class="forma fatia" />
+              {f.fracao >= 0.07 && (
+                <text x={f.rotuloX} y={f.rotuloY + 6} text-anchor="middle" font-size={FONTE} class="valor-fatia">{formatar(100 * f.fracao, "%", 0)}</text>
+              )}
+            </g>
+          ))}
+          {/* legenda dentro do SVG, para o recorte levar o significado junto */}
+          {pizza.fatias.map((f, i) => (
+            <g class="legenda">
+              <rect x="320" y={40 + i * 36} width="22" height="22" fill={hachura(i)} class="forma" rx="3" />
+              <text x="352" y={40 + i * 36 + 17} font-size={FONTE} class="rotulo">{categorias[i]}: {fmt(f.valor)} ({formatar(100 * f.fracao, "%", 0)})</text>
+            </g>
+          ))}
+        </g>
+      )}
+    </svg>
+  </div>
+
+  {tipo !== "pizza" && series.length > 1 && (
+    <ul class="legenda-html" aria-label="Séries">
+      {series.map((s, si) => (
+        <li>
+          <svg viewBox="0 0 22 22" width="18" height="18" aria-hidden="true"><rect width="22" height="22" rx="3" fill={hachura(si)} class="forma" /></svg>
+          {s.nome}
+        </li>
+      ))}
+    </ul>
+  )}
+
+  <details class="numeros">
+    <summary>Ver os números</summary>
+    <div class="b-tabela-wrap">
+      <table class="b-tabela">
+        <thead>
+          <tr>
+            <th> </th>
+            {series.map((s) => <th>{s.nome}{tipo === "pizza" ? " (parte do todo)" : ""}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {categorias.map((c, ci) => (
+            <tr>
+              <th scope="row">{c}</th>
+              {series.map((s) => (
+                <td class={s.valores[ci] === null ? "vazio" : undefined}>
+                  {fmt(s.valores[ci])}
+                  {pizza && ` (${formatar((100 * (s.valores[ci] as number)) / pizza.total, "%", 0)})`}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="b-fonte fonte">{fonte}</p>
+</figure>
+
+<style>
+  .grafico { padding: 14px 16px 10px; max-width: var(--b-medida); }
+  .cab { display: flex; flex-wrap: wrap; gap: 9px; align-items: baseline; margin: 0 0 8px; }
+  .chip {
+    font-family: var(--b-fonte-meta);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-acento-tinta);
+  }
+  .titulo { font-family: var(--b-fonte-titulo); color: var(--b-tinta); }
+  .palco { overflow: hidden; }
+  .desenho { display: block; height: auto; color: var(--b-corpo); font-family: var(--b-fonte-meta); }
+  .desenho text { fill: currentColor; }
+  .grade line { stroke: var(--b-grafico-grade); stroke-width: 1; }
+  .grade text, .rotulo { fill: var(--b-tinta-2); }
+  .lacuna { fill: var(--b-tinta-2); font-style: italic; }
+
+  /* a cor de cada série entra aqui, sobre o pincel do padrão, nunca por
+     atributo no SVG. O furo é o fundo, e é o que faz a hachura ler. */
+  .pincel.s0 { fill: var(--b-grafico-1); }
+  .pincel.s1 { fill: var(--b-grafico-2); }
+  .pincel.s2 { fill: var(--b-grafico-3); }
+  .pincel.s3 { fill: var(--b-grafico-4); }
+  .furo { fill: var(--b-superficie); }
+  .forma { stroke: var(--b-superficie); stroke-width: 1; }
+  .traco { fill: none; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+  .traco.t0 { stroke: var(--b-grafico-1); }
+  .traco.t1 { stroke: var(--b-grafico-2); stroke-dasharray: 8 5; }
+  .traco.t2 { stroke: var(--b-grafico-3); stroke-dasharray: 2 5; }
+  .traco.t3 { stroke: var(--b-grafico-4); stroke-dasharray: 12 4 2 4; }
+  .serie.s0 .ponto { fill: var(--b-grafico-1); }
+  .serie.s1 .ponto { fill: var(--b-grafico-2); }
+  .serie.s2 .ponto { fill: var(--b-grafico-3); }
+  .serie.s3 .ponto { fill: var(--b-grafico-4); }
+  .ponto { stroke: var(--b-superficie); stroke-width: 2; }
+  .valor-fatia { fill: var(--b-sobre-acento); font-weight: 700; paint-order: stroke; stroke: var(--b-tinta); stroke-width: 3px; stroke-linejoin: round; }
+
+  /* a interatividade: realce por hover ou foco, o resto apaga um pouco. Sem
+     script. Na linha, o valor de cada ponto só aparece no realce, exceto o
+     último, que fica fixo: é o que a tabela abaixo cobre para quem não
+     aponta. */
+  .item { outline: none; cursor: default; transition: opacity .15s ease; }
+  .desenho:has(.item:hover) .item:not(:hover),
+  .desenho:has(.item:focus-visible) .item:not(:focus-visible) { opacity: .45; }
+  .item:focus-visible .forma, .item:focus-visible .ponto { stroke: var(--b-acento-tinta); stroke-width: 3; }
+  .grafico[data-tipo="linha"] .valor { opacity: 0; transition: opacity .15s ease; }
+  .grafico[data-tipo="linha"] .valor.fixo,
+  .grafico[data-tipo="linha"] .item:hover .valor,
+  .grafico[data-tipo="linha"] .item:focus-visible .valor { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .item, .valor { transition: none; } }
+
+  .legenda-html {
+    list-style: none; margin: 8px 0 0; padding: 0;
+    display: flex; flex-wrap: wrap; gap: 6px 18px;
+    font-family: var(--b-fonte-meta); font-size: 13px; color: var(--b-corpo);
+  }
+  .legenda-html li { display: inline-flex; align-items: center; gap: 7px; }
+  .legenda-html svg { flex: none; }
+
+  .numeros { margin-top: 10px; }
+  .numeros summary {
+    cursor: pointer; font-family: var(--b-fonte-meta); font-size: 12.5px;
+    color: var(--b-acento-tinta); padding: 4px 0;
+  }
+  .numeros summary:focus-visible { outline: 2px solid var(--b-acento-tinta); outline-offset: 2px; }
+  .numeros td.vazio { color: var(--b-tinta-2); font-style: italic; }
+  .fonte { margin: 8px 0 0; }
+</style>

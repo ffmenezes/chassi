@@ -19,6 +19,7 @@ import CaixaConclusoes from "../components/blocos/CaixaConclusoes.astro";
 import Sumario from "../components/blocos/Sumario.astro";
 import TabelaPanorama from "../components/blocos/TabelaPanorama.astro";
 import TabelaContraste from "../components/blocos/TabelaContraste.astro";
+import Grafico from "../components/blocos/Grafico.astro";
 import CitacaoDestacada from "../components/blocos/CitacaoDestacada.astro";
 import CitacaoFonte from "../components/blocos/CitacaoFonte.astro";
 import Checklist from "../components/blocos/Checklist.astro";
@@ -164,6 +165,15 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
         <Fragment slot="b3"><Sumario itens={m.sumario} /></Fragment>
         <Fragment slot="b4"><TabelaPanorama {...m.panorama} /></Fragment>
         <Fragment slot="b5"><TabelaContraste {...m.contraste} /></Fragment>
+        <Fragment slot="b31">
+          {/* as três formas lado a lado, que é o único lugar em que dá para
+              comparar de um olhar qual pergunta cada uma responde */}
+          <div style="display:flex;flex-direction:column;gap:22px">
+            <Grafico {...m.graficos.barra} id="g-barra" />
+            <Grafico {...m.graficos.linha} id="g-linha" />
+            <Grafico {...m.graficos.pizza} id="g-pizza" />
+          </div>
+        </Fragment>
         <Fragment slot="b6"><CitacaoDestacada texto={m.destaque} /></Fragment>
         <Fragment slot="b7"><CitacaoFonte {...m.citacao} /></Fragment>
         <Fragment slot="b8">
