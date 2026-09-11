@@ -274,6 +274,33 @@ const altura = barra?.H ?? linha?.H ?? pizza?.H ?? 300;
   .desenho { display: block; height: auto; color: var(--b-corpo); font-family: var(--b-fonte-meta); }
   .desenho text { fill: currentColor; }
   .grade line { stroke: var(--b-grafico-grade); stroke-width: 1; }
+
+  /* O TREMOR — o gráfico desenhado à mão, e ele nasce DESLIGADO.
+     Uma linha aqui, e nenhuma marcação: o filtro inteiro mora no token
+     `--b-grafico-tremor`, que um estilo seta com um SVG em `data:`. É o que
+     mantém a promessa do inventário — markup igual em qualquer estilo, só o
+     token muda — sem id de filtro no SVG, e portanto sem colisão quando a
+     mesma página monta três gráficos.
+
+     Duas coisas medidas no navegador antes de virar comentário:
+
+     1. `filterUnits="userSpaceOnUse"` no filtro do token NÃO é detalhe. Com o
+        padrão `objectBoundingBox`, toda linha de grade SOME: a caixa
+        delimitadora de uma linha vertical tem largura zero, e a região do
+        filtro degenera junto.
+     2. A primeira tentativa foi `<filter>` no `<defs>` mais
+        `--b-grafico-tremor: var(--v-rabisco)` no estilo, e ela NÃO funciona:
+        `var()` é substituído onde a propriedade é DECLARADA, não onde é
+        usada, e `--v-rabisco` só existe no `<svg>`, que é descendente do
+        `[data-estilo]`. Resolvia para inválido e caía no `none`.
+
+     `text` fica de fora da lista de propósito: rabisco em número é número
+     ilegível, e este bloco existe para mostrar número.
+
+     Referência de SVG externo em `filter` não é universal — o Safari não
+     suporta. A degradação é limpa: o filtro não aplica e o gráfico sai
+     normal, que é o mesmo resultado de qualquer estilo sem o token. */
+  .forma, .traco, .grade line, .ponto { filter: var(--b-grafico-tremor, none); }
   .grade text, .rotulo { fill: var(--b-tinta-2); }
   .lacuna { fill: var(--b-tinta-2); font-style: italic; }
 

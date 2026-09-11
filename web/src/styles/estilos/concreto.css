@@ -32,6 +32,24 @@
   --b-lista-recuo: 1.5em;
   --b-lista-vao: 10px;
   --b-lista-recuo-aninhado: 1.3em;
+
+  /* O GRÁFICO DESENHADO À MÃO.
+
+     Fica registrada a objeção, porque ela é de VOZ e não de técnica: este
+     mesmo arquivo diz, doze linhas acima, que tracejado neste tema lê como
+     rascunho e que o sistema de origem não rascunha. Borda de 2px e sombra
+     dura não combinam com traço trêmulo, e o lugar mais honesto do rabisco
+     seria um estilo novo com essa voz. A objeção foi levantada duas vezes e
+     o dono decidiu ligar assim mesmo, vendo o resultado na tela — a decisão
+     é dele, e este comentário existe para que quem chegar depois saiba que
+     foi escolha, e não descuido.
+
+     Repare que é só token: nenhum seletor daqui mira dentro do bloco, e o
+     componente não ganhou uma tag sequer — o filtro inteiro mora aqui, num
+     SVG em `data:`. `filterUnits="userSpaceOnUse"` com a região cobrindo o
+     viewBox é obrigatório: sem isso, toda linha de grade some, porque a caixa
+     delimitadora de uma linha vertical tem largura zero. */
+  --b-grafico-tremor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='r' filterUnits='userSpaceOnUse' x='0' y='0' width='600' height='600'><feTurbulence type='fractalNoise' baseFrequency='0.028' numOctaves='3' seed='7' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='3' xChannelSelector='R' yChannelSelector='G'/></filter></svg>#r");
 }
 }
 
