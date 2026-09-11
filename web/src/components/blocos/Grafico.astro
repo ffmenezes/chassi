@@ -259,12 +259,12 @@ const altura = barra?.H ?? linha?.H ?? pizza?.H ?? 300;
 </figure>
 
 <style>
-  .grafico { padding: 14px 16px 10px; max-width: var(--b-medida); }
-  .cab { display: flex; flex-wrap: wrap; gap: 9px; align-items: baseline; margin: 0 0 8px; }
+  .grafico { padding: var(--b-grafico-recuo); max-width: var(--b-medida); }
+  .cab { display: flex; flex-wrap: wrap; gap: var(--b-grafico-vao-cab); align-items: baseline; margin: 0 0 var(--b-grafico-espaco); }
   .chip {
     font-family: var(--b-fonte-meta);
-    font-size: 10.5px;
-    font-weight: 700;
+    font-size: var(--b-grafico-rotulo-tamanho);
+    font-weight: var(--b-grafico-rotulo-peso);
     letter-spacing: var(--b-track-rotulo);
     text-transform: var(--b-caixa-rotulo);
     color: var(--b-acento-tinta);
@@ -273,7 +273,7 @@ const altura = barra?.H ?? linha?.H ?? pizza?.H ?? 300;
   .palco { overflow: hidden; }
   .desenho { display: block; height: auto; color: var(--b-corpo); font-family: var(--b-fonte-meta); }
   .desenho text { fill: currentColor; }
-  .grade line { stroke: var(--b-grafico-grade); stroke-width: 1; }
+  .grade line { stroke: var(--b-grafico-grade); stroke-width: var(--b-grafico-linha-fina); }
 
   /* O TREMOR — o gráfico desenhado à mão, e ele nasce DESLIGADO.
      Uma linha aqui, e nenhuma marcação: o filtro inteiro mora no token
@@ -311,47 +311,47 @@ const altura = barra?.H ?? linha?.H ?? pizza?.H ?? 300;
   .pincel.s2 { fill: var(--b-grafico-3); }
   .pincel.s3 { fill: var(--b-grafico-4); }
   .furo { fill: var(--b-superficie); }
-  .forma { stroke: var(--b-superficie); stroke-width: 1; }
-  .traco { fill: none; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+  .forma { stroke: var(--b-superficie); stroke-width: var(--b-grafico-linha-fina); }
+  .traco { fill: none; stroke-width: var(--b-grafico-linha-forte); stroke-linejoin: round; stroke-linecap: round; }
   .traco.t0 { stroke: var(--b-grafico-1); }
-  .traco.t1 { stroke: var(--b-grafico-2); stroke-dasharray: 8 5; }
-  .traco.t2 { stroke: var(--b-grafico-3); stroke-dasharray: 2 5; }
-  .traco.t3 { stroke: var(--b-grafico-4); stroke-dasharray: 12 4 2 4; }
+  .traco.t1 { stroke: var(--b-grafico-2); stroke-dasharray: var(--b-grafico-traco-2); }
+  .traco.t2 { stroke: var(--b-grafico-3); stroke-dasharray: var(--b-grafico-traco-3); }
+  .traco.t3 { stroke: var(--b-grafico-4); stroke-dasharray: var(--b-grafico-traco-4); }
   .serie.s0 .ponto { fill: var(--b-grafico-1); }
   .serie.s1 .ponto { fill: var(--b-grafico-2); }
   .serie.s2 .ponto { fill: var(--b-grafico-3); }
   .serie.s3 .ponto { fill: var(--b-grafico-4); }
-  .ponto { stroke: var(--b-superficie); stroke-width: 2; }
-  .valor-fatia { fill: var(--b-sobre-acento); font-weight: 700; paint-order: stroke; stroke: var(--b-tinta); stroke-width: 3px; stroke-linejoin: round; }
+  .ponto { stroke: var(--b-superficie); stroke-width: var(--b-grafico-linha-media); }
+  .valor-fatia { fill: var(--b-sobre-acento); font-weight: var(--b-grafico-rotulo-peso); paint-order: stroke; stroke: var(--b-tinta); stroke-width: var(--b-grafico-linha-forte); stroke-linejoin: round; }
 
   /* a interatividade: realce por hover ou foco, o resto apaga um pouco. Sem
      script. Na linha, o valor de cada ponto só aparece no realce, exceto o
      último, que fica fixo: é o que a tabela abaixo cobre para quem não
      aponta. */
-  .item { outline: none; cursor: default; transition: opacity .15s ease; }
+  .item { outline: none; cursor: default; transition: var(--b-grafico-transicao); }
   .desenho:has(.item:hover) .item:not(:hover),
-  .desenho:has(.item:focus-visible) .item:not(:focus-visible) { opacity: .45; }
-  .item:focus-visible .forma, .item:focus-visible .ponto { stroke: var(--b-acento-tinta); stroke-width: 3; }
-  .grafico[data-tipo="linha"] .valor { opacity: 0; transition: opacity .15s ease; }
+  .desenho:has(.item:focus-visible) .item:not(:focus-visible) { opacity: var(--b-grafico-atenuado); }
+  .item:focus-visible .forma, .item:focus-visible .ponto { stroke: var(--b-acento-tinta); stroke-width: var(--b-grafico-linha-forte); }
+  .grafico[data-tipo="linha"] .valor { opacity: 0; transition: var(--b-grafico-transicao); }
   .grafico[data-tipo="linha"] .valor.fixo,
   .grafico[data-tipo="linha"] .item:hover .valor,
   .grafico[data-tipo="linha"] .item:focus-visible .valor { opacity: 1; }
   @media (prefers-reduced-motion: reduce) { .item, .valor { transition: none; } }
 
   .legenda-html {
-    list-style: none; margin: 8px 0 0; padding: 0;
-    display: flex; flex-wrap: wrap; gap: 6px 18px;
-    font-family: var(--b-fonte-meta); font-size: 13px; color: var(--b-corpo);
+    list-style: none; margin: var(--b-grafico-espaco) 0 0; padding: 0;
+    display: flex; flex-wrap: wrap; gap: var(--b-grafico-legenda-vao);
+    font-family: var(--b-fonte-meta); font-size: var(--b-grafico-legenda-tamanho); color: var(--b-corpo);
   }
-  .legenda-html li { display: inline-flex; align-items: center; gap: 7px; }
+  .legenda-html li { display: inline-flex; align-items: center; gap: var(--b-grafico-legenda-item-vao); }
   .legenda-html svg { flex: none; }
 
-  .numeros { margin-top: 10px; }
+  .numeros { margin-top: var(--b-grafico-tabela-espaco); }
   .numeros summary {
-    cursor: pointer; font-family: var(--b-fonte-meta); font-size: 12.5px;
-    color: var(--b-acento-tinta); padding: 4px 0;
+    cursor: pointer; font-family: var(--b-fonte-meta); font-size: var(--b-grafico-resumo-tamanho);
+    color: var(--b-acento-tinta); padding: var(--b-grafico-resumo-recuo);
   }
-  .numeros summary:focus-visible { outline: 2px solid var(--b-acento-tinta); outline-offset: 2px; }
+  .numeros summary:focus-visible { outline: var(--b-grafico-foco) solid var(--b-acento-tinta); outline-offset: var(--b-grafico-foco); }
   .numeros td.vazio { color: var(--b-tinta-2); font-style: italic; }
-  .fonte { margin: 8px 0 0; }
+  .fonte { margin: var(--b-grafico-espaco) 0 0; }
 </style>

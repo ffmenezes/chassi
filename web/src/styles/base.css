@@ -171,6 +171,28 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
   --b-grafico-3: var(--b-tinta-2);
   --b-grafico-4: var(--b-acento-forte);
   --b-grafico-grade: var(--b-linha);
+  /* Forma do gráfico: os padrões reproduzem o espécime existente. O site
+     pode desviar um token sem precisar editar o componente. */
+  --b-grafico-recuo: 14px 16px 10px;
+  --b-grafico-vao-cab: 9px;
+  --b-grafico-espaco: 8px;
+  --b-grafico-rotulo-tamanho: 10.5px;
+  --b-grafico-rotulo-peso: 700;
+  --b-grafico-linha-fina: 1;
+  --b-grafico-linha-media: 2;
+  --b-grafico-linha-forte: 3;
+  --b-grafico-traco-2: 8 5;
+  --b-grafico-traco-3: 2 5;
+  --b-grafico-traco-4: 12 4 2 4;
+  --b-grafico-transicao: opacity .15s ease;
+  --b-grafico-atenuado: .45;
+  --b-grafico-legenda-vao: 6px 18px;
+  --b-grafico-legenda-tamanho: 13px;
+  --b-grafico-legenda-item-vao: 7px;
+  --b-grafico-tabela-espaco: 10px;
+  --b-grafico-resumo-tamanho: 12.5px;
+  --b-grafico-resumo-recuo: 4px 0;
+  --b-grafico-foco: 2px;
 }
 
 /* A superfície do estilo. Fundo explícito sempre: superfície transparente
