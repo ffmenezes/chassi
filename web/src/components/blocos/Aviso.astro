@@ -32,28 +32,36 @@ if (tipo === "atencao" && !fonte) {
 const ROTULO: Record<TipoAviso, string> = { atencao: "atenção", nota: "nota" };
 ---
 
-<aside class="b-card aviso" data-tipo={tipo} aria-label={`${ROTULO[tipo]}: ${titulo}`}>
+<aside class="b-card caixa-aviso" data-tipo={tipo} aria-label={`${ROTULO[tipo]}: ${titulo}`}>
   <p class="cab">
-    <span class="chip">{ROTULO[tipo]}</span>
-    <b class="titulo">{titulo}</b>
+    <span class="tipo-aviso">{ROTULO[tipo]}</span>
+    <b class="titulo-aviso">{titulo}</b>
   </p>
   <p class="texto">{texto}</p>
   {fonte && <p class="b-fonte fonte">{fonte}</p>}
 </aside>
 
 <style>
-  .aviso {
+  /* OS NOMES DE CLASSE AQUI NÃO SÃO LIVRES — é a mesma armadilha registrada
+     em `Slides.astro` e `Video.astro`. `chrome.css`, a folha das vitrines,
+     declara `.aviso`, `.titulo` e `.chip` GLOBAIS. O escopo do Astro protege o
+     que este arquivo declara, não o resto: com os nomes antigos o aviso saía,
+     só no inventário e no exemplo, com `display: flex` (cabeçalho, texto e
+     fonte viravam três colunas), fundo azul e borda da bancada, título com
+     entrelinha 1,08 e rótulo com cara de pílula. Daí `caixa-aviso`,
+     `titulo-aviso` e `tipo-aviso`. */
+  .caixa-aviso {
     padding: 16px 18px;
     max-width: var(--b-medida);
     /* o tipo vira FORMA, não só cor: a faixa lateral distingue no print em
        preto e branco e para quem não separa as duas cores */
     border-left: 4px solid var(--b-tinta-2);
   }
-  .aviso[data-tipo="atencao"] { border-left-color: var(--b-erro); }
-  .aviso[data-tipo="nota"] { border-left-style: dotted; border-left-color: var(--b-acento); }
+  .caixa-aviso[data-tipo="atencao"] { border-left-color: var(--b-erro); }
+  .caixa-aviso[data-tipo="nota"] { border-left-style: dotted; border-left-color: var(--b-acento); }
 
   .cab { display: flex; flex-wrap: wrap; gap: 9px; align-items: baseline; margin: 0 0 7px; }
-  .chip {
+  .tipo-aviso {
     font-family: var(--b-fonte-meta);
     font-size: 10.5px;
     font-weight: 700;
@@ -61,8 +69,8 @@ const ROTULO: Record<TipoAviso, string> = { atencao: "atenção", nota: "nota" }
     text-transform: uppercase;
     color: var(--b-tinta-2);
   }
-  .aviso[data-tipo="atencao"] .chip { color: var(--b-erro); }
-  .titulo { color: var(--b-tinta); font-size: 15.5px; }
+  .caixa-aviso[data-tipo="atencao"] .tipo-aviso { color: var(--b-erro); }
+  .titulo-aviso { color: var(--b-tinta); font-size: 15.5px; }
   .texto { margin: 0; color: var(--b-corpo); font-size: 15px; line-height: 1.6; }
   .fonte { margin-top: 9px; }
 </style>
