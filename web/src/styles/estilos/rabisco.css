@@ -1,0 +1,229 @@
+/* ============================================================
+   RABISCO — caneta esferográfica azul em caderno pautado
+   ------------------------------------------------------------
+   Tokens medidos no CSS publicado de rabisco.net (Distrito
+   Rabisco), com a prosa e as decisões em
+   `docs/estilos/rabisco/DESIGN.md`. Quatro marcas:
+
+   1. TUDO é tinta azul sobre papel morno. Título na Bic viva
+      (#1018ad), corpo na Bic gasta (#263e8e). Não existe preto.
+   2. O amarelo é marca-texto, e marca-texto PREENCHE: fundo do
+      botão forte, página atual, grifo sob o H2. Nunca é texto.
+   3. A caneta vermelha é a do professor: margem do caderno,
+      link, foco circulado. É o único vermelho da folha.
+   4. Nada é reto. Canto com quatro raios diferentes, card
+      levemente torto, contorno passado duas vezes (a folha de
+      trás, que é a sombra). Tudo isso sai de token — nenhum
+      seletor aqui entra num bloco.
+
+   O escuro é derivação declarada: a referência não tem modo
+   escuro. Ele sai do mapa NIGHT do próprio jogo — folha azul-noite,
+   tinta de caneta gel creme, e o amarelo que lá é janela acesa e
+   lua continua sendo o marca-texto.
+   ============================================================ */
+
+/* A letra É o estilo, então vem junto, auto-hospedada: sem requisição a
+   terceiro (nada de Google Fonts em página com aviso de privacidade), e sem
+   depender de a máquina do leitor ter uma manuscrita instalada. Os dois
+   recortes e os `unicode-range` são os mesmos que o Google serve; o latino
+   cobre todo o português, e o estendido só baixa se a página pedir. */
+@font-face {
+  font-family: "Patrick Hand";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fontes/patrick-hand/latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Patrick Hand";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fontes/patrick-hand/latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* "1)" em vez de "1.": é assim que se numera à mão num caderno. O nome leva o
+   prefixo do estilo porque `@counter-style` é global. */
+@counter-style rabisco-parenteses {
+  system: extends decimal;
+  suffix: ") ";
+}
+
+@layer estilo {
+[data-estilo="rabisco"] {
+  /* uma letra só, em toda superfície — é o que a referência faz. O código
+     continua mono por `--b-fonte-codigo`, que é semântica e não gosto. */
+  --b-fonte-titulo: "Patrick Hand", "Segoe Print", "Bradley Hand", cursive;
+  --b-fonte-corpo: "Patrick Hand", "Segoe Print", "Bradley Hand", cursive;
+  --b-fonte-meta: "Patrick Hand", "Segoe Print", "Bradley Hand", cursive;
+  /* A Patrick Hand só tem o 400, então o 700 é negrito SINTETIZADO pelo
+     navegador. É o que a referência faz no título do mapa (700 mais contorno
+     de 1px): lê como caneta passada duas vezes, e não como fonte quebrada. */
+  --b-peso-titulo: 700;
+  --b-titulo-track: -.01em;
+  /* rótulo em caixa alta espaçada, como "PLAY SOLO" na referência */
+  --b-caixa-rotulo: uppercase;
+  --b-track-rotulo: .08em;
+  --b-medida: 64ch;
+
+  /* quatro raios diferentes, e o eixo vertical diferente do horizontal:
+     nenhum canto repete. É o `border-radius` dos cartões da referência. */
+  --b-radius: 6px 10px 5px 8px / 8px 5px 10px 6px;
+  --b-borda: 1.5px solid var(--b-linha-forte);
+  /* A FOLHA DE TRÁS. A primeira sombra, na cor da superfície e encolhida de
+     1,5px, tapa o miolo da segunda, na cor da tinta: sobra só o contorno de
+     um retângulo deslocado. Sombra externa nunca pinta dentro da caixa, então
+     o que aparece é a borda de uma folha atrás desta — o contorno passado
+     duas vezes da referência, sem pseudo-elemento em bloco nenhum. */
+  --b-sombra: 3px 4px 0 -1.5px var(--b-superficie), 3px 4px 0 0 var(--b-sombra-cor);
+  --b-sombra-hover: 5px 6px 0 -1.5px var(--b-superficie), 5px 6px 0 0 var(--b-sombra-cor);
+  /* o hover da referência sobe e entorta: `translateY(-3px) rotate(-1.4deg)`
+     no botão grande. Aqui menos, porque o card de artigo é maior. */
+  --b-lift: translate(-1px, -2px) rotate(-.6deg);
+
+  /* nada é reto: ímpar para um lado, par para o outro, como os mapas
+     empilhados da referência (-0,45° e 0,35°) */
+  --b-giro: -.4deg;
+  --b-giro-par: .3deg;
+
+  /* o risco de marca-texto sob o H2. Sublinhado grosso com recuo NEGATIVO:
+     sobe para trás da metade de baixo das letras, que é onde o marca-texto
+     passa de verdade. A cor vem do modo por `var()`. */
+  --b-titulo-grifo: underline var(--b-acento);
+  --b-titulo-grifo-peso: .34em;
+  --b-titulo-grifo-recuo: -.2em;
+
+  /* foco circulado a caneta vermelha: tracejado, como o `3px dashed` da
+     referência. A cor já vem de `--b-acento-tinta`, que aqui é o vermelho. */
+  --b-foco-traco: dashed;
+
+  /* A HACHURA DO MARCA-TEXTO — os três amarelos a 137° da referência, com o
+     fio claro de 1px a cada 5px. Geometria aqui, cor no modo. A última camada
+     do `background` leva a cor de base, então o token entra inteiro no
+     `background:` do botão. */
+  --b-acento-preenchimento:
+    repeating-linear-gradient(137deg, transparent 0 4px, var(--b-acento-brilho) 4px 5px, transparent 5px 9px)
+    var(--b-acento);
+  --b-acento-preenchimento-forte:
+    repeating-linear-gradient(137deg, transparent 0 4px, var(--b-acento-brilho) 4px 5px, transparent 5px 9px)
+    var(--b-acento-forte);
+
+  /* a régua é um traço de caneta: sólido, da grossura da borda */
+  --b-regua-peso: 1.5px;
+  --b-regua-vao: 0px;
+  --b-esquina: 0px;
+
+  /* lista de caderno: travessão curto e numeração "1)". O vão é maior porque
+     a manuscrita pesa mais por linha que uma sans. */
+  --b-lista-marcador: "– ";
+  --b-lista-marcador-num: rabisco-parenteses;
+  --b-lista-recuo: 1.4em;
+  --b-lista-vao: 8px;
+  --b-lista-recuo-aninhado: 1.3em;
+
+  /* O gráfico desenhado à mão, que o `concreto` liga sob protesto registrado
+     ("o lugar mais honesto do rabisco seria um estilo novo com essa voz").
+     É esta a voz. Mesmo filtro, tremor um pouco maior. */
+  --b-grafico-tremor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='r' filterUnits='userSpaceOnUse' x='0' y='0' width='600' height='600'><feTurbulence type='fractalNoise' baseFrequency='0.03' numOctaves='3' seed='11' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='3.5' xChannelSelector='R' yChannelSelector='G'/></filter></svg>#r");
+
+  /* A FOLHA. Margem vermelha, pauta azul a cada 28px (a da referência) e a
+     fibra do papel, nessa ordem de cima para baixo. É `--b-aurora` porque
+     esse é o token de fundo decorativo do contrato: sendo token, um site pode
+     trocar a folha sem seletor. A margem fica à esquerda da coluna em toda
+     largura — no celular, antes dos 28px de sangria do artigo. */
+  --b-margem-pos: clamp(10px, 2.5vw, 48px);
+  --b-aurora:
+    linear-gradient(90deg, transparent var(--b-margem-pos), var(--b-margem-cor) var(--b-margem-pos) calc(var(--b-margem-pos) + 2px), transparent 0),
+    repeating-linear-gradient(180deg, transparent 0 27px, var(--b-pauta-cor) 27px 28px),
+    var(--b-papel-fibra);
+  background-image: var(--b-aurora);
+
+  /* A Patrick Hand tem altura-x de 0,467 (medida no arquivo: 467 em 1000
+     unidades); a sans do sistema, para a qual os blocos foram medidos em px,
+     fica perto de 0,52. Sem compensar, a letra sai visivelmente menor que o
+     tamanho declarado. `font-size-adjust` é herdado: vale para todo bloco
+     dentro da folha, sem tocar em nenhum. */
+  font-size-adjust: .5;
+}
+
+/* selecionar texto é passar marca-texto nele */
+[data-estilo="rabisco"] ::selection {
+  background: var(--b-acento);
+  color: var(--b-sobre-acento);
+}
+}
+
+@layer modo {
+[data-estilo="rabisco"][data-modo="claro"] {
+  /* papel e folha avulsa: o card é MAIS claro que a página, como o cartão
+     colado sobre o caderno na referência */
+  --b-fundo: #f6f3e6;
+  --b-superficie: #fcfaf2;
+  /* Bic viva no título (10,75:1), Bic gasta no corpo (8,73:1) */
+  --b-tinta: #1018ad;
+  --b-corpo: #263e8e;
+  --b-tinta-2: #586581;
+  --b-linha: rgba(38, 62, 142, .2);
+  /* 3,36:1 sobre a folha: é a borda de campo de formulário, e peça de
+     interface precisa de 3:1 */
+  --b-linha-forte: rgba(38, 62, 142, .62);
+  --b-sombra-cor: rgba(38, 62, 142, .5);
+  --b-acento: #ffcf23;
+  --b-acento-forte: #f6b807;
+  --b-acento-brilho: #ffe987;
+  /* a caneta vermelha: 5,55:1 sobre a folha, 5,43:1 sobre o marca-texto fraco */
+  --b-acento-tinta: #b3303a;
+  --b-acento-fraco: #fff1b0;
+  /* azul sobre amarelo: 8,09:1 no acento, 6,71:1 no hover */
+  --b-sobre-acento: #1018ad;
+  /* mais fundo e mais frio que a caneta do link, para erro não ler como link */
+  --b-erro: #a01830;
+
+  /* as canetas do estojo — azul, vermelha, verde e laranja, as mesmas que
+     pintam os objetos do jogo. Todas acima de 3:1 sobre a superfície. */
+  --b-grafico-1: #1018ad;
+  --b-grafico-2: #b3303a;
+  --b-grafico-3: #2f8a3a;
+  --b-grafico-4: #b05e00;
+
+  --b-pauta-cor: rgba(73, 106, 187, .09);
+  --b-margem-cor: rgba(190, 58, 60, .45);
+  --b-papel-fibra: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .3  0 0 0 0 .2  .28 0 0 0 -.1'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+}
+}
+
+@layer modo {
+[data-estilo="rabisco"][data-modo="escuro"] {
+  /* a folha azul-noite do mapa NIGHT, e a superfície um degrau acima */
+  --b-fundo: #121634;
+  --b-superficie: #1b2048;
+  /* caneta gel creme sobre papel escuro */
+  --b-tinta: #f6f1d8;
+  --b-corpo: #e2ddc6;
+  --b-tinta-2: #a9aed0;
+  --b-linha: rgba(246, 241, 216, .16);
+  --b-linha-forte: rgba(246, 241, 216, .55);
+  --b-sombra-cor: rgba(246, 241, 216, .38);
+  /* o marca-texto não muda de cor: no mapa NIGHT o amarelo é a lua e a
+     janela acesa, e continua amarelo */
+  --b-acento: #ffcf23;
+  --b-acento-forte: #ffe066;
+  --b-acento-brilho: #fff0a0;
+  /* a caneta vermelha vira gel coral: 7,95:1 na folha, 5,16:1 no acento fraco */
+  --b-acento-tinta: #ff8f7a;
+  --b-acento-fraco: rgba(255, 207, 35, .14);
+  --b-sobre-acento: #121634;
+  --b-erro: #ff9b9b;
+
+  --b-grafico-1: #f6f1d8;
+  --b-grafico-2: #ff8f7a;
+  --b-grafico-3: #7fd48a;
+  --b-grafico-4: #ffcf23;
+
+  --b-pauta-cor: rgba(150, 170, 255, .1);
+  --b-margem-cor: rgba(255, 120, 120, .35);
+  --b-papel-fibra: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .85  0 0 0 0 .85  0 0 0 0 1  .22 0 0 0 -.09'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+}
+}
