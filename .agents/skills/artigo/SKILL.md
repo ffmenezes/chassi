@@ -29,21 +29,34 @@ disco, nunca na conversa.
 3. Abra `sites/<slug>/estado/CLUSTER.md`. É a autoridade sobre slug,
    query-alvo e status de toda peça. Nada do que você escrever contradiz
    uma linha de lá; se precisar, acrescenta linha nova.
-4. Descubra em que etapa a peça está pelo disco, não pela memória. A
-   coluna do meio é leitura de disco, não o status do `CLUSTER.md` (esse
-   tem vocabulário próprio, mais abaixo):
+4. Liste `pautas/`, `pesquisa/<peça>/` e `posts/<peça>/` (incluindo
+   `capitulos/`) e descubra a etapa pelo disco. Existência de arquivo não
+   prova conclusão: confira a checagem da etapa que o produziu. Arquivo
+   parcial retoma essa etapa. Aplique primeiro `descartada`, `publicado`
+   e `pronto` do `CLUSTER.md`; depois, o último veredito da revisão; só
+   então procure o artefato concluído mais adiantado nesta tabela:
 
 | Se existe | A peça está em | Próxima etapa |
 |---|---|---|
-| nada, ou só `pautas/_candidatas.md` | ideias | `etapas/01-pauta.md` |
-| `pautas/<slug>.md` | pauta | `etapas/02-dossie.md` |
-| `pesquisa/<slug>/dossie.md` | dossiê | `etapas/03-esqueleto.md` |
+| nada | sem candidatas | `etapas/00-ideias.md` |
+| `pautas/_candidatas.md`, com candidata aprovada e escolhida | ideias | `etapas/01-pauta.md` |
+| `pautas/<slug>.md`, checagem completa | pauta | `etapas/02-dossie.md` |
+| `pesquisa/<slug>/dossie.md`, checagem completa | dossiê | `etapas/03-esqueleto.md` |
 | `posts/<slug>/esqueleto.md` com `CONGELADO` | esqueleto | `etapas/04-capitulos.md` |
-| `posts/<slug>/capitulos/NN-*.md` (um por H2 do esqueleto) | capítulos | `etapas/05-costura.md` |
+| capítulos faltando ou incompletos | redação em andamento | `etapas/04-capitulos.md`, primeiro C pendente |
+| `posts/<slug>/capitulos/NN-*.md`, todos os C do esqueleto completos | capítulos | `etapas/05-costura.md` |
 | `posts/<slug>/post.md` | costurado | `etapas/06-revisao.md` |
 | `posts/<slug>/revisao.md` com `VEREDITO: aprovado` | revisado | `etapas/07-entrega.md` |
 | linha `pronto` no `CLUSTER.md` | entregue | nada: espera a página (o dono marca `publicado`) |
 | linha `publicado` no `CLUSTER.md` | no ar | manutenção (fora deste método) |
+| linha `descartada` no `CLUSTER.md` | abandonada, com motivo | nada; só reabra por pedido do dono |
+
+`revisao.md` pode nascer na costura só com observações: sem veredito,
+rode a etapa 6. Se o último veredito é `devolvido à etapa N`, retome N
+para o item nomeado; depois confira as etapas dependentes. `reprovado`
+retoma a revisão até o teto de três rodadas; diagnóstico na terceira
+reprovação espera o dono. Uma aprovação antiga nunca vence uma devolução
+mais recente. Sem candidata escolhida, termine a etapa 0.
 
 Sem nenhuma peça em andamento e sem pedido específico, rode
 `etapas/00-ideias.md`.
@@ -61,7 +74,9 @@ Sem nenhuma peça em andamento e sem pedido específico, rode
 | 6 | Revisão | `post.md`, dossiê, `CLUSTER.md`, `referencias/antipadroes.md` | `posts/<slug>/revisao.md`, `post.md` corrigido |
 | 7 | Entrega | `post.md`, `referencias/blocos.md`, `web/src/sites/<slug>.ts` | `CLUSTER.md` (status), pendências para o dono |
 
-Cada arquivo em `etapas/` é autossuficiente: diz o que ler, o que escrever
+O mapa das oito etapas, com arquivos, status e voltas previstas, está em
+`referencias/fluxo.md` (um diagrama Mermaid). Cada arquivo em `etapas/` é
+autossuficiente: diz o que ler, o que escrever
 (com gabarito literal), as regras numeradas, a checagem antes de fechar e o
 que fazer quando travar. **Abra só a etapa que vai executar.** Ler as oito
 de uma vez é o que torna o método lento; executar uma por vez é o que faz
@@ -75,8 +90,10 @@ a próxima etapa lê, e é o arquivo que permite parar e retomar.
 
 1. **Número sem bloco no dossiê não existe.** Vale para o texto, para o
    título, para a description e para a tabela. A marca de origem viaja com
-   o número: `[FONTE]`, `[ESTIMATIVA]`, `[PREMISSA]`, `[SEM DADO]`. Só
-   `[FONTE]` entra em conta. Ver `etapas/02-dossie.md`.
+   o número: `[FONTE]`, `[ESTIMATIVA]`, `[PREMISSA]`, `[SEM DADO]`. Fatos
+   usados em conta vêm de `[FONTE]`; resultados calculados mantêm os D de
+   origem e a conta. Estimativas e premissas só entram nos usos rotulados
+   da tabela da etapa 2. Ver `etapas/02-dossie.md`.
 2. **Slug nasce no `CLUSTER.md`.** Link interno só para slug que está lá
    com status `publicado`. Link para slug em outro status vira
    `[LINK PENDENTE: slug]` e fica na lista de pendências da entrega.
@@ -88,7 +105,7 @@ a próxima etapa lê, e é o arquivo que permite parar e retomar.
    devolve à etapa 3. Não corrige na prosa.
 5. **Correção é cirúrgica.** Um defeito por edição, no formato
    `LINHA / TRECHO / PROBLEMA / CORREÇÃO`. Máximo três rodadas de revisão;
-   na terceira, entrega o diagnóstico em vez do texto.
+   na terceira reprovação, entrega o diagnóstico em vez do texto.
 6. **"Apurar" é verbo reservado.** Só descreve fonte aberta, com data. Para
    resumo de busca não aberto, a frase é "li no resumo de busca, não abri".
 7. **Todo artigo tem ao menos um dado nosso**, com data e método: preço em
@@ -289,7 +306,8 @@ como "o que faria a tese fechar".
 **tempo:** ~50 min.
 ```
 
-Os cinco campos são fixos e aparecem sempre, mesmo com "nada". Entrada
+Os seis campos são fixos e aparecem sempre, mesmo com "nada". Tempo sem
+cronômetro é estimativa declarada; nunca invente duração medida. Entrada
 sem "descartado" e sem "adiado" em três etapas seguidas é sinal de que
 alguém está decidindo sem registrar, não de que não houve escolha.
 
@@ -298,4 +316,3 @@ guardam as ideias e o corte que as matou; a pauta guarda o que a peça
 recusa; o dossiê guarda a tese ajustada; a revisão guarda cada rodada com
 seu veredito. O diário não repete isso; aponta para lá e registra o que
 nenhum deles registra: a escolha entre alternativas e o motivo.
-
