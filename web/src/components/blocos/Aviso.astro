@@ -32,7 +32,7 @@ if (tipo === "atencao" && !fonte) {
 const ROTULO: Record<TipoAviso, string> = { atencao: "atenção", nota: "nota" };
 ---
 
-<aside class="b-card caixa-aviso" data-tipo={tipo} aria-label={`${ROTULO[tipo]}: ${titulo}`}>
+<aside class="b-card b-nota caixa-aviso" data-tipo={tipo} aria-label={`${ROTULO[tipo]}: ${titulo}`}>
   <p class="cab">
     <span class="tipo-aviso">{ROTULO[tipo]}</span>
     <b class="titulo-aviso">{titulo}</b>

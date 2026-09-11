@@ -14,7 +14,7 @@ const { embed, perfil } = Astro.props;
 ---
 <div class="social">
   {embed && (
-    <figure class="b-card cartao">
+    <figure class="b-card b-nota cartao">
       <p class="b-rotulo">A · embed de post de terceiro</p>
       <div class="cab">
         <span class="av" aria-hidden="true"></span>
@@ -28,7 +28,7 @@ const { embed, perfil } = Astro.props;
     </figure>
   )}
   {perfil && (
-    <div class="b-card cartao perfil">
+    <div class="b-card b-nota cartao perfil">
       <div>
         <p class="b-rotulo">B · card de perfil</p>
         <b class="tit">{perfil.titulo}</b>

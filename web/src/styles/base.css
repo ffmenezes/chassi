@@ -112,11 +112,15 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
   /* O TRAÇO À MÃO — chaves que só um estilo desenhado liga. O padrão de cada
      uma reproduz exatamente o que existia antes delas.
 
-     O giro é `none`, e não `0deg`, de propósito: `rotate` com qualquer valor
+     O giro é das peças SOLTAS na folha: a nota (`.b-nota`) e a figura. O card
+     genérico não gira, e foi medido: ele também vive dentro de palco que
+     corta (slides, carrossel), e o canto girado saía comido pelo `overflow`.
+
+     É `none`, e não `0deg`, de propósito: `rotate` com qualquer valor
      diferente de `none` abre contexto de empilhamento e vira bloco de
-     contenção para descendente `position: fixed`. Com zero, todo card de todo
-     estilo mudaria de comportamento sem mudar de cara. `-par` é o giro dos
-     cards pares, para a pilha não entortar toda para o mesmo lado. */
+     contenção para descendente `position: fixed`. Com zero, toda peça de todo
+     estilo mudaria de comportamento sem mudar de cara. `-par` é o giro das
+     notas pares, para a pilha não entortar toda para o mesmo lado. */
   --b-giro: none;
   --b-giro-par: none;
   /* o risco de marca-texto sob o H2: é o `text-decoration` inteiro, e os
@@ -152,6 +156,22 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
      `border-color`, `fill` e `color` em outros blocos, onde gradiente não entra. */
   --b-acento-preenchimento: var(--b-acento);
   --b-acento-preenchimento-forte: var(--b-acento-forte);
+
+  /* A NOTA — o card que é anotação colada na página (conclusões, aviso,
+     card de rede social), e não moldura de conteúdo. Cada token nasce igual
+     ao do card, então sem redefinir nada a nota É o `.b-card`. Um estilo
+     desenhado faz dela post-it: fundo de papel colorido, sem contorno, canto
+     levantado, fita em cima.
+     `-acento` troca o acento DENTRO da nota: marcador amarelo sobre post-it
+     amarelo some. `-fita` é o `content` do `::before` da nota; `none`
+     desliga a fita. */
+  --b-nota-fundo: var(--b-superficie);
+  --b-nota-borda: var(--b-borda);
+  --b-nota-radius: var(--b-radius);
+  --b-nota-sombra: var(--b-sombra);
+  --b-nota-acento: var(--b-acento);
+  --b-nota-fita: none;
+  --b-nota-fita-cor: transparent;
   /* a régua herda a linha do modo; derivado, para o tema mexer só na forma */
   --b-regua-cor: var(--b-linha);
   /* fundo decorativo. Existe como token para poder ser sobrescrito por site:

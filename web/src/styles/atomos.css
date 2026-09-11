@@ -255,11 +255,39 @@
   box-shadow: var(--b-sombra);
   backdrop-filter: var(--b-blur);
   -webkit-backdrop-filter: var(--b-blur);
-  /* `rotate`, e não `transform`: a propriedade própria compõe com o
-     `transform: var(--b-lift)` do hover em vez de ser apagada por ele */
-  rotate: var(--b-giro);
 }
-.b-card:nth-child(even) { rotate: var(--b-giro-par); }
+
+/* A NOTA — `.b-card` que é anotação colada, e não moldura de conteúdo. Vem
+   junto com `.b-card` no markup e, sem estilo que a redefina, não muda nada.
+
+   Gira, e o card genérico não: nota é peça solta na folha, e card também
+   mora dentro de palco que corta (slides, carrossel), onde o canto girado
+   sai comido. `rotate`, e não `transform`, para compor com o `--b-lift`. */
+.b-nota {
+  position: relative;
+  background: var(--b-nota-fundo);
+  border: var(--b-nota-borda);
+  border-radius: var(--b-nota-radius);
+  box-shadow: var(--b-nota-sombra);
+  rotate: var(--b-giro);
+  --b-acento: var(--b-nota-acento);
+}
+.b-nota:nth-child(even) { rotate: var(--b-giro-par); }
+/* A fita que prende a nota. `content: none` por padrão, então ela só existe
+   no estilo que a liga. As bordas serrilhadas são a fita crepe rasgada à mão. */
+.b-nota::before {
+  content: var(--b-nota-fita);
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 86px;
+  height: 24px;
+  translate: -50% 0;
+  rotate: -3deg;
+  background: var(--b-nota-fita-cor);
+  clip-path: polygon(0 8%, 8% 0, 16% 7%, 25% 1%, 34% 6%, 43% 0, 52% 7%, 61% 1%, 70% 6%, 79% 0, 88% 6%, 100% 4%, 98% 93%, 90% 100%, 81% 94%, 72% 100%, 63% 95%, 54% 100%, 45% 94%, 36% 100%, 27% 95%, 18% 100%, 9% 94%, 0 97%);
+  pointer-events: none;
+}
 
 /* A ressalva não é enfeite tipográfico: é slot obrigatório.
    Piso, premissa, faixa com data, caso único apurado, conflito. */

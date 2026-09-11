@@ -11,7 +11,7 @@ export interface Conclusao {
 interface Props { rotulo?: string; itens: Conclusao[] }
 const { rotulo = "O que este artigo conclui", itens } = Astro.props;
 ---
-<div class="b-card caixa">
+<div class="b-card b-nota caixa">
   <p class="b-rotulo">{rotulo}</p>
   <ul>
     {itens.map((c) => (
