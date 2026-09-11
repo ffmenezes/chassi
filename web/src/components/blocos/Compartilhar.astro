@@ -157,7 +157,7 @@ const DESTINOS = [
     padding: 10px 18px;
     border-radius: var(--b-radius);
     border: 0;
-    background: var(--b-acento);
+    background: var(--b-acento-preenchimento);
     color: var(--b-sobre-acento);
     font-family: var(--b-fonte-meta);
     font-size: 13.5px;
@@ -168,8 +168,9 @@ const DESTINOS = [
   /* Mesma receita de `.b-btn--forte` em `atomos.css`: botão preenchido troca
      de INTENSIDADE no hover, não de par texto/fundo. `--b-sobre-acento` já
      foi escolhido para ler bem sobre `--b-acento`, e `--b-acento-forte` é o
-     mesmo acento mais forte — a leitura continua garantida sem token novo. */
-  .nativo:hover { background: var(--b-acento-forte); }
+     mesmo acento mais forte — a leitura continua garantida sem token novo.
+     O `-preenchimento` é a mesma cor quando o estilo não desenha hachura. */
+  .nativo:hover { background: var(--b-acento-preenchimento-forte); }
 
   /* Foco por teclado do nativo tem o mesmo problema de raiz do hover: o anel
      nasce `outline: 2px solid currentColor` (contrato, `base.css`) e aqui

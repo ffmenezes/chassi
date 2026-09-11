@@ -66,7 +66,10 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
    remendada em cada componente. */
 [hidden] { display: none !important; }
 
-:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 3px; }
+/* O traço do anel vem de token para que um estilo manuscrito possa circular o
+   foco a caneta, tracejado. O fallback cobre o que mora fora de `[data-estilo]`,
+   onde o token não existe. */
+:focus-visible { outline: 2px var(--b-foco-traco, solid) currentColor; outline-offset: 2px; border-radius: 3px; }
 
 /* Fica FORA de `@layer contrato` de propósito, e não é descuido: uma regra
    dentro de camada perde para QUALQUER regra sem camada, mesmo com
@@ -106,6 +109,24 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
   --b-blur: none;
   --b-medida: 68ch;
 
+  /* O TRAÇO À MÃO — chaves que só um estilo desenhado liga. O padrão de cada
+     uma reproduz exatamente o que existia antes delas.
+
+     O giro é `none`, e não `0deg`, de propósito: `rotate` com qualquer valor
+     diferente de `none` abre contexto de empilhamento e vira bloco de
+     contenção para descendente `position: fixed`. Com zero, todo card de todo
+     estilo mudaria de comportamento sem mudar de cara. `-par` é o giro dos
+     cards pares, para a pilha não entortar toda para o mesmo lado. */
+  --b-giro: none;
+  --b-giro-par: none;
+  /* o risco de marca-texto sob o H2: é o `text-decoration` inteiro, e os
+     outros dois só pesam quando ele não é `none` */
+  --b-titulo-grifo: none;
+  --b-titulo-grifo-peso: auto;
+  --b-titulo-grifo-recuo: auto;
+  /* o estilo da linha do anel de foco (`solid`, `dashed`, `dotted`) */
+  --b-foco-traco: solid;
+
   /* tipografia */
   --b-fonte-titulo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --b-fonte-corpo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -126,6 +147,11 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
   --b-sombra-cor: var(--b-tinta);
   /* preenchimento e texto são acentos diferentes: lime preenche bem e lê mal */
   --b-acento-tinta: var(--b-acento);
+  /* o preenchimento do botão forte, que vai em `background` e por isso pode
+     ser hachura. Não dá para ser o próprio `--b-acento`: ele também é
+     `border-color`, `fill` e `color` em outros blocos, onde gradiente não entra. */
+  --b-acento-preenchimento: var(--b-acento);
+  --b-acento-preenchimento-forte: var(--b-acento-forte);
   /* a régua herda a linha do modo; derivado, para o tema mexer só na forma */
   --b-regua-cor: var(--b-linha);
   /* fundo decorativo. Existe como token para poder ser sobrescrito por site:

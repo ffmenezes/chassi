@@ -40,6 +40,13 @@
   margin: 10px 0 12px;
   color: var(--b-tinta);
   text-wrap: balance;
+  /* O grifo é sublinhado, e não fundo: acompanha o texto em cada linha de um
+     título quebrado, e o sublinhado pinta ATRÁS do glifo, como marca-texto.
+     `skip-ink: none` porque marca-texto não desvia de perna de letra. */
+  text-decoration: var(--b-titulo-grifo);
+  text-decoration-thickness: var(--b-titulo-grifo-peso);
+  text-underline-offset: var(--b-titulo-grifo-recuo);
+  text-decoration-skip-ink: none;
 }
 
 .b-h3 {
@@ -248,7 +255,11 @@
   box-shadow: var(--b-sombra);
   backdrop-filter: var(--b-blur);
   -webkit-backdrop-filter: var(--b-blur);
+  /* `rotate`, e não `transform`: a propriedade própria compõe com o
+     `transform: var(--b-lift)` do hover em vez de ser apagada por ele */
+  rotate: var(--b-giro);
 }
+.b-card:nth-child(even) { rotate: var(--b-giro-par); }
 
 /* A ressalva não é enfeite tipográfico: é slot obrigatório.
    Piso, premissa, faixa com data, caso único apurado, conflito. */
@@ -288,11 +299,11 @@
 .b-btn:hover { box-shadow: var(--b-sombra-hover); transform: var(--b-lift); }
 
 .b-btn--forte {
-  background: var(--b-acento);
+  background: var(--b-acento-preenchimento);
   color: var(--b-sobre-acento);
   border-color: var(--b-linha-forte);
 }
-.b-btn--forte:hover { background: var(--b-acento-forte); }
+.b-btn--forte:hover { background: var(--b-acento-preenchimento-forte); }
 
 /* ---------- A1: os átomos da prosa ----------
    Não são blocos: a arquitetura não os escolhe, a prosa usa. A regra de

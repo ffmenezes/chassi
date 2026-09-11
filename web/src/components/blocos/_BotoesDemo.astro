@@ -92,7 +92,7 @@
   /* congela .b-btn:hover / .b-btn--forte:hover de atomos.css — comentário no
      frontmatter explica por que a duplicação é deliberada aqui. */
   .demo-hover { box-shadow: var(--b-sombra-hover); transform: var(--b-lift); }
-  .demo-hover.b-btn--forte { background: var(--b-acento-forte); }
+  .demo-hover.b-btn--forte { background: var(--b-acento-preenchimento-forte); }
 
   /* congela o :focus-visible de base.css — na variante de dentro de
      [data-estilo] (`outline-color: var(--b-acento-tinta)`), porque é lá que
@@ -100,5 +100,5 @@
      congelados (hover e foco) tira os dois do fluxo de Tab: quem navega por
      teclado só deve encontrar, e conseguir acionar, o botão de repouso — que
      é o único de verdade nesta grade. */
-  .demo-foco { outline: 2px solid var(--b-acento-tinta); outline-offset: 2px; border-radius: 3px; }
+  .demo-foco { outline: 2px var(--b-foco-traco) var(--b-acento-tinta); outline-offset: 2px; border-radius: 3px; }
 </style>
