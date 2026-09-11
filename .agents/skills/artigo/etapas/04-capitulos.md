@@ -1,5 +1,11 @@
 # Etapa 4 — Capítulos
 
+Caminhos: `sites/`, `web/` e `scripts/` partem da raiz do checkout do
+chassi; `referencias/` parte de `.agents/skills/artigo/`. `base/`,
+`estado/`, `pautas/`, `pesquisa/` e `posts/` abreviados partem de
+`sites/<slug>/`. Rode scripts da raiz, com o caminho completo da peça.
+Site novo exige o par de cópias descrito em `sites/_modelo/README.md`.
+
 Escreve a prosa de **um capítulo por vez**, a partir do esqueleto
 congelado. Cada capítulo é um arquivo. O redator não apura, não calcula e
 não decide estrutura: transforma a resposta e os dados do capítulo em
@@ -16,10 +22,14 @@ melhor: contexto curto, uma tarefa, um arquivo.
 - Os blocos `D` do dossiê listados em `dados:` do capítulo. Só esses.
 - `sites/<slug>/base/TOM.md` — como o texto soa. O parágrafo de amostra é
   a régua.
+- `sites/<slug>/base/LEITOR.md` — vocabulário e conhecimento de quem lê.
+- `sites/<slug>/estado/CLUSTER.md` — status da peça e dos links internos.
 - `sites/<slug>/base/POSTURAS.md` — a postura da pauta, e o que ela exige
   dizer quando o autor não testou.
 - Se já existe algum `capitulos/NN-*.md` desta peça: o último parágrafo do
   anterior, para não abrir igual.
+- `referencias/blocos.md` — somente a sintaxe de um bloco previsto que
+  não esteja na cola abaixo; não invente atributos.
 
 Cola das diretivas mais usadas, para não reabrir `referencias/blocos.md`
 a cada capítulo (a lista completa está lá):
@@ -110,7 +120,8 @@ Regras de forma do arquivo:
 ## Regras de prosa
 
 1. **O primeiro parágrafo responde.** Se o leitor parar ali, tem a
-   resposta do H2 com número e data. Contexto e mecanismo vêm depois.
+   resposta do H2 com o dado e a data, ou a lacuna explícita prevista no
+   esqueleto. Contexto e mecanismo vêm depois.
 2. **Número só do esqueleto.** Discordou, ou achou o esqueleto errado
    (número, data, nome)? Não corrija na prosa: escreva em "Objeções do
    redator" no esqueleto, com o D que prova, e pare este capítulo. Quem
@@ -155,11 +166,23 @@ no fim do SKILL.md): feito, decidido (com a alternativa que perdeu),
 descartado, adiado, travou em, tempo. Uma entrada por capítulo é demais; uma por sessão de redação basta,
 listando os capítulos escritos e qualquer objeção levada ao esqueleto.
 
+Gabarito desta entrada (acrescente ao diário; não substitua entradas):
+
+```markdown
+## <data> · etapa 4 · capitulos
+**feito:** <arquivos e resultado>
+**decidido:** <escolha, critério e alternativa que perdeu>
+**descartado:** <item e motivo, ou nada>
+**adiado:** <item e destino/condição, ou nada>
+**travou em:** <obstáculo e encaminhamento, ou nada>
+**tempo:** <duração medida, estimativa declarada ou não medido>
+```
+
 ## Checagem antes de fechar o capítulo
 
-- [ ] Entrada desta sessão de redação no `diario.md`, com os cinco campos.
+- [ ] Entrada desta sessão de redação no `diario.md`, com os seis campos.
 - [ ] Arquivo começa com o H2 idêntico ao esqueleto.
-- [ ] Primeiro parágrafo contém a resposta do esqueleto com o número.
+- [ ] Primeiro parágrafo contém a resposta do esqueleto com o dado ou a lacuna.
 - [ ] Todo número do capítulo está no esqueleto, com a mesma marca.
 - [ ] Só o bloco previsto no esqueleto, na sintaxe de `referencias/blocos.md`.
 - [ ] Nenhum "como veremos" / "como vimos" / "neste capítulo".

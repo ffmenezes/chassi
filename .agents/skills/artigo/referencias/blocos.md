@@ -47,7 +47,7 @@ problema: ...
 :::
 
 :::conclusoes{rotulo="O essencial em 4 pontos"}
-- ... **número** ... (ressalva entre parênteses no fim)
+- ... **dado verificável: número, condição ou regra** ... (ressalva no fim)
 :::
 
 ## H2 ...
@@ -79,9 +79,11 @@ que `web/src/data.ts` formata sem o bug do dia 1º virar o mês anterior.
 da grade (N2) e o card social; título vazio quebra a build do card.
 
 O **sumário (bloco 3)** e o **autor (bloco 22)** nunca são escritos: o
-sumário nasce dos H2 (quatro ou mais, ou não nasce) e o autor vem de
-`base/AUTOR.md`. "Fontes" e "Como esta peça foi feita" são as duas seções
-fixas depois do fechamento; o parser as trata como rodapé da peça, não como
+sumário nasce dos H2 (quatro ou mais, ou não nasce). A fonte editorial do
+autor é `base/AUTOR.md`, mas o componente recebe hoje um objeto `Autor`:
+a leitura automática desse arquivo ainda não existe. "Fontes" e "Como
+esta peça foi feita" são as duas seções fixas depois do fechamento; o
+contrato do futuro parser as trata como rodapé da peça, não como
 capítulo, e elas não contam para o sumário.
 
 ## Os blocos de corpo
@@ -93,7 +95,7 @@ sabendo que fica como prosa até o encanamento chegar.
 | nome | # | estado | campos | o que derruba a build ou impede o bloco |
 |---|---|---|---|---|
 | `abertura` | 1 | montável (fixo) | `cena`, `problema` | nada em código; editorial: problema até a segunda frase |
-| `conclusoes` | 2 | montável (fixo) | `rotulo?`; itens com número em negrito e ressalva | nada em código; editorial: número e ressalva em todo item |
+| `conclusoes` | 2 | montável (fixo) | `rotulo?`; itens com dado verificável em negrito e ressalva | nada em código; editorial: dado ou lacuna explícita e ressalva em todo item, sem numeral decorativo |
 | `tabela-panorama` | 4 | montável | `fonte?`; tabela markdown; célula sem dado escrita `[sem dado confiável]` | nada em código; editorial: coluna só existe se todas as células saem do esqueleto |
 | `tabela-contraste` | 5 | montável | idem, duas colunas apuradas na mesma base e data | idem |
 | `grafico` | 31 | montável | `tipo` (barra, linha, pizza), `titulo` com unidade, `fonte` com data; tabela markdown dentro: primeira coluna é a categoria, as outras são as séries; `unidade?`, `decimais?` | **quebra**: sem título; sem fonte; série com contagem diferente das categorias; valor que não é número (lacuna é célula vazia, nunca zero); mais de 12 categorias; mais de 4 séries; linha com menos de 3 pontos; pizza com mais de uma série, mais de 6 fatias, lacuna ou negativo. Editorial: um por peça, e só onde a tabela já existe |
@@ -180,9 +182,10 @@ pega o valor real.
 No `grafico`, a tabela markdown é a fonte dos números: primeira coluna são
 as categorias (barras, pontos da linha ou fatias), cada coluna seguinte é
 uma série. Célula vazia é lacuna declarada e sai como "[sem dado]", nunca
-como zero. Os números são os da tabela de panorama ou de contraste do mesmo
-capítulo, copiados, nunca outros: o gráfico é a tabela desenhada, e a
-tabela com os números viaja dentro dele, em "Ver os números".
+como zero. Os números vêm da comparação congelada no esqueleto: o gráfico
+é a tabela desenhada, e a tabela viaja dentro dele, em "Ver os números".
+Não repita uma tabela-panorama ou tabela-contraste separada com os mesmos
+dados: gráfico e tabela embutida contam como um bloco de dado no orçamento.
 
 ## Quando a tabela vira gráfico, e quando não
 
@@ -238,8 +241,10 @@ aceita figura sem `src` como marcador de prévia.
 - Quatro ou mais H2, ou o sumário não nasce.
 - `titulo` não vazio (card social), `dominio` do site só host.
 - `atualizado` em `AAAA-MM-DD`.
-- `base/AUTOR.md` válido (nome com sobrenome, não coletivo, sem
-  `[DEFINIR]`, `sameAs` declarado), ou o bloco 22 não nasce.
+- Objeto `Autor` válido (nome com sobrenome, não coletivo, sem
+  `[DEFINIR]`, foto e `sameAs` declarado), ou o bloco 22 não nasce.
+  A etapa 7 confere a ficha `base/AUTOR.md` manualmente; uma build verde
+  dos mocks não valida essa ficha nem verifica se a foto é real.
 - `posts/<peça>/comentarios.json`, se existir, válido e com `versao: 1`.
   A peça não escreve esse arquivo; a moderação escreve.
 - Todo bloco usado declarado em `blocos` do `web/src/sites/<slug>.ts`.

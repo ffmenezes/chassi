@@ -1,5 +1,11 @@
 # Etapa 6 — Revisão
 
+Caminhos: `sites/`, `web/` e `scripts/` partem da raiz do checkout do
+chassi; `referencias/` parte de `.agents/skills/artigo/`. `base/`,
+`estado/`, `pautas/`, `pesquisa/` e `posts/` abreviados partem de
+`sites/<slug>/`. Rode scripts da raiz, com o caminho completo da peça.
+Site novo exige o par de cópias descrito em `sites/_modelo/README.md`.
+
 Três passes sobre o `post.md`, nesta ordem: rastreabilidade (todo número e
 toda afirmação voltam ao dossiê), texto de máquina (a lista de
 `referencias/antipadroes.md`, com o freio), e leitor cético (a peça de pé
@@ -16,6 +22,10 @@ primeiro.
 
 - `sites/<slug>/posts/<peça>/post.md`.
 - `sites/<slug>/pesquisa/<peça>/dossie.md`.
+- `sites/<slug>/posts/<peça>/esqueleto.md` — números e contas congeladas.
+- `sites/<slug>/posts/<peça>/diario.md` — papéis reais na produção.
+- `sites/<slug>/base/DECLARACOES.md` — declarações obrigatórias.
+- `sites/<slug>/pautas/<peça>.md` — query-alvo para a medição.
 - `sites/<slug>/estado/CLUSTER.md` — status dos slugs linkados.
 - `referencias/antipadroes.md` — inteiro, no passe 2.
 - `sites/<slug>/base/TOM.md` — o "nunca faz" e o "sempre faz".
@@ -94,6 +104,10 @@ Para cada número, data, nome de norma, preço e citação do `post.md`:
    feita`, esta com o dado próprio (método e data) e o que
    `base/DECLARACOES.md` manda. Ausente: defeito, antes de qualquer
    leitura de conteúdo.
+   Os papéis declarados correspondem ao que aconteceu? IA que apurou
+   não vira apenas ajuda de redação; assinatura do autor não autoriza
+   afirmar que ele conferiu fontes ou contas. Confira o diário da peça
+   se houver dúvida e declare a conferência humana pendente quando for o caso.
 
 Afirmação órfã (fonte caiu) não se reancora na fonte vizinha. Ou acha
 fonte nova (volta ao dossiê), ou rebaixa a afirmação, ou corta.
@@ -165,6 +179,12 @@ Cinco ataques, sempre estes, com a resposta por escrito:
 Ataque que o texto não aguenta e o dossiê responde: correção. Ataque que
 nem o dossiê responde: `devolvido à etapa 2`, com o item.
 
+Depois dos cinco ataques gerais, confronte os três ataques específicos
+da pauta com "Ataque à tese" do dossiê. Registre, para cada um, o trecho
+final que preserva a resposta ou a limitação. A objeção que quase derrubou
+a tese não pode desaparecer na costura. Faltou ressalva já apurada:
+correção cirúrgica; faltou dado: devolva à etapa 2 para aquele item.
+
 ## Aplicar as correções
 
 - Uma por edição, na ordem da lista. Nunca "aproveita e melhora".
@@ -194,9 +214,21 @@ no fim do SKILL.md): feito, decidido (com a alternativa que perdeu),
 descartado, adiado, travou em, tempo. Uma entrada por rodada, apontando para a rodada em `revisao.md`; o que
 vale registrar é a correção que foi considerada e não feita, e por quê.
 
+Gabarito desta entrada (acrescente ao diário; não substitua entradas):
+
+```markdown
+## <data> · etapa 6 · revisao
+**feito:** <arquivos e resultado>
+**decidido:** <escolha, critério e alternativa que perdeu>
+**descartado:** <item e motivo, ou nada>
+**adiado:** <item e destino/condição, ou nada>
+**travou em:** <obstáculo e encaminhamento, ou nada>
+**tempo:** <duração medida, estimativa declarada ou não medido>
+```
+
 ## Checagem antes de fechar
 
-- [ ] Entrada desta etapa no `diario.md`, com os cinco campos.
+- [ ] Entrada desta etapa no `diario.md`, com os seis campos.
 - [ ] Os três passes têm tabela, mesmo vazia ("nenhum defeito"), e o passe
       2 tem a linha "segunda ordem: aberturas" com o resultado.
 - [ ] `## Fontes` e `## Como esta peça foi feita` existem no `post.md`.

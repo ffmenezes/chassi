@@ -23,6 +23,9 @@ e o leitor para de ler para olhar.
   quantas provas houver, mas prova, não enfeite.
 - **Os fixos não contam**: abertura, conclusões, sumário, FAQ, fechamento,
   autor.
+- A tabela dentro de `grafico`, em "Ver os números", faz parte do mesmo
+  bloco. Não monte uma tabela separada e o gráfico no mesmo capítulo:
+  os dados tabulados ficam dentro do gráfico e contam como um bloco só.
 - Peça curta (quatro ou cinco capítulos): dois ou três blocos de corpo é o
   normal. Peça com um bloco em todo capítulo está decorada, não escrita.
 

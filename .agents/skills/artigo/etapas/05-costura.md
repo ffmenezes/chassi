@@ -1,5 +1,11 @@
 # Etapa 5 — Costura
 
+Caminhos: `sites/`, `web/` e `scripts/` partem da raiz do checkout do
+chassi; `referencias/` parte de `.agents/skills/artigo/`. `base/`,
+`estado/`, `pautas/`, `pesquisa/` e `posts/` abreviados partem de
+`sites/<slug>/`. Rode scripts da raiz, com o caminho completo da peça.
+Site novo exige o par de cópias descrito em `sites/_modelo/README.md`.
+
 Junta os capítulos num `post.md` só, com abertura, conclusões, FAQ,
 fechamento e fontes, e liga as partes: transição, repetição entre
 capítulos, sigla, nome do objeto, marca que vira frase. A costura mexe em
@@ -12,6 +18,12 @@ forma. **Não muda fato, número, nem ordem de capítulo.**
 - `sites/<slug>/posts/<peça>/capitulos/*.md` — todos, na ordem do NN.
 - `referencias/blocos.md` — a seção "O arquivo `post.md`", para o
   frontmatter e os blocos fixos.
+- `sites/<slug>/pesquisa/<peça>/dossie.md` — fontes, dado próprio, marcas
+  e validade; leitura para preservar fatos, sem nova apuração.
+- `sites/<slug>/base/DECLARACOES.md` — o que declarar na seção de método.
+- `sites/<slug>/base/TOM.md` e `pautas/<peça>.md` — voz, precisão e query.
+- `sites/<slug>/posts/<peça>/revisao.md`, se existir — devoluções pendentes.
+- `sites/<slug>/posts/<peça>/diario.md` — quem executou cada parte.
 
 ## Escreva só isto
 
@@ -31,7 +43,7 @@ selo: "Guia de consumo"
 
 :::abertura
 cena: <uma frase>
-problema: <uma frase com número>
+problema: <uma frase com dado verificável ou lacuna que a peça resolve>
 :::
 
 :::conclusoes{rotulo="O essencial em 4 pontos"}
@@ -61,7 +73,9 @@ problema: <uma frase com número>
 ## Como esta peça foi feita
 Dois a quatro parágrafos curtos: o dado próprio (o que foi feito, quando,
 como), o que `base/DECLARACOES.md` manda declarar (uso de IA, afiliado,
-produto da casa), e a data em que os números perecíveis vencem.
+produto da casa), quem apurou, redigiu e revisou de fato, e a data em que
+os números perecíveis vencem. Se a IA executou essas funções, nomeie-as;
+conferência humana só é declarada quando o dono a realizou.
 ```
 
 `minutos` é o total de palavras do corpo dividido por 200, arredondado
@@ -75,6 +89,11 @@ aqui entram com a data de hoje e a etapa 7 confere.
    órgão, norma, ficha técnica, loja; não a bibliografia inteira) e a seção
    fixa "Como esta peça foi feita", com o dado próprio do dossiê e o que
    `base/DECLARACOES.md` manda declarar. Ela não conta como H2 do sumário.
+   A assinatura não prova revisão humana. Compare a declaração com o
+   diário: agente que abriu fontes, escolheu dados ou refez contas usou
+   IA também na apuração, não só na redação. Se o stub atribui essas
+   ações ao editor mas elas não ocorreram, registre a pendência e diga
+   que a conferência humana ainda não foi realizada.
 2. **Resolve as marcas.** `[ESTIMATIVA]` vira frase ("estimativa sobre a
    ficha técnica, não medição"); `[PISO: exclui X]` vira "sem contar X";
    `[PREMISSA]` vira "no exemplo, com <valor>; o seu está em <onde>";
@@ -94,8 +113,9 @@ aqui entram com a data de hoje e a etapa 7 confere.
    20 palavras por frase; ao menos 30% de frases curtas (até 10
    palavras); no máximo 25% de frases longas (21 ou mais); nenhuma acima
    de 45; Flesch-PT de 55 para cima. Fora da régua, o remédio é sempre o
-   mesmo: a frase longa vira duas, a enumeração vira lista, e cada
-   parágrafo ganha uma frase curta que afirma o número. Não conte só as
+   mesmo: a frase longa vira duas e a enumeração vira lista quando isso
+   facilita a leitura. Não acrescente frase vazia ou repita um número só
+   para atingir a proporção de curtas. Não conte só as
    acima de 45: a primeira validação desta skill passou nessa conta com
    78% das frases acima de 20 palavras e 5% curtas.
    O bloco SEO do mesmo script cobra o que a busca lê: query no título e
@@ -145,9 +165,21 @@ no fim do SKILL.md): feito, decidido (com a alternativa que perdeu),
 descartado, adiado, travou em, tempo. Registre o bloco que virou prosa, a repetição podada e o `REVER` de
 legibilidade que ficou com motivo.
 
+Gabarito desta entrada (acrescente ao diário; não substitua entradas):
+
+```markdown
+## <data> · etapa 5 · costura
+**feito:** <arquivos e resultado>
+**decidido:** <escolha, critério e alternativa que perdeu>
+**descartado:** <item e motivo, ou nada>
+**adiado:** <item e destino/condição, ou nada>
+**travou em:** <obstáculo e encaminhamento, ou nada>
+**tempo:** <duração medida, estimativa declarada ou não medido>
+```
+
 ## Checagem antes de fechar
 
-- [ ] Entrada desta etapa no `diario.md`, com os cinco campos.
+- [ ] Entrada desta etapa no `diario.md`, com os seis campos.
 - [ ] Frontmatter completo: titulo, descricao, slug, publicado,
       atualizado, minutos, selo; os três campos de texto entre aspas
       duplas, e `python3 -c 'import yaml,sys; yaml.safe_load(sys.stdin.read().split("---")[1])' < post.md`

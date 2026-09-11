@@ -1,5 +1,11 @@
 # Etapa 0 — Ideias
 
+Caminhos: `sites/`, `web/` e `scripts/` partem da raiz do checkout do
+chassi; `referencias/` parte de `.agents/skills/artigo/`. `base/`,
+`estado/`, `pautas/`, `pesquisa/` e `posts/` abreviados partem de
+`sites/<slug>/`. Rode scripts da raiz, com o caminho completo da peça.
+Site novo exige o par de cópias descrito em `sites/_modelo/README.md`.
+
 Produz um lote de candidatas a pauta. Candidata é uma linha, não um
 compromisso: ideia, de onde veio, para qual busca existe e qual vantagem
 ela teria contra o que já está na primeira página. O lote é grande de
@@ -44,6 +50,19 @@ Aprovadas nesta rodada: 1, 2.
 Adiadas: nenhuma.
 Escolhida para a próxima peça: 1, porque é a mais barata de apurar e a
 query tem o qualificador mais forte. As outras aprovadas ficam na fila.
+
+### Corte 2 — <query> · <data>
+Resultados [SNIPPET], só para intenção; <quantidade real> devolvidos.
+| URL | classe (serve / outro leitor / incerto) | motivo |
+|---|---|---|
+| <URL devolvida> | <classe> | <relação com LEITOR> |
+Resultado: <contagem por classe e decisão>.
+
+### Leitura das finalistas — <query> · <data>
+| URL | acesso (lida / falhou) | o que a página entrega | lacuna para esta peça |
+|---|---|---|---|
+| <URL> | <estado real> | <conteúdo efetivamente lido, ou não apurado> | <lacuna observada, ou não apurada> |
+Decisão: <três páginas lidas e ganho concreto, ou escolha adiada>.
 ```
 
 Colunas:
@@ -64,8 +83,9 @@ Colunas:
 - **origem** — de qual gerador a ideia saiu, com o item (perfil, erro,
   peça). Ideia sem origem rastreável é ideia sua, e a sua cabeça não é
   fonte.
-- **qualificador** — a razão pela qual um resumo automático de busca não
-  responde esta pergunta. Um dos quatro, ou nenhum:
+- **qualificador** — o ganho verificável que a peça pretende acrescentar
+  ao que a busca já responde. Não garante posição nem ausência em resumo
+  automático. Um dos quatro, ou nenhum:
   `número que muda` (preço, tarifa, prazo, com data),
   `verificação` (conta refeita, teste, medição que alguém precisou fazer),
   `regra BR` (norma, lei, prática local que a resposta genérica ignora),
@@ -116,15 +136,20 @@ média.
 1. **Pergunta real.** Alguém digita isto, com estas palavras? Prova aceita:
    apareceu no autocomplete, no "também perguntam", em título de fórum, em
    `LEITOR.md` pergunta 3. Ideia que só você formulou reprova.
-2. **Destinatário.** Abra os dez primeiros resultados da query (uma busca
-   por candidata) e conte com quem cada página fala. O orçamento: abra de
-   verdade para toda candidata que chegou até aqui viva; candidata que
-   caiu no corte 1 não gasta busca. Vinte candidatas são vinte buscas, e
-   é por isso que os cortes vêm em cascata. Se não dá para abrir (bloqueio,
-   sem ferramenta), a candidata fica com corte `2: não verificado` e só
-   pode ser escolhida depois de verificada na etapa 1. Se menos de quatro falam com o perfil de
-   `LEITOR.md`, a query pertence a outro leitor. Reenquadre ("para quem
-   produz", "custo por peça", "no Brasil") antes de descartar.
+2. **Destinatário.** Faça uma busca real por candidata que passou o corte
+   1. Classifique os primeiros dez resultados orgânicos devolvidos pela
+   ferramenta como `serve`, `outro leitor` ou `incerto`, registrando query,
+   data, URL e motivo. Títulos e trechos de busca são `[SNIPPET]`: aqui
+   servem apenas como sinal de intenção, nunca como prova de preço, lei
+   ou qualquer afirmação do artigo. Não diga que abriu uma página quando
+   só viu seu resultado. Abra as páginas incertas somente se puderem
+   mudar a decisão: quatro `serve` aprovam; menos de quatro possíveis
+   reprovam. Se houver menos de dez resultados ou bloqueio, registre a
+   amostra real; sem quatro `serve` e sem amostra suficiente para reprovar,
+   fica `2: não verificado`, a resolver antes da pauta. Nunca complete dez
+   com páginas imaginadas. Registre a evidência abaixo da tabela das
+   candidatas, agrupada por query. Reenquadre para o leitor antes de
+   descartar ("para quem produz", "custo por peça", "no Brasil").
 3. **Qualificador.** Sem um dos quatro qualificadores, a peça diz o que o
    resumo automático já diz, melhor escrito. "Escrevo melhor" não é
    qualificador. Reenquadrar aqui é acrescentar um número datado, uma
@@ -134,6 +159,16 @@ média.
    dias, só entra como pilar, e pilar é uma por cluster.
 5. **Dentro do território.** `TERRITORIO.md` recusa? Reprova, mesmo
    passando em tudo acima.
+
+Antes de escolher entre as aprovadas, abra as três páginas mais fortes
+da query finalista. Registre URL, o que entregam e uma lacuna concreta
+que esta peça pode preencher (método ausente, dado vencido, recorte sem
+resposta). Qualificador sozinho não basta: se elas já entregam a mesma
+conta com a mesma qualidade, reenquadre ou escolha a próxima candidata.
+Sem acesso para comparar, adie a escolha; não afirme superioridade sem
+ler. Tentativa com erro não conta entre as três páginas lidas: registre
+`falhou`, tente outro acesso ou substitua pela próxima forte da busca.
+Essa leitura alimenta "O que a primeira página já diz" na pauta.
 
 Registre o corte que matou. Candidata reprovada em 3 costuma voltar
 reenquadrada na rodada seguinte, e o registro é o que evita propor a
@@ -146,6 +181,9 @@ mesma versão de novo.
 - [ ] Toda linha tem query entre aspas, verbo único e origem com item.
 - [ ] Nenhuma aprovada repete query-alvo do `CLUSTER.md`.
 - [ ] Toda aprovada tem qualificador diferente de `nenhum`.
+- [ ] Corte 2 de cada aprovada tem URLs, classes, motivos e contagem real.
+- [ ] Escolhida tem três páginas efetivamente lidas e lacuna observada;
+      abertura que falhou não foi contada como leitura.
 - [ ] As linhas "Aprovadas nesta rodada", "Adiadas" e "Escolhida para a
       próxima peça" existem, a última com o motivo em uma frase.
 - [ ] Nada foi apagado ou reordenado nos blocos anteriores.

@@ -131,8 +131,9 @@ de dois revisores chegarem ao mesmo resultado.
 
 - Não "humaniza" inventando: nunca acrescente fato, nome, número, data ou
   citação para o texto soar pessoal. Sinal humano sem fonte é mentira.
-- Não corre atrás de detector de IA: o Google não usa detector; usa padrão
-  de produção (volume, template, valor). Texto lavado por tradução ou
-  paráfrase para enganar detector não entra neste método.
+- Não corre atrás de detector de IA. A política pública do Google trata
+  de propósito e valor do conteúdo; não permite afirmar quais detectores
+  internos existem. Texto lavado por tradução ou paráfrase para enganar
+  detector não entra neste método. Ver `fundamentos.md`.
 - Não remove ressalva obrigatória por "soar mais direto". A ressalva
   nomeada é informação.

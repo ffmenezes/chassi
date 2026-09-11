@@ -1,5 +1,11 @@
 # Etapa 7 — Entrega
 
+Caminhos: `sites/`, `web/` e `scripts/` partem da raiz do checkout do
+chassi; `referencias/` parte de `.agents/skills/artigo/`. `base/`,
+`estado/`, `pautas/`, `pesquisa/` e `posts/` abreviados partem de
+`sites/<slug>/`. Rode scripts da raiz, com o caminho completo da peça.
+Site novo exige o par de cópias descrito em `sites/_modelo/README.md`.
+
 Confere que a peça revisada cabe no que a build cobra, atualiza o
 `CLUSTER.md`, e entrega ao dono a lista curta do que só ele pode fazer.
 Não escreve prosa. Não corrige texto: se achar defeito de texto aqui,
@@ -14,6 +20,9 @@ devolve à etapa 6.
 - `web/src/sites/<slug>.ts` — o campo `blocos` e o `dominio`.
 - `sites/<slug>/base/AUTOR.md` — os campos que `web/src/autor.ts` exige.
 - `sites/<slug>/estado/CLUSTER.md`.
+- `sites/<slug>/pesquisa/<peça>/dossie.md` — dado próprio e `vence primeiro`.
+- `sites/<slug>/base/DECLARACOES.md` e `base/MONETIZACAO.md` — declarações
+  e contexto para a lista de links; não decidem a coluna do dono.
 
 ## Escreva só isto
 
@@ -26,6 +35,9 @@ devolve à etapa 6.
   coluna "decisão do dono" vazia. É o checklist que o dono preenche
   depois do rascunho: manter, trocar por afiliado, trocar a fonte,
   remover. A peça não vai a `publicado` com linha sem decisão.
+  Se `links.md` já existe, não sobrescreva decisões: gere uma proposta
+  temporária, compare por URL e âncora, preserve decisões dos links iguais
+  e deixe vazia só a decisão de link novo ou alterado.
 - A lista de pendências, no fim de `revisao.md`, sob `## Entrega`.
 
 ```markdown
@@ -118,9 +130,21 @@ Acrescente a entrada da etapa 7 em `posts/<peça>/diario.md` (gabarito
 no fim do SKILL.md): feito, decidido (com a alternativa que perdeu),
 descartado, adiado, travou em, tempo. Registre as pendências que ficaram com o dono e a data de manutenção.
 
+Gabarito desta entrada (acrescente ao diário; não substitua entradas):
+
+```markdown
+## <data> · etapa 7 · entrega
+**feito:** <arquivos e resultado>
+**decidido:** <escolha, critério e alternativa que perdeu>
+**descartado:** <item e motivo, ou nada>
+**adiado:** <item e destino/condição, ou nada>
+**travou em:** <obstáculo e encaminhamento, ou nada>
+**tempo:** <duração medida, estimativa declarada ou não medido>
+```
+
 ## Checagem antes de fechar
 
-- [ ] Entrada desta etapa no `diario.md`, com os cinco campos.
+- [ ] Entrada desta etapa no `diario.md`, com os seis campos.
 - [ ] Veredito `aprovado` na última rodada.
 - [ ] Todos os blocos usados estão em `blocos` do site.
 - [ ] Todas as travas da build conferidas por bloco presente.

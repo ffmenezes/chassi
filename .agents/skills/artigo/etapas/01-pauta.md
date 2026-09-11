@@ -1,5 +1,11 @@
 # Etapa 1 — Pauta
 
+Caminhos: `sites/`, `web/` e `scripts/` partem da raiz do checkout do
+chassi; `referencias/` parte de `.agents/skills/artigo/`. `base/`,
+`estado/`, `pautas/`, `pesquisa/` e `posts/` abreviados partem de
+`sites/<slug>/`. Rode scripts da raiz, com o caminho completo da peça.
+Site novo exige o par de cópias descrito em `sites/_modelo/README.md`.
+
 Transforma uma candidata aprovada em contrato: o que a peça afirma, quais
 perguntas responde, o que recusa, e o que precisa ser apurado antes de
 qualquer parágrafo. A pauta não redecide nada de `base/`; ela aplica a uma
@@ -12,6 +18,7 @@ peça o que `base/` já decidiu.
   internos possíveis (só slugs `publicado`).
 - `sites/<slug>/base/POSTURAS.md` — os tipos de peça do site e de que lugar
   cada um fala.
+- `sites/<slug>/base/AUTOR.md` — o que o autor pode afirmar que fez.
 - `sites/<slug>/base/LEITOR.md` — perguntas 4 e 5: o que faz fechar a aba,
   o que precisa ter em mãos ao terminar.
 - `sites/<slug>/base/EDITORIAL.md` — o que o site nunca afirma sem fonte, e
@@ -38,8 +45,9 @@ palavras. Não pode existir na tabela do `CLUSTER.md`.
 **eixo de valor:** mais atualizado e com a conta aberta
 
 ## A tese
-Uma frase afirmativa, com número, que a peça vai sustentar. Não é
-pergunta. Se der para escrever hoje sem apurar nada, é resenha, não tese.
+Uma frase afirmativa e verificável que a peça vai sustentar. Não é
+pergunta. Quando a decisão é quantitativa, use X/Y para o número ainda a
+apurar; quando é regra ou procedimento, nomeie a condição verificável.
 > Um split de 9.000 BTU inverter ligado 8 horas por noite custa entre R$ X
 > e R$ Y por mês em setembro de 2026, e a diferença para o convencional
 > aparece na conta em menos de dois verões.
@@ -88,8 +96,15 @@ vazia do stub, substitua-a.
 
 ## Regras
 
-1. **Tese é afirmativa.** "Vale a pena?" não é tese. "Vale a pena a partir
-   de X horas por dia, em setembro de 2026" é. Tese sem número é opinião.
+0. **Cortes antes da pauta.** Se a candidata ficou com `2: não verificado`,
+   execute agora o corte de destinatário da etapa 0 e registre a evidência
+   em um acréscimo datado nas candidatas. Sem verificação, não reserve slug.
+   Candidata aprovada não exige repetir a busca.
+1. **Tese é afirmativa e verificável.** "Vale a pena?" não é tese. "Vale
+   a pena a partir de X horas por dia, em setembro de 2026" é. Uma tese
+   sobre regra pode ser "O documento X é dispensado no caso Y"; ela exige
+   a norma e o caso, não um numeral decorativo. Todo número efetivamente
+   usado continua exigindo D, fonte e data.
 2. **Uma pergunta, um critério.** Se a resposta de uma pergunta do
    contrato depende de dois critérios em conflito ("mais barato" e "mais
    silencioso"), são duas perguntas ou dois artigos.
@@ -121,13 +136,25 @@ no fim do SKILL.md): feito, decidido (com a alternativa que perdeu),
 descartado, adiado, travou em, tempo. É aqui que o diário nasce: crie o arquivo com o cabeçalho. A alternativa
 que perdeu costuma ser outra planta, outra query ou outra candidata.
 
+Gabarito desta entrada (acrescente ao diário; não substitua entradas):
+
+```markdown
+## <data> · etapa 1 · pauta
+**feito:** <arquivos e resultado>
+**decidido:** <escolha, critério e alternativa que perdeu>
+**descartado:** <item e motivo, ou nada>
+**adiado:** <item e destino/condição, ou nada>
+**travou em:** <obstáculo e encaminhamento, ou nada>
+**tempo:** <duração medida, estimativa declarada ou não medido>
+```
+
 ## Checagem antes de fechar
 
-- [ ] Entrada desta etapa no `diario.md`, com os cinco campos.
+- [ ] Entrada desta etapa no `diario.md`, com os seis campos.
 - [ ] Slug não existe no `CLUSTER.md` e a linha nova foi acrescentada com
       status `pauta`.
 - [ ] Query-alvo da pauta é idêntica à do `CLUSTER.md`, aspas incluídas.
-- [ ] A tese é uma frase afirmativa com ao menos um número a apurar.
+- [ ] A tese é afirmativa e nomeia o número, a condição ou a regra a apurar.
 - [ ] Há três formas de estar errada, cada uma com o que apurar.
 - [ ] Contrato tem 5 a 8 perguntas e nenhuma repete outra peça do cluster.
 - [ ] "O que recusa" tem ao menos um assunto vizinho.
@@ -136,9 +163,10 @@ que perdeu costuma ser outra planta, outra query ou outra candidata.
 
 ## Se travar
 
-- Tese não fecha porque a candidata era vaga: volte à candidata e
-  reenquadre a query, registrando na coluna corte da `_candidatas.md`
-  ("reenquadrada em <slug>"). Não invente tese para preencher.
+- Tese não fecha porque a candidata era vaga: reenquadre a query em um
+  acréscimo datado de `_candidatas.md`, apontando a rodada e a linha
+  original ("reenquadrada em <slug>"). Não altere a rodada antiga nem
+  invente tese para preencher.
 - `POSTURAS.md` está em branco: a única postura disponível é "quem leu a
   fonte e refez a conta". Escreva isso na pauta e avise o dono.
 - A pauta pede dado que só se obtém com dias de trabalho (ligar para

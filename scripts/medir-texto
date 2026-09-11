@@ -106,6 +106,7 @@ def main():
     titulo = fm.get("titulo", ""); desc = fm.get("descricao", "")
     m = re.search(r"\b" + re.escape(sem_acento(termos[0])) + r"\b", sem_acento(titulo.lower())) if termos else None
     pos = m.start() if m else -1
+    query_titulo = bool(termos) and 0 <= pos < 40 and all(tem(t, titulo.lower()) for t in termos)
 
     def ok(cond): return "ok " if cond else "REVER"
     print(f"medir-texto: {sys.argv[1]}")
@@ -119,8 +120,8 @@ def main():
     for f in mais45:
         print(f"        > {f[:120]}...")
     print("\nSEO on-page")
-    print(f"  {ok(len(titulo) < 60)}  título: {len(titulo)} caracteres  (régua: < 60)")
-    print(f"  {ok(0 <= pos < 40)}  query no título: posição {pos}  (régua: nos primeiros 40)" if termos else "        query não informada; passe como segundo argumento")
+    print(f"  {ok(bool(titulo.strip()) and len(titulo) < 60)}  título: {len(titulo)} caracteres  (régua: 1 a 59)")
+    print(f"  {ok(query_titulo)}  query no título: posição {pos}  (régua: termos presentes, primeiro nos primeiros 40)" if termos else "        query não informada; passe como segundo argumento")
     print(f"  {ok(150 <= len(desc) <= 160)}  description: {len(desc)} caracteres  (régua: 150 a 160)")
     print(f"  {ok(len(h2) >= 4)}  H2 antes de Fontes: {len(h2)}  (régua: >= 4, senão o sumário não nasce)")
     print(f"  {ok(3 <= faq <= 6)}  perguntas na FAQ: {faq}  (régua: 3 a 6)")

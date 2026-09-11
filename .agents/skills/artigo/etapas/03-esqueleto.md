@@ -1,5 +1,11 @@
 # Etapa 3 — Esqueleto
 
+Caminhos: `sites/`, `web/` e `scripts/` partem da raiz do checkout do
+chassi; `referencias/` parte de `.agents/skills/artigo/`. `base/`,
+`estado/`, `pautas/`, `pesquisa/` e `posts/` abreviados partem de
+`sites/<slug>/`. Rode scripts da raiz, com o caminho completo da peça.
+Site novo exige o par de cópias descrito em `sites/_modelo/README.md`.
+
 Decide a estrutura e fecha todos os números antes de existir prosa. O
 esqueleto lista os capítulos (H2), e para cada um a resposta em uma frase,
 os dados do dossiê que ela usa e o bloco que a apresenta. Depois de
@@ -18,6 +24,8 @@ Calcular e argumentar são atos separados. Aqui só se calcula.
   bloco, a condição e o orçamento por peça. É por ela que o campo `bloco:`
   se preenche.
 - `referencias/blocos.md` — só a tabela de blocos, para o nome da diretiva.
+- `sites/<slug>/estado/CLUSTER.md` e `web/src/sites/<slug>.ts` — status e
+  blocos disponíveis para esta peça.
 - Os outros `sites/<slug>/posts/*/esqueleto.md` — só a lista de H2 de cada
   um, para a regra 8.
 
@@ -45,11 +53,11 @@ no corpo; contagem: 156>
 ## Abertura (bloco 1)
 **cena:** uma frase, o momento em que o leitor está (da seção "O que o
 leitor diz").
-**problema:** uma frase, com número, até a segunda linha. É o que a peça
+**problema:** uma frase, com dado verificável, até a segunda linha. É o que a peça
 resolve.
 
 ## Conclusões (bloco 2)
-Três a cinco, autossuficientes, cada uma com número e ressalva:
+Três a cinco, autossuficientes, cada uma com dado verificável ou lacuna e ressalva:
 - Ligado 8 h por noite, o split de 9.000 BTU inverter custa **R$ 24 a
   R$ 37 por mês** (D1 × D2), em SP, setembro de 2026, bandeira verde.
 - ...
@@ -60,7 +68,7 @@ Três a cinco, autossuficientes, cada uma com número e ressalva:
 uma noite, em kWh">
 **pergunta do contrato:** 1
 **resposta:** uma frase de 25 a 45 palavras que responde sozinha, com
-número, data e origem, e sobrevive extraída da página.
+dado verificável, data e origem, e sobrevive extraída da página.
 **dados:** D2, D5
 **conta:** 0,75 kW × 8 h × 0,15 a 0,23 = 0,9 a 1,4 kWh (refeita aqui)
 **depende de:** temperatura configurada, isolamento (declarar)
@@ -102,8 +110,10 @@ Conferência inversa: ...
    consome em uma noite, em kWh" é H2. Nunca todos em forma de pergunta;
    nunca um fragmento que o primeiro parágrafo repete.
 3. **A resposta de cada capítulo é uma frase que sobrevive sozinha.** Com
-   número, data e origem. É ela que um resumo automático de busca vai
-   citar, e é por isso que ela leva o dado que ele não tem.
+   dado verificável, data e origem; número quando a pergunta é
+   quantitativa. Pergunta sobre lacuna declara `[SEM DADO]` e seu limite,
+   sem inventar número para caber no gabarito. A frase deve preservar seu
+   sentido mesmo citada fora da página.
 4. **Todo número aponta um D, e leva a marca dele.** Número sem D no
    esqueleto é número que não existe. Em `resposta:`, `conta:` e nas
    conclusões, o número que não é `[FONTE]` carrega a marca
@@ -137,14 +147,36 @@ Conferência inversa: ...
 10. **A description é auditável.** Cita um número ou um método que existe
    no corpo. "Descubra tudo sobre" não é description.
 11. **Conclusões são o que o leitor levaria se lesse só a caixa.** Cada
-    uma com número e a ressalva que o corpo faz; ressalva que evapora na
-    caixa é mentira por omissão.
+    uma com o dado (número, condição ou regra) e a ressalva do corpo;
+    ressalva que evapora na caixa é mentira por omissão. Não invente
+    numeral para conclusão sobre procedimento ou ausência de dado.
 
 O que **não** congela: `minutos` (é contagem de palavras da costura),
 `publicado` e `atualizado` (são da entrega). Tudo o mais que tem número
 congela.
 
 ## Congelar
+
+Resultado calculado que vai aparecer no texto também ganha um D no
+dossiê antes de congelar. Acrescente sem alterar os dados de entrada:
+
+```markdown
+### D<n> — <resultado calculado, com unidade>
+**valor:** <resultado exato ou faixa>
+**marca:** [FONTE] (cálculo exato sobre D1 e D2; não é medição)
+**fonte:** D1 e D2 — <URLs já abertas>
+**consultado em:** <datas de coleta de D1 e D2>
+**calculado em:** <data da conferência>
+**frases literais de origem:** ver os trechos de D1 e D2
+**conta:** <expressão completa com unidades e resultado>
+**o que este dado NÃO diz:** <limites herdados das entradas>
+```
+
+Se usa estimativa, mantenha `[ESTIMATIVA]`; se usa um valor de exemplo,
+mantenha `[PREMISSA]` e o cenário explícito, nunca `[FONTE]`. Fonte e frase
+do resultado apontam para as entradas: não invente uma citação dizendo
+que a página fez a nossa conta. O esqueleto referencia esse D e refaz a
+conta como conferência, incluindo a inversa quando aplicável.
 
 Quando a checagem abaixo passa inteira, troque `estado: RASCUNHO` por
 `estado: CONGELADO` e a data. A partir daí ninguém muda número aqui sem
@@ -157,15 +189,27 @@ no fim do SKILL.md): feito, decidido (com a alternativa que perdeu),
 descartado, adiado, travou em, tempo. Registre a pergunta do contrato que virou H3 ou saiu, e o bloco
 considerado e não usado.
 
+Gabarito desta entrada (acrescente ao diário; não substitua entradas):
+
+```markdown
+## <data> · etapa 3 · esqueleto
+**feito:** <arquivos e resultado>
+**decidido:** <escolha, critério e alternativa que perdeu>
+**descartado:** <item e motivo, ou nada>
+**adiado:** <item e destino/condição, ou nada>
+**travou em:** <obstáculo e encaminhamento, ou nada>
+**tempo:** <duração medida, estimativa declarada ou não medido>
+```
+
 ## Checagem antes de fechar
 
-- [ ] Entrada desta etapa no `diario.md`, com os cinco campos.
+- [ ] Entrada desta etapa no `diario.md`, com os seis campos.
 - [ ] 4 a 8 capítulos, cada um com pergunta do contrato, resposta em uma
       frase, dados (D), bloco e "não entra".
 - [ ] Toda conta está em "Contas refeitas", em ordem de dependência, com
       unidade, e a conferência inversa bate.
 - [ ] Nenhum número no esqueleto sem D; nenhum D `[SNIPPET]`.
-- [ ] Toda conclusão tem número e ressalva.
+- [ ] Toda conclusão tem dado verificável ou lacuna explícita e ressalva.
 - [ ] Título escolhido tem menos de 60 caracteres e a query nos primeiros
       40; description tem 150 a 160.
 - [ ] Lista de H2 não coincide com a de outro esqueleto do site.

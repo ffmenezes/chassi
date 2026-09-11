@@ -128,8 +128,10 @@ Regras próprias desta planta:
   pessoa nomeada que autorizou; o registro fica em `pesquisa/<peça>/` e
   o dossiê aponta para ele. Sem registro, a candidata não passa da etapa
   0 (qualificador `experiência própria` exige prova).
-- **Resultado negativo é obrigatório.** O capítulo 4 não pode ficar
-  vazio; se nada deu errado, o relato não durou o suficiente.
+- **Resultado verdadeiro é obrigatório.** O capítulo 4 registra falhas e
+  tentativas reais. Se nenhuma falha foi observada, diga isso junto do
+  período, das condições e dos limites do registro. Nunca invente
+  dificuldade para preencher a planta, nem conclua que falha é impossível.
 - **A postura é fixa: quem fez.** `POSTURAS.md` precisa ter essa postura;
   site que não a tem não publica relato.
 - **Número medido entra exato, com data e instrumento.** Faixa é para

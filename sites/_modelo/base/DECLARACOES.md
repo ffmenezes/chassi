@@ -14,9 +14,10 @@
    termos?
 4. O que muda na declaração quando o artigo é sobre a própria marca ou
    produto da casa?
-5. Qual é a frase exata da declaração de IA que vai na seção "Como esta
-   peça foi feita" de toda peça: o que a IA fez (rascunho, revisão) e o
-   que ela não decidiu (fonte, número, lacuna)?
+5. Como a declaração na seção "Como esta peça foi feita" registra os
+   papéis reais em cada artigo: quem pesquisou, escolheu fontes, conferiu
+   números, redigiu e revisou? Se essas ações foram feitas por IA, como
+   isso fica explícito? Que conferência humana ocorreu, ou ainda falta?
 6. Qual é a frase exata do aviso de afiliado, e ela diz que o preço para o
    leitor não muda? Vale para link no corpo e para link em tabela?
 7. Quando a peça usa uma premissa de exemplo no lugar de um dado (a

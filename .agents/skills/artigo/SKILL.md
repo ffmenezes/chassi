@@ -1,17 +1,20 @@
 ---
 name: artigo
-description: Use quando o dono quiser produzir artigo para um site em `sites/<slug>/` — "gera ideias pro site", "fecha a pauta de X", "escreve o artigo sobre Y", "revisa o rascunho", "o que dá pra publicar essa semana". Conduz em oito etapas com estado em disco (ideias, pauta, dossiê, esqueleto, capítulos, costura, revisão, entrega), cada uma executável sozinha por um modelo pequeno. Nunca inventa número, nunca inventa link interno, nunca publica sem um dado próprio.
+description: Produz artigos para um site configurado na pasta sites do chassi, da geração de candidatas até a entrega revisada. Oito etapas com estado em disco, executáveis separadamente por modelo pequeno, com apuração rastreável e dado próprio. Use para ideias, pauta, redação ou revisão; não publica a página nem decide links de afiliado pelo dono.
 ---
 
 # Produzir um artigo
 
 Um artigo aqui é uma peça que ganha uma busca real com um dado que a
 página do concorrente não tem. O método existe para que isso saia **3 a 5
-vezes por semana sem virar fábrica de texto igual**: o Google derruba site
-inteiro por padrão de produção (volume, template repetido, zero valor
-próprio), não por "ter usado IA". A defesa é a mesma coisa que faz o artigo
-valer: um dado apurado por peça, autor real assinando, estrutura que a
-pauta pede e não a que o molde deu.
+vezes por semana sem virar fábrica de texto igual**. A política do Google
+trata como abuso produzir páginas em escala para manipular rankings sem
+ajudar o leitor, independentemente de serem feitas por IA ou por gente.
+Por decisão editorial, o chassi exige dado apurado por peça, autor real e
+estrutura que responda à pauta. Volume fora da capacidade de apurar e H2
+que só trocam o substantivo são sinais para revisão, não limites oficiais
+de publicação nem diagnóstico automático de penalização. Fontes e limites:
+`referencias/fundamentos.md`.
 
 **A regra que sustenta tudo: nenhum número entra no texto sem um bloco no
 dossiê com fonte e data.** Quem escreve o capítulo não apura; quem apura
@@ -23,6 +26,10 @@ disco, nunca na conversa.
 
 1. Descubra o site: `ls sites/` menos `_modelo`. Se houver mais de um e o
    pedido não disser qual, pergunte.
+   Se o pedido é criar um site de ensaio ou novo, siga primeiro
+   `sites/_modelo/README.md`: copie a pasta e o par
+   `web/src/sites/exemplo.ts`, com o mesmo slug nos dois destinos, sem
+   sobrescrever site existente. Não responda stubs dentro de `_modelo`.
 2. Abra `sites/<slug>/base/TERRITORIO.md` e `base/LEITOR.md`. Se qualquer
    um ainda tiver as perguntas do stub visíveis, **pare**: sem território e
    leitor não existe pauta, só tema. Diga ao dono qual arquivo falta.
@@ -62,6 +69,10 @@ Sem nenhuma peça em andamento e sem pedido específico, rode
 `etapas/00-ideias.md`.
 
 ## As oito etapas
+
+Nos arquivos das etapas, `referencias/` é relativo a esta skill. Caminhos
+`sites/`, `web/` e `scripts/` são relativos à raiz do checkout, nunca à
+pasta da peça. As abreviações `base/` e `estado/` são do site escolhido.
 
 | # | Etapa | Lê | Escreve |
 |---|---|---|---|
@@ -141,9 +152,10 @@ a próxima etapa lê, e é o arquivo que permite parar e retomar.
   em que a experiência própria é a peça inteira.
 - Antes de abrir peça nova, a pergunta é "tem peça publicada com dado
   vencido?". Atualizar o que existe vem antes de publicar mais.
-- Volume acompanha o histórico do domínio: site novo publica dezenas por
-  mês, não centenas. Se a fila de candidatas passa de 30, o problema não é
-  falta de ideia.
+- Volume acompanha a capacidade de apurar, revisar e manter o publicado.
+  A meta de 3 a 5 por semana é editorial, não um limite do Google. Os
+  ensaios validam execução do método; ainda não provam essa cadência em
+  operação nem resultado de busca. Fila acima de 30 pede priorização.
 
 ## O que sai de cada peça, e onde
 
@@ -225,9 +237,10 @@ de 2026. Estão aqui para não se repetir.
 - **Espécime externo com todo número inventado tinha página melhor** (caixa
   de conclusões, panorama, FAQ). Virou a regra do slot: bloco só nasce se
   todo campo dele sai de número congelado.
-- **Site 100% IA derrubado na atualização de spam de agosto de 2026**, e o
-  dono atribuiu ao volume, não à IA; um pipeline 100% IA subiu na mesma
-  semana. Virou a seção de ritmo e a regra 8.
+- **Relatos de operadores sobre quedas e altas em agosto de 2026**
+  motivaram a seção de ritmo e a regra 8. São hipóteses dos operadores,
+  não demonstrações da causa de queda; a política oficial e o evento
+  confirmado estão separados desses testemunhos em `referencias/fundamentos.md`.
 - **Na validação desta skill (10/09/2026, dois sites de teste)**: o capítulo
   saiu com 25 travessões porque a etapa 4 não dizia nada e a 6 pagou a
   conta (virou regra de forma na etapa 4); a declaração de IA que
