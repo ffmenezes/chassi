@@ -33,7 +33,7 @@ import type { Site, BlocoId } from "./tipos";
  *                     lista não existe na página, e a recíproca também vale:
  *                     declarar sem ter roteiro de slot é declaração inerte.
  */
-const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, 26, 29, "A1", "A2", "A3"];
+const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 31, 6, 7, 8, 9, 10, 19, 20, 21, 22, 26, 29, "A1", "A2", "A3"];
 
 /**
  * Navegação (N1–N5) é chrome de site, não conteúdo de artigo — por isso nunca

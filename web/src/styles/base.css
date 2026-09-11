@@ -154,6 +154,18 @@ ul[class], ol[class] { list-style: none; margin: 0; padding: 0; }
   --b-lista-vao: 7px;
   /* dois níveis é o teto (ver `atomos.css`): só o segundo nível tem recuo próprio */
   --b-lista-recuo-aninhado: 1.2em;
+
+  /* O GRÁFICO (bloco 31) — quatro cores de série e a cor da grade, todas
+     derivadas: nenhum estilo precisa declará-las para o gráfico acompanhar o
+     modo. A ordem é a de contraste sobre a superfície: acento, tinta, tinta
+     secundária, acento forte. Cor nunca é o único sinal — cada série leva
+     hachura própria no componente —, então quatro é o teto, não uma paleta.
+     Estilo que quiser cores próprias redefine só estes cinco. */
+  --b-grafico-1: var(--b-acento-tinta);
+  --b-grafico-2: var(--b-tinta);
+  --b-grafico-3: var(--b-tinta-2);
+  --b-grafico-4: var(--b-acento-forte);
+  --b-grafico-grade: var(--b-linha);
 }
 
 /* A superfície do estilo. Fundo explícito sempre: superfície transparente
