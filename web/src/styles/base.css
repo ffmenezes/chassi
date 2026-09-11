@@ -48,7 +48,12 @@ select { font: inherit; color: inherit; }
 
 h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
 
-ul[class], ol[class] { list-style: none; margin: 0; padding: 0; }
+/* `:where()` zera a especificidade, e não é detalhe: `ul[class]` pesa (0,1,1)
+   e ganhava de `.b-lista` (0,1,0), que é classe só. A lista do contrato (A2)
+   saía sem marcador e sem recuo em TODO estilo, com os tokens de lista
+   declarados e ignorados. Agora qualquer classe que fale de lista vence o
+   reset, e lista com classe que não fala continua zerada. */
+:where(ul[class], ol[class]) { list-style: none; margin: 0; padding: 0; }
 
 /* `hidden` é declaração de intenção do autor do markup — nenhuma regra de
    apresentação deveria poder contradizê-la. Sem o `!important` aqui,
