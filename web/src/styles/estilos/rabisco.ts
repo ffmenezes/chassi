@@ -5,6 +5,7 @@
  */
 import "./rabisco.css";
 import type { MetaEstilo } from "./index";
+import patrickHandLatino from "./fontes/patrick-hand/latin.woff2?url";
 
 const meta: MetaEstilo = {
   nome: "Rabisco",
@@ -14,5 +15,7 @@ const meta: MetaEstilo = {
   acento: "#1018ad",
   origem:
     "Tokens medidos no CSS publicado de rabisco.net (Distrito Rabisco): caneta esferográfica em caderno pautado. Letra Patrick Hand (OFL), auto-hospedada. O modo escuro é derivação declarada, do mapa NIGHT do jogo.",
+  /* só o recorte latino: é o que todo texto em português usa */
+  fontes: [patrickHandLatino],
 };
 export default meta;

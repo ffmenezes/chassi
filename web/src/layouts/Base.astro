@@ -1,7 +1,7 @@
 ---
 /** Casca mínima. Só o que toda página precisa. */
 import "../styles/base.css";
-import "../styles/estilos/index";
+import { ESTILOS } from "../styles/estilos/index";
 import "../styles/atomos.css";
 import Analytics from "../components/Analytics.astro";
 import BarraAviso from "../components/BarraAviso.astro";
@@ -31,11 +31,21 @@ interface Props {
    * Um valor, duas renderizações. Padrão: o próprio `titulo`.
    */
   tituloSocial?: string;
+  /**
+   * O estilo que a página pinta, para o `preload` das fontes dele. Padrão:
+   * o do `site`. A vitrine de estilo passa o seu, porque não tem `site`.
+   */
+  estilo?: string;
 }
 const {
   titulo, descricao, lang = LANG_HTML, noindex = false, site,
   tipo = "website", imagemCard = "/social/padrao.png", tituloSocial = titulo,
+  estilo = site?.estilo,
 } = Astro.props;
+
+/* As fontes do estilo, pedidas junto com o HTML e não depois do CSS. Estilo
+   que usa fonte do sistema não declara nada, e aqui não sai tag nenhuma. */
+const fontes = (estilo && ESTILOS[estilo]?.fontes) || [];
 
 /* A DECISÃO — se esta página se anuncia, e com o quê — mora em
    `social/tags.ts`, onde um teste consegue fixá-la. Aqui só se mapeia dado
@@ -69,6 +79,12 @@ const iconeEmoji = (e: string) =>
       `is:inline` para o Astro não processar nem mover este bloco.
     */}
     <style is:inline>@layer contrato, estilo, modo, site;</style>
+    {/* `crossorigin` é obrigatório mesmo na mesma origem: fonte é sempre pedida
+        em modo CORS, e o preload sem ele não casa com o pedido do CSS — a fonte
+        baixaria duas vezes. */}
+    {fontes.map((href) => (
+      <link rel="preload" as="font" type="font/woff2" href={href} crossorigin />
+    ))}
     <title>{titulo}</title>
     {descricao && <meta name="description" content={descricao} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
