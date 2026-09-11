@@ -11,10 +11,10 @@
       botão forte, página atual, grifo sob o H2. Nunca é texto.
    3. A caneta vermelha é a do professor: margem do caderno,
       link, foco circulado. É o único vermelho da folha.
-   4. Nada é reto. Canto com quatro raios diferentes, card
-      levemente torto, contorno passado duas vezes (a folha de
-      trás, que é a sombra). Tudo isso sai de token — nenhum
-      seletor aqui entra num bloco.
+   4. Papel, e não relevo. Canto com quatro raios diferentes,
+      sombra de papel apoiado (nada de sombra dura deslocada), e
+      o que é anotação vira post-it torto preso com fita crepe.
+      Tudo isso sai de token — nenhum seletor aqui entra num bloco.
 
    O escuro é derivação declarada: a referência não tem modo
    escuro. Ele sai do mapa NIGHT do próprio jogo — folha azul-noite,
@@ -72,21 +72,32 @@
      nenhum canto repete. É o `border-radius` dos cartões da referência. */
   --b-radius: 6px 10px 5px 8px / 8px 5px 10px 6px;
   --b-borda: 1.5px solid var(--b-linha-forte);
-  /* A FOLHA DE TRÁS. A primeira sombra, na cor da superfície e encolhida de
-     1,5px, tapa o miolo da segunda, na cor da tinta: sobra só o contorno de
-     um retângulo deslocado. Sombra externa nunca pinta dentro da caixa, então
-     o que aparece é a borda de uma folha atrás desta — o contorno passado
-     duas vezes da referência, sem pseudo-elemento em bloco nenhum. */
-  --b-sombra: 3px 4px 0 -1.5px var(--b-superficie), 3px 4px 0 0 var(--b-sombra-cor);
-  --b-sombra-hover: 5px 6px 0 -1.5px var(--b-superficie), 5px 6px 0 0 var(--b-sombra-cor);
+  /* PAPEL, e não relevo. A primeira versão desenhava a "folha de trás" com
+     sombra dura deslocada, e o dono leu como neobrutalismo — que é o que ela
+     era. Agora a sombra é a de papel apoiado: um fio de 1px colado na borda e
+     uma penumbra curta embaixo, com espalhamento negativo para não vazar dos
+     lados. É a sombra que a referência dá ao que está COLADO na folha (a fita
+     e os recortes têm desfoque de 2–3px); desenho, lá, não tem sombra. */
+  --b-sombra: 0 1px 1px var(--b-sombra-cor), 0 5px 10px -6px var(--b-sombra-cor);
+  --b-sombra-hover: 0 1px 1px var(--b-sombra-cor), 0 12px 18px -10px var(--b-sombra-cor);
   /* o hover da referência sobe e entorta: `translateY(-3px) rotate(-1.4deg)`
      no botão grande. Aqui menos, porque o card de artigo é maior. */
-  --b-lift: translate(-1px, -2px) rotate(-.6deg);
+  --b-lift: translateY(-2px) rotate(-.5deg);
 
-  /* nada é reto: ímpar para um lado, par para o outro, como os mapas
-     empilhados da referência (-0,45° e 0,35°) */
-  --b-giro: -.4deg;
-  --b-giro-par: .3deg;
+  /* nada é reto, mas só no que está SOLTO na folha: a nota e a figura. O card
+     genérico fica reto (ver `base.css`: girado, ele saía cortado dentro de
+     slides e carrossel). Ímpar para um lado, par para o outro. */
+  --b-giro: -.7deg;
+  --b-giro-par: .5deg;
+
+  /* O POST-IT. A nota perde o contorno de tinta (post-it não tem borda), ganha
+     o canto de baixo levantado — raio largo na horizontal e curto na vertical,
+     a receita clássica de papel descolando — e a sombra puxada para esse
+     canto, que é onde o papel sai da folha. A fita crepe prende em cima. */
+  --b-nota-borda: 0 solid transparent;
+  --b-nota-radius: 2px 3px 60px 2px / 2px 3px 7px 2px;
+  --b-nota-sombra: 0 1px 1px var(--b-sombra-cor), 4px 10px 12px -9px var(--b-sombra-nota);
+  --b-nota-fita: "";
 
   /* o risco de marca-texto sob o H2. Sublinhado grosso com recuo NEGATIVO:
      sobe para trás da metade de baixo das letras, que é onde o marca-texto
@@ -169,7 +180,8 @@
   /* 3,36:1 sobre a folha: é a borda de campo de formulário, e peça de
      interface precisa de 3:1 */
   --b-linha-forte: rgba(38, 62, 142, .62);
-  --b-sombra-cor: rgba(38, 62, 142, .5);
+  --b-sombra-cor: rgba(38, 50, 110, .22);
+  --b-sombra-nota: rgba(60, 50, 10, .55);
   --b-acento: #ffcf23;
   --b-acento-forte: #f6b807;
   --b-acento-brilho: #ffe987;
@@ -188,6 +200,13 @@
   --b-grafico-3: #2f8a3a;
   --b-grafico-4: #b05e00;
 
+  /* o post-it amarelo. Tudo que é texto passa em cima dele: tinta 10,6:1,
+     corpo 8,61:1, tinta-2 5,18:1, caneta vermelha 5,48:1, erro 6,98:1. O
+     marcador de dentro vira caneta azul, porque amarelo sobre amarelo some. */
+  --b-nota-fundo: #fff3a6;
+  --b-nota-acento: #1018ad;
+  --b-nota-fita-cor: rgba(225, 214, 189, .88);
+
   --b-pauta-cor: rgba(73, 106, 187, .09);
   --b-margem-cor: rgba(190, 58, 60, .45);
   --b-papel-fibra: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .3  0 0 0 0 .2  .28 0 0 0 -.1'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
@@ -205,7 +224,9 @@
   --b-tinta-2: #a9aed0;
   --b-linha: rgba(246, 241, 216, .16);
   --b-linha-forte: rgba(246, 241, 216, .55);
-  --b-sombra-cor: rgba(246, 241, 216, .38);
+  /* no escuro a sombra é preta: sombra clara em papel escuro lê como brilho */
+  --b-sombra-cor: rgba(0, 0, 0, .45);
+  --b-sombra-nota: rgba(0, 0, 0, .7);
   /* o marca-texto não muda de cor: no mapa NIGHT o amarelo é a lua e a
      janela acesa, e continua amarelo */
   --b-acento: #ffcf23;
@@ -221,6 +242,14 @@
   --b-grafico-2: #ff8f7a;
   --b-grafico-3: #7fd48a;
   --b-grafico-4: #ffcf23;
+
+  /* o post-it à meia-luz: o mesmo amarelo com a luz apagada, e não amarelo
+     aceso — amarelo cheio numa página escura ofusca, e obrigaria a trocar a
+     tinta de tudo dentro dele. Texto em cima: tinta 10,83:1, corpo 9,01:1,
+     tinta-2 5,65:1, coral 5,54:1, erro 6,10:1. */
+  --b-nota-fundo: #3b3517;
+  --b-nota-acento: #ffcf23;
+  --b-nota-fita-cor: rgba(225, 214, 189, .5);
 
   --b-pauta-cor: rgba(150, 170, 255, .1);
   --b-margem-cor: rgba(255, 120, 120, .35);

@@ -1,8 +1,9 @@
 # Rabisco — DESIGN.md
 
 Caneta esferográfica azul em caderno pautado, com marca-texto amarelo e a
-caneta vermelha do professor. Scrapbook por cima: folha colada, contorno
-passado duas vezes, nada perfeitamente reto.
+caneta vermelha do professor. Scrapbook por cima: o que é anotação vira
+post-it preso com fita crepe, e nada do que está solto fica perfeitamente
+reto.
 
 - **Referência:** rabisco.net (Distrito Rabisco, jogo de tiro em primeira
   pessoa desenhado como rabisco de caderno). Todo valor abaixo foi medido no
@@ -26,8 +27,12 @@ embaixo do título. O vermelho é raro e tem dono: a margem do caderno e a
 correção.
 
 A imperfeição é **medida**, não aleatória: cantos com quatro raios diferentes,
-giros de meio grau, contorno repetido deslocado alguns pixels. Passou de 1,5°
-vira bagunça; abaixo de 0,3° ninguém vê.
+giros de meio grau no que está solto. Passou de 1,5° vira bagunça; abaixo de
+0,3° ninguém vê.
+
+É **papel, e não relevo**. A primeira versão desenhava uma "folha de trás"
+com sombra dura deslocada e leu como neobrutalismo. A profundidade aqui é a
+de papel apoiado ou colado, com penumbra macia.
 
 ## 2. Paleta e papéis
 
@@ -135,51 +140,81 @@ Cada técnica da referência, e onde ela mora no chassi.
 | Técnica na referência | Como é lá | No chassi |
 |---|---|---|
 | Canto torto | `border-radius: 5px 8px 3px 6px` e variações | `--b-radius: 6px 10px 5px 8px / 8px 5px 10px 6px` |
-| Contorno passado duas vezes | `::before` com segunda borda deslocada e girada 1° | **aproximado** por `--b-sombra`: sombra na cor da superfície, encolhida 1,5px, sobre sombra na cor da tinta. Sobra o contorno de uma "folha de trás" |
-| Nada é reto | `rotate(-.45deg)` / `rotate(.35deg)` alternados | `--b-giro: -.4deg`, `--b-giro-par: .3deg` (token novo) |
-| Hover que sobe e entorta | `translateY(-3px) rotate(-1.4deg)` | `--b-lift: translate(-1px,-2px) rotate(-.6deg)` |
-| Marca-texto hachurado | `repeating-linear-gradient(137deg, …)` em 3 amarelos | `--b-acento-preenchimento` (token novo) |
-| Risco sob o título | `::after` hachurado de 7px, girado -2° | `--b-titulo-grifo`: sublinhado de .34em com recuo -.2em (token novo) |
-| Foco circulado | `outline: 3px dashed #b82030` | `--b-foco-traco: dashed` (token novo), cor de `--b-acento-tinta` |
-| Sombra chapada | `3px 3px 0 var(--ink)`, sem desfoque | idem, dentro de `--b-sombra` |
+| Sombra de coisa colada | fita e recortes com `1px 2px 3px` e `drop-shadow(1px 3px 2px)` | `--b-sombra`: fio de 1px mais penumbra curta com espalhamento negativo |
+| Fita crepe | `clip-path` serrilhado, girada -23° e -48° | `::before` do `.b-nota`, ligado por `--b-nota-fita`, cor em `--b-nota-fita-cor` |
+| Nada é reto | `rotate(-.45deg)` / `rotate(.35deg)` alternados | `--b-giro: -.7deg`, `--b-giro-par: .5deg`, **só no post-it e na figura** |
+| Hover que sobe e entorta | `translateY(-3px) rotate(-1.4deg)` | `--b-lift: translateY(-2px) rotate(-.5deg)` |
+| Marca-texto hachurado | `repeating-linear-gradient(137deg, …)` em 3 amarelos | `--b-acento-preenchimento` |
+| Risco sob o título | `::after` hachurado de 7px, girado -2° | `--b-titulo-grifo`: sublinhado de .34em com recuo -.2em |
+| Foco circulado | `outline: 3px dashed #b82030` | `--b-foco-traco: dashed`, cor de `--b-acento-tinta` |
 | Papel pautado | gradiente de 28px + margem vermelha | `--b-aurora` no contêiner do estilo |
 | Fibra do papel | `paper-fiber.webp`, 256×28 | ruído SVG (`feTurbulence`) em `data:`, uma cor por modo |
 | Traço trêmulo | desenho feito à mão | `--b-grafico-tremor`: deslocamento SVG no gráfico (bloco 31) |
 | Seleção de texto | — | `::selection` em marca-texto (acréscimo nosso) |
 | Lista | — | travessão (`"– "`) e numeração `1)` via `@counter-style` |
 
+### O post-it
+
+O que é **anotação colada** na página, e não moldura de conteúdo, vira
+post-it: Caixa de conclusões (02), Aviso (21) e Card de rede social (14).
+No markup é `.b-card.b-nota`; o `.b-nota` lê `--b-nota-*`, que em todo outro
+estilo nasce igual ao card.
+
+| Traço | Valor |
+|---|---|
+| Papel | `#fff3a6` no claro; `#3b3517` no escuro (o mesmo amarelo com a luz apagada) |
+| Contorno | nenhum: post-it não tem borda |
+| Canto levantado | `2px 3px 60px 2px / 2px 3px 7px 2px`: raio largo e baixo embaixo à direita |
+| Sombra | `0 1px 1px` mais `4px 10px 12px -9px`, puxada para o canto que levanta |
+| Fita | crepe `rgba(225,214,189,.88)`, 86×24px, girada -3°, bordas serrilhadas |
+| Marcador de dentro | caneta azul no claro, amarelo no escuro (`--b-nota-acento`) |
+| Giro | -0,7° e 0,5° alternados |
+
+Todo texto que cai no post-it passa de 4,5:1 nos dois modos (tinta 10,6 e
+10,83; tinta-2 5,18 e 5,65; caneta vermelha 5,48 e 5,54; erro 6,98 e 6,10).
+
+**Por que o card genérico não gira:** foi medido. Card também mora dentro de
+palco que corta (slides, carrossel), e o canto girado saía comido em 0,7 a
+1,7px pelo `overflow`. O post-it e a figura são peças soltas na folha e giram
+sem perigo.
+
 ### O que a referência tem e o chassi não reproduz
 
-- **Fita crepe** (`clip-path` serrilhado, textura em `multiply`, girada -23° e
-  -48°) e **papel rasgado** (`clip-path` de 46 pontos). Exigem
-  pseudo-elemento dentro do bloco; estilo não escreve seletor em bloco.
+- **Papel rasgado** (`clip-path` de 46 pontos na legenda do mapa). Exigiria
+  pseudo-elemento em bloco específico.
 - **Ilustração recortada com `mix-blend-mode: multiply`**, que faz o branco
   da imagem sumir no papel. Precisaria de token na figura; fica para quando
   houver imagem própria do participante.
 - **Animação ociosa** (personagens balançando, painel entrando em
   `steps(4)`, como stop-motion). Blog não tem personagem.
-- **Contorno duplo girado de verdade.** A sombra dá a folha de trás, mas não
-  gira independente da peça.
+- **Contorno passado duas vezes.** A primeira versão o aproximava com sombra
+  dura deslocada ("folha de trás") e foi retirada: lia como neobrutalismo.
 
 ## 5. Profundidade
 
-Não há desfoque em lugar nenhum. Profundidade é **folha sobre folha**:
+Papel, e não relevo. Desenho não tem sombra; o que está **apoiado ou colado**
+na folha tem penumbra curta e macia:
 
-- repouso: `3px 4px 0 -1.5px superfície, 3px 4px 0 0 tinta a 50%`
-- hover: a folha de trás se afasta para `5px 6px`, e a peça sobe e entorta
+- card e botão: `0 1px 1px`, `0 5px 10px -6px`, na cor da tinta a 22%
+- hover: a penumbra desce para `0 12px 18px -10px`, e a peça sobe e entorta
+- post-it: a sombra puxa para o canto que levanta
+- no escuro, a sombra é preta: sombra clara em papel escuro lê como brilho
 
 ## 6. Faça e não faça
 
 **Faça**
 - Mantenha tudo em azul. Preto quebra o caderno.
-- Use o amarelo só como preenchimento (botão, página atual, grifo, seleção).
-- Mantenha giros entre 0,3° e 0,6°. Ímpar para um lado, par para o outro.
+- Use o amarelo só como preenchimento (botão, página atual, grifo, seleção,
+  post-it).
+- Gire só o que está solto (post-it, figura), entre 0,3° e 1°. Ímpar para um
+  lado, par para o outro.
 - Deixe a pauta quase invisível (9% de opacidade). Ela é textura, não grade.
 
 **Não faça**
 - Amarelo como cor de texto: sai a 1,3:1 sobre o papel.
 - Vermelho como decoração: ele é margem, link, foco e erro, e só.
-- Giro acima de 1,5° ou em tabela e código: tira a leitura.
+- Sombra dura deslocada: vira neobrutalismo, que é outro estilo.
+- Girar card que mora dentro de palco com `overflow`: o canto sai cortado.
 - Caveat em texto pequeno: abaixo de 16px ela vira rabisco de verdade.
 
 ## 7. Guia para agente
@@ -189,8 +224,10 @@ Não há desfoque em lugar nenhum. Profundidade é **folha sobre folha**:
 > (`#1018ad` título, `#263e8e` corpo) na letra Patrick Hand. Marca-texto
 > `#ffcf23` hachurado a 137° só em botão, item selecionado e grifo de título.
 > Caneta vermelha `#b3303a` para link e foco tracejado. Cantos com quatro
-> raios diferentes, peças giradas ±0,4°, sombra sem desfoque desenhando o
-> contorno de uma folha atrás. Nada de preto, nada de blur, nada reto.
+> raios diferentes e sombra macia de papel apoiado, nunca sombra dura.
+> Anotação (conclusões, aviso, card social) é post-it amarelo `#fff3a6`, sem
+> borda, canto de baixo levantado, fita crepe em cima e giro de -0,7°.
+> Nada de preto, nada de relevo neobrutal.
 
 ## 8. Limites conhecidos
 
@@ -200,5 +237,8 @@ Não há desfoque em lugar nenhum. Profundidade é **folha sobre folha**:
   esse rodapé quase ilegível no card claro.
 - **Diagrama com `fill: var(--b-acento)`:** a barra amarela fica a 1,3:1 do
   papel. Diagrama próprio deve usar as cores de `--b-grafico-*`.
+- **Avatar do card de rede social:** é um círculo decorativo em
+  `--b-acento-fraco`, e sobre o post-it amarelo ele quase some. Não carrega
+  informação (`aria-hidden`), então ficou assim.
 - **Filtro SVG externo** (`--b-grafico-tremor`) não aplica no Safari; o
   gráfico sai reto, como em qualquer estilo sem o token.
