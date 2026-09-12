@@ -1,7 +1,8 @@
 # chassi
 
-Esqueleto de blog de nicho: Astro estático, 30 blocos, 5 estilos, páginas
-institucionais. Escrito em português — doutrina, comentários, nomes de arquivo
+Esqueleto de blog de nicho: Astro estático, 32 blocos, 7 estilos, páginas
+institucionais, e o método de artigo em skills (`artigo`, `pitaco`). Escrito
+em português — doutrina, comentários, nomes de arquivo
 e de variável. Mantenha assim.
 
 ## A fronteira
@@ -37,6 +38,8 @@ CLAUDE.md               → symlink →    AGENTS.md
 .agents/skills/atualizar-template/     arquivos reais
 .agents/skills/artigo/                 o método de artigo: oito etapas, estado em sites/<slug>/
 .agents/skills/pitaco/                 o toque do autor numa peça pronta, sem mexer em número
+.agents/skills/novo-estilo/            DESIGN.md ou prosa vira o par <nome>.css + <nome>.ts
+.agents/skills/criar-componente/       bloco novo no catálogo, ou chrome de site
 .claude/skills          → symlink →    ../.agents/skills
 LICENSE                                MIT
 README.md
@@ -61,8 +64,8 @@ sites/_modelo/{base,estado,pautas,pesquisa,posts}/
 ```
 
 `sites/_modelo/base/*.md` não nasce vazio nem preenchido: cada arquivo é o
-roteiro de perguntas que ele responde. É o que substitui uma skill de conteúdo
-neste repositório público.
+roteiro de perguntas que ele responde. Respondido na cópia `sites/<slug>/`, é
+de lá que a skill `artigo` lê território, leitor, tom, autor e provas.
 
 ## As três camadas de token
 
@@ -107,6 +110,12 @@ componente conhece cor, fonte ou medida literal.
   diferente das categorias, valor que não é número, mais de 12 categorias
   ou 4 séries, linha com menos de 3 pontos, pizza com mais de uma série,
   mais de 6 fatias, lacuna ou negativo. As travas estão em `web/src/grafico.ts`.
+- **Vídeo (bloco 32)** — sem título, sem legenda, legenda igual ao título, sem
+  duração. YouTube: id que não é de vídeo (link de canal, playlist ou busca
+  não serve; vale o id de 11 caracteres ou `youtu.be`, `watch?v=`, `embed/`,
+  `shorts/`). Arquivo: sem `src`, `src` de YouTube ou Vimeo (página não é
+  arquivo), `src` sem extensão de vídeo, `largura` sem `altura` ou vice-versa,
+  medida que não é número positivo. As travas estão em `web/src/video.ts`.
 
 ## A regra das portas
 
