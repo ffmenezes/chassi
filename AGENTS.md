@@ -122,6 +122,6 @@ nova nunca edita arquivo existente**: `escolherX(env)` em `porta.ts` cresce um
     ./scripts/atualizar       o que mudou no upstream x o que você tocou
     cd web && npm run dev     Astro em 4321
     cd web && npm run build
-    cd web && npm test
+    cd web && npm test                vitest, e as suítes Python de scripts/ (puladas sem Python)
     cd web && npm run check           astro check (tipos de src/)
     cd web && npm run check:functions tsc -p functions (Functions ficam fora do tsconfig de src/)

@@ -8,6 +8,9 @@
 # procurado: vale o primeiro que roda e é 3.7 ou mais novo (o
 # `sys.stdout.reconfigure` dos scripts pede 3.7).
 #
+# web/scripts/scripts-python.test.ts repete esta busca em Node, para o
+# `npm test` rodar as suítes sem depender de bash. Mudou a lista aqui, muda lá.
+#
 # Uso: scripts/_lib/python <argumentos que iriam para o python>
 set -euo pipefail
 
