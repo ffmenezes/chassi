@@ -19,7 +19,8 @@ Rode do diretório da peça. Cada ocorrência é defeito.
 grep -nE '—|–| -- ' post.md
 
 # emoji e setas
-grep -nP '[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}\x{2190}-\x{21FF}]' post.md
+# (o grep do Git Bash recusa \x{} acima de FFFF; no Windows, use o Python)
+python -c "import re,sys; sys.stdout.reconfigure(encoding='utf-8'); s=open(sys.argv[1],encoding='utf-8').read(); e=re.compile('[\U0001F300-\U0001FAFF\u2600-\u27BF\u2190-\u21FF]'); [print(i,l) for i,l in enumerate(s.splitlines(),1) if e.search(l)]" post.md
 
 # metadiscurso e enchimento
 grep -niE 'neste artigo|nesta seção|vamos (explorar|mergulhar|entender)|vale (ressaltar|destacar|lembrar)|é importante (notar|ressaltar|destacar)|dito isso|sem mais delongas|no fim do dia|nos dias de hoje|no mundo de hoje|em suma|em resumo,' post.md

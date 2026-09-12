@@ -39,7 +39,7 @@ class LinksDaPeca(unittest.TestCase):
         with tempfile.TemporaryDirectory() as pasta:
             post = Path(pasta) / 'post.md'
             post.write_text('## Fontes\n[Fonte][Norma] e [Norma][] e [Norma].\n\n[norma]: /norma/ "Texto oficial"\n', encoding='utf-8')
-            saida = subprocess.check_output([sys.executable, str(caminho), str(post)], text=True)
+            saida = subprocess.check_output([sys.executable, str(caminho), str(post)], text=True, encoding="utf-8")
         self.assertIn('| Fonte | /norma/ |', saida)
         self.assertIn('Total: 3 links.', saida)
 
@@ -47,7 +47,7 @@ class LinksDaPeca(unittest.TestCase):
         with tempfile.TemporaryDirectory() as pasta:
             post = Path(pasta) / 'post.md'
             post.write_text('## [Fonte](https://exemplo.org/h2)\n````markdown\n```\nhttps://exemplo.org/codigo\n````\n', encoding='utf-8')
-            saida = subprocess.check_output([sys.executable, str(caminho), str(post)], text=True)
+            saida = subprocess.check_output([sys.executable, str(caminho), str(post)], text=True, encoding="utf-8")
         self.assertIn('| Fonte | https://exemplo.org/h2 |', saida)
         self.assertNotIn('https://exemplo.org/codigo', saida)
 

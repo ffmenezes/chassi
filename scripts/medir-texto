@@ -34,11 +34,21 @@ def frontmatter(texto):
             fm[k.strip()] = v.strip().strip('"').strip("'")
     return fm, "---".join(partes[2:])
 
+# Fim de frase: ponto, interrogação ou exclamação, com ou sem aspas e
+# parêntese de fechamento em cima. Sem a segunda alternativa, a citação
+# terminada em `?"` não fechava frase e colava na seguinte: um parágrafo
+# comum de duas frases aparecia como uma de 43 palavras, com Flesch 36.
+FIM_DE_FRASE = re.compile(r"""(?<=[.!?])\s+|(?<=[.!?][\"'\u201d\u2019)\]])\s+""")
+
+
 def silabas(w):
     w = unicodedata.normalize("NFC", w.lower())
     return max(1, len(re.findall(r"[aeiouáéíóúâêôãõàü]+", w)))
 
 def main():
+    # No Windows a locale do console é cp1252: sem isto o acento sai
+    # quebrado no terminal e o `>` grava um arquivo que não é UTF-8.
+    sys.stdout.reconfigure(encoding="utf-8")
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(2)
     texto = open(sys.argv[1], encoding="utf-8").read()
@@ -55,15 +65,27 @@ def main():
     figuras = len(re.findall(r"^:::figura", corpo_util, re.M))
     pendentes = len(re.findall(r"LINK PENDENTE", corpo_util))
 
-    prosa, abertura = [], []
+    # A prosa é medida PARÁGRAFO A PARÁGRAFO, e não como um texto corrido. A
+    # razão: linha que não fecha com ponto (a que termina em dois-pontos antes
+    # de uma lista, por exemplo) colava no parágrafo seguinte, e nascia uma
+    # "frase" de 50 ou 60 palavras que ninguém escreveu. Fim de parágrafo
+    # fecha frase, que é o que o leitor enxerga.
+    paragrafos, abertura, atual = [], [], []
     # dentro destas diretivas não há prosa: são dado (linhas `campo`/`saida`,
     # tabela, código, atributos). O texto delas não entra na conta de frases.
     SEM_PROSA = ("calculadora", "grafico", "codigo", "figura", "tabela-panorama", "tabela-contraste", "slides", "quiz", "verificacao")
     dentro = None
+
+    def fecha():
+        if atual:
+            paragrafos.append(" ".join(atual))
+            atual.clear()
+
     for ln in corpo_util.splitlines():
         t = ln.strip()
         m = re.match(r"^:::([a-z-]+)", t)
         if m and dentro is None:
+            fecha()
             if m.group(1) in SEM_PROSA:
                 dentro = m.group(1)
             continue
@@ -72,14 +94,23 @@ def main():
                 dentro = None
             continue
         if t.startswith(("cena:", "problema:")):
+            fecha()
             abertura.append(t.split(":", 1)[1].strip()); continue
         if not t or t.startswith(("#", ":::", "|", "- ", "* ")):
+            fecha()
             continue
-        prosa.append(t)
-    junto = " ".join(abertura + prosa)
-    junto = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", junto)
-    junto = junto.replace("**", "")
-    frases = [f for f in re.split(r"(?<=[.!?])\s+", junto) if len(f.split()) >= 2]
+        atual.append(t)
+    fecha()
+    paragrafos = abertura + paragrafos
+    junto = " ".join(paragrafos)
+    def limpa(p):
+        p = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", p)
+        return p.replace("**", "")
+
+    paragrafos = [limpa(p) for p in paragrafos]
+    junto = limpa(junto)
+    frases = [f for p in paragrafos for f in FIM_DE_FRASE.split(p)
+              if len(f.split()) >= 2]
     tam = [len(f.split()) for f in frases]
     palavras = re.findall(r"[\wÀ-ÿ'-]+", junto)
     if not tam or not palavras:
