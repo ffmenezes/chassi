@@ -102,7 +102,7 @@ sabendo que fica como prosa até o encanamento chegar.
 | `citacao` | 6 | montável | texto | teto editorial de 2 por peça; é conclusão **nossa**, nunca de terceiro |
 | `citacao-fonte` | 7 | montável | `nome`, `papel`, `conflito` (todos obrigatórios); texto literal | tipo: sem `conflito` o `astro check` falha. Citação não é origem de número |
 | `checklist` | 8 | montável | `rotulo?`; itens `- [ ] **forte** resto`, até 7 | corta em 7; recapitula, nunca introduz |
-| `faq` | 9 | montável (fixo) | `### pergunta` + resposta, 3 a 6 | nada em código |
+| `faq` | 9 | montável (fixo) | `### pergunta` + resposta, 3 a 8 | nada em código |
 | `fechamento` | 10 | montável (fixo) | parágrafos | nada em código; retoma o problema da abertura |
 | `figura` | 19 | montável | `papel` (prova, diagrama, spot), `alt`, `legenda`, `fonte`, `src?`, `largura?`, `altura?`, `pendencia?` | **quebra**: alt vazio; alt igual à legenda; prova ou diagrama sem legenda ou sem fonte; `src` que não existe no acervo; `largura`/`altura` diferentes do arquivo; SVG por `src`. Sem `src` sai marcador de prévia (legítimo) |
 | `codigo` | 20 | montável | `rotulo` (obrigatório), `aviso?`; bloco de código dentro | **quebra**: rótulo vazio; linha começando com `$ `, `# ` ou `> ` |
