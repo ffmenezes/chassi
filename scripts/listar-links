@@ -83,6 +83,9 @@ def celula(texto):
     return texto.replace("|", "&#124;").replace("\n", " ")
 
 def main():
+    # A saída deste script é redirecionada para links.md. No Windows a
+    # locale é cp1252, e sem isto o arquivo gravado não é UTF-8.
+    sys.stdout.reconfigure(encoding="utf-8")
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(2)
     texto = open(sys.argv[1], encoding="utf-8").read()
