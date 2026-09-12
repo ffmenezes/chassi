@@ -16,12 +16,24 @@ Réguas que a etapa 5 usa (vindas de newsletters medidas e do TOM.md):
   de fato, é sinal de que a costura ainda não fez o passo 6 (ritmo).
 
 SEO on-page (o que a etapa 6 confere):
-  título < 60 e query nos primeiros 40 caracteres; description entre 150 e
-  160; 4 ou mais H2 antes de "Fontes"; FAQ com 3 a 6 perguntas; query nas
+  título < 60 e query nos primeiros 40 caracteres; description entre 140 e
+  160; 4 ou mais H2 antes de "Fontes"; FAQ com 3 a 8 perguntas; query nas
   primeiras 100 palavras (abertura incluída); ao menos um link externo no
   corpo (não só na lista de fontes); figuras.
 """
 import re, sys, unicodedata
+
+# A faixa da description era 150 a 160. Medida contra um acervo de 269 artigos
+# publicados, ela reprovava 28% deles por description de 140 a 149, tamanho que
+# o buscador não trunca e que não é defeito. Abaixo de 140 sobra espaço no
+# resultado; acima de 160 corta no meio. Com 140 a 160 a reprovação cai para
+# 5%, e o que sobra são casos reais.
+DESC_MIN, DESC_MAX = 140, 160
+# O teto da FAQ existe para pegar a seção que virou um segundo artigo. Sete
+# perguntas bem feitas não são isso, e cortar a sétima é perder resposta que a
+# busca faz.
+FAQ_MIN, FAQ_MAX = 3, 8
+
 
 def frontmatter(texto):
     partes = texto.split("---")
@@ -122,9 +134,9 @@ def main():
     print("\nSEO on-page")
     print(f"  {ok(bool(titulo.strip()) and len(titulo) < 60)}  título: {len(titulo)} caracteres  (régua: 1 a 59)")
     print(f"  {ok(query_titulo)}  query no título: posição {pos}  (régua: termos presentes, primeiro nos primeiros 40)" if termos else "        query não informada; passe como segundo argumento")
-    print(f"  {ok(150 <= len(desc) <= 160)}  description: {len(desc)} caracteres  (régua: 150 a 160)")
+    print(f"  {ok(DESC_MIN <= len(desc) <= DESC_MAX)}  description: {len(desc)} caracteres  (régua: {DESC_MIN} a {DESC_MAX})")
     print(f"  {ok(len(h2) >= 4)}  H2 antes de Fontes: {len(h2)}  (régua: >= 4, senão o sumário não nasce)")
-    print(f"  {ok(3 <= faq <= 6)}  perguntas na FAQ: {faq}  (régua: 3 a 6)")
+    print(f"  {ok(FAQ_MIN <= faq <= FAQ_MAX)}  perguntas na FAQ: {faq}  (régua: {FAQ_MIN} a {FAQ_MAX})")
     if termos:
         print(f"  {ok(kw100)}  query nas primeiras 100 palavras: {'sim' if kw100 else 'não'}")
     print(f"  {ok(len(links_corpo) >= 1)}  links externos no corpo (fora da lista Fontes): {len(set(links_corpo))}  (régua: a fonte mais forte linkada onde é usada)")

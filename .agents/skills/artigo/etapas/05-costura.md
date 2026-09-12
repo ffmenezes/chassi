@@ -120,7 +120,7 @@ aqui entram com a data de hoje e a etapa 7 confere.
    78% das frases acima de 20 palavras e 5% curtas.
    O bloco SEO do mesmo script cobra o que a busca lê: query no título e
    nas primeiras 100 palavras (é assim que a página diz do que trata),
-   description entre 150 e 160 (é o que aparece no resultado), quatro H2
+   description entre 140 e 160 (é o que aparece no resultado), quatro H2
    (sumário), FAQ com as perguntas literais, e a fonte mais forte linkada
    na frase em que é usada (fonte só no rodapé é fonte que leitor e
    buscador não veem sustentando a afirmação). Um `REVER` que some quando
