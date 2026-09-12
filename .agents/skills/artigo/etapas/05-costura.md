@@ -109,15 +109,17 @@ aqui entram com a data de hoje e a etapa 7 confere.
 5. **Um objeto, um nome, no texto inteiro.** O que era "o split" no C1
    não vira "o aparelho" no C4.
 6. **Ritmo, medido.** Rode `scripts/medir-texto posts/<peça>/post.md
-   "<query-alvo>"` e olhe o bloco Legibilidade. As réguas: média de até
-   20 palavras por frase; ao menos 30% de frases curtas (até 10
-   palavras); no máximo 25% de frases longas (21 ou mais); nenhuma acima
-   de 45; Flesch-PT de 55 para cima. Fora da régua, o remédio é sempre o
-   mesmo: a frase longa vira duas e a enumeração vira lista quando isso
-   facilita a leitura. Não acrescente frase vazia ou repita um número só
-   para atingir a proporção de curtas. Não conte só as
-   acima de 45: a primeira validação desta skill passou nessa conta com
-   78% das frases acima de 20 palavras e 5% curtas.
+   "<query-alvo>"` e olhe o bloco Legibilidade. As réguas padrão (o site
+   pode mudar qualquer uma em `base/REGUAS.json`, e aí o relatório abre
+   com a linha "réguas do site"): média de até 20 palavras por frase; ao
+   menos 30% de frases curtas (até 10 palavras); no máximo 25% de frases
+   longas (21 ou mais); nenhuma acima de 45; Flesch-PT de 55 para cima.
+   Fora da régua, o remédio é sempre o mesmo: a frase longa vira duas e
+   a enumeração vira lista quando isso facilita a leitura. Não
+   acrescente frase vazia ou repita um número só para atingir a
+   proporção de curtas. Não conte só as acima de 45: a primeira
+   validação desta skill passou nessa conta com 78% das frases acima de
+   20 palavras e 5% curtas.
    O bloco SEO do mesmo script cobra o que a busca lê: query no título e
    nas primeiras 100 palavras (é assim que a página diz do que trata),
    description entre 140 e 160 (é o que aparece no resultado), quatro H2

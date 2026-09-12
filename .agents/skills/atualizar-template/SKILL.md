@@ -52,6 +52,27 @@ caminho certo:** a cara própria sai de até 6 tokens em
 arquivo do upstream volta a ser puxável para sempre. Ofereça migrar a
 customização para tokens.
 
+### `scripts/medir-texto` em conflito
+
+Quase sempre é régua mudada no próprio script (faixa da description, teto da
+FAQ). Hoje o `scripts/medir-texto` é só um lançador, o código mora em
+`scripts/_lib/medir-texto.py`, e a régua de um site tem lugar próprio:
+`sites/<slug>/base/REGUAS.json`, território do dono, lido por cima dos
+padrões. É a mesma saída dos tokens: o desvio sai do arquivo do upstream.
+
+1. Leia o diff do dono e escreva só os números que ele mudou no
+   `REGUAS.json`, com os nomes de `REGUAS` em `scripts/_lib/medir-texto.py`
+   e um `"_porque"`: `{"_porque": "...", "descricao_min": 150}`.
+2. Puxe `scripts/medir-texto` do upstream.
+3. Rode `scripts/medir-texto` numa peça do site: a linha "réguas do site" no
+   topo do relatório tem que listar o que ele mudou.
+
+Enquanto o arquivo antigo ficar, `npm test` quebra com `import: command not
+found`: é o teste do lançador achando o Python antigo no lugar dele, não
+defeito do upstream. E nunca ofereça mudar a régua em `REGUAS` direto: é
+arquivo do upstream (volta como CONFLITO) e o `teste-reguas` passa a exigir
+que as skills do método mudem junto.
+
 ## O que nunca fazer
 
 - Nunca `git merge upstream/main`. As fronteiras deste repositório foram

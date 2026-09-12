@@ -85,6 +85,45 @@ class MedicaoDeTexto(unittest.TestCase):
                            'campo custo | ' + 'dado ' * 80 + '\n:::\n')
         self.assertRegex(saida, r"ok\s+frases acima de 45 palavras: 0")
 
+    def medir_no_site(self, reguas_json, relativo=False):
+        """Mede uma peça dentro de sites/teste/, com o REGUAS.json dado. Com
+        `relativo`, roda de dentro da pasta do site, como a etapa 6 manda."""
+        with tempfile.TemporaryDirectory() as pasta:
+            site = Path(pasta) / "sites" / "teste"
+            (site / "base").mkdir(parents=True)
+            (site / "base" / "REGUAS.json").write_text(reguas_json, encoding="utf-8")
+            post = site / "posts" / "peca" / "post.md"
+            post.parent.mkdir(parents=True)
+            post.write_text('---\ntitulo: "Consumo de energia"\ndescricao: "Descrição do ensaio."\n---\n'
+                            '## A conta\nVeja o consumo de energia no mês. A conta é sua.\n', encoding="utf-8")
+            alvo = "posts/peca/post.md" if relativo else str(post)
+            return subprocess.run([sys.executable, str(SCRIPT), alvo, "consumo energia"],
+                                  capture_output=True, text=True, encoding="utf-8",
+                                  cwd=site if relativo else None)
+
+    def test_regua_do_site_vence_a_padrao(self):
+        """A régua do site mora em sites/<slug>/base/REGUAS.json, território do
+        dono, para que mudar um número nunca vire CONFLITO no scripts/atualizar."""
+        for relativo in (False, True):
+            with self.subTest(relativo=relativo):
+                r = self.medir_no_site('{"_porque": "description curta é o padrão do nicho", "descricao_min": 20}',
+                                       relativo=relativo)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                self.assertRegex(r.stdout, r"ok\s+description: 20 caracteres\s+\(régua: 20 a 160\)")
+                self.assertIn("descricao_min de 140 para 20", r.stdout)
+
+    def test_regua_do_site_com_erro_para_o_script(self):
+        """Régua com erro de digitação que passasse calada seria régua nenhuma."""
+        for conteudo, culpado in (('{"descricao_minima": 20}', "descricao_minima"),
+                                  ('{"faq_max": "8"}', "faq_max"),
+                                  ('{"faq_max": true}', "faq_max"),
+                                  ('[20]', "objeto"),
+                                  ('{"faq_max": 8,}', "JSON inválido")):
+            with self.subTest(conteudo=conteudo):
+                r = self.medir_no_site(conteudo)
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn(culpado, r.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

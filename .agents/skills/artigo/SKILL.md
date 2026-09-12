@@ -73,6 +73,9 @@ Sem nenhuma peça em andamento e sem pedido específico, rode
 Nos arquivos das etapas, `referencias/` é relativo a esta skill. Caminhos
 `sites/`, `web/` e `scripts/` são relativos à raiz do checkout, nunca à
 pasta da peça. As abreviações `base/` e `estado/` são do site escolhido.
+Os números das etapas (faixa da description, perguntas na FAQ, tamanho de
+frase) são as réguas padrão de `scripts/medir-texto`; se o site tem
+`base/REGUAS.json`, vale o número de lá, e é ele que o relatório cobra.
 
 | # | Etapa | Lê | Escreve |
 |---|---|---|---|

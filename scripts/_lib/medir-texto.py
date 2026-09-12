@@ -18,15 +18,22 @@ primeiras palavras (abertura incluída); ao menos um link externo no corpo
 (não só na lista de fontes); figuras.
 
 Os números de cada régua estão em REGUAS, no topo do código, e saem
-impressos em cada linha do relatório.
+impressos em cada linha do relatório. Um site muda régua sem tocar neste
+arquivo: em sites/<slug>/base/REGUAS.json, só com as chaves que mudam, como
+{"_porque": "description longa é o padrão do nicho", "descricao_min": 150}.
 """
-import re, sys, unicodedata
+import json, re, sys, unicodedata
+from pathlib import Path
 
 # As réguas, num lugar só. As skills do método (etapas 3, 5 e 6, blocos.md,
 # quando-cada-bloco.md) repetem estes números por escrito, porque quem monta o
 # esqueleto precisa vê-los antes de ter texto para medir. scripts/teste-reguas.py
 # reprova a suíte quando uma skill diverge daqui, e diz qual: mudou um número,
 # rode o teste e corrija o que ele listar.
+#
+# Estes são os padrões do chassi. Site que precisa de outro número declara em
+# sites/<slug>/base/REGUAS.json (ver reguas_do_site), e não aqui: este arquivo
+# é do upstream, e régua mudada aqui vira CONFLITO na próxima atualização.
 REGUAS = {
     # Legibilidade, vinda de newsletters medidas e do TOM.md.
     "palavras_por_frase_max": 20,   # média
@@ -54,6 +61,41 @@ REGUAS = {
     "faq_max": 8,
     "query_nas_primeiras": 100,     # palavras, abertura incluída
 }
+
+
+def reguas_do_site(post):
+    """REGUAS com o desvio que o site declarou, e o arquivo de onde veio.
+
+    O desvio mora em sites/<slug>/base/REGUAS.json, território do dono: mudar
+    régua ali nunca toca arquivo do upstream, e por isso nunca vira CONFLITO
+    no scripts/atualizar. Vale o REGUAS.json mais próximo subindo a partir da
+    peça, então tanto faz rodar da raiz do repositório ou da pasta do site.
+    Chave que começa com "_" é comentário ("_porque"). Chave desconhecida ou
+    valor que não é inteiro para o script: régua com erro de digitação que
+    passasse calada seria régua nenhuma.
+    """
+    for pasta in Path(post).resolve().parents:
+        arquivo = pasta / "base" / "REGUAS.json"
+        if arquivo.is_file():
+            break
+    else:
+        return dict(REGUAS), None
+    try:
+        desvio = json.loads(arquivo.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        sys.exit(f"{arquivo}: JSON inválido ({e})")
+    if not isinstance(desvio, dict):
+        sys.exit(f"{arquivo}: precisa ser um objeto, como {{\"descricao_min\": 150}}")
+    reguas = dict(REGUAS)
+    for chave, valor in desvio.items():
+        if chave.startswith("_"):
+            continue
+        if chave not in REGUAS:
+            sys.exit(f"{arquivo}: régua desconhecida {chave!r}. As que existem: {', '.join(REGUAS)}")
+        if type(valor) is not int:
+            sys.exit(f"{arquivo}: {chave} precisa ser número inteiro, e veio {valor!r}")
+        reguas[chave] = valor
+    return reguas, arquivo
 
 
 def frontmatter(texto):
@@ -84,7 +126,7 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8", newline="\n")
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(2)
-    r = REGUAS
+    r, origem = reguas_do_site(sys.argv[1])
     texto = open(sys.argv[1], encoding="utf-8").read()
     fm, corpo = frontmatter(texto)
     query = sys.argv[2].lower() if len(sys.argv) > 2 else ""
@@ -175,6 +217,9 @@ def main():
 
     def ok(cond): return "ok " if cond else "REVER"
     print(f"medir-texto: {sys.argv[1]}")
+    if origem:
+        mudadas = ", ".join(f"{k} de {REGUAS[k]} para {v}" for k, v in r.items() if v != REGUAS[k])
+        print(f"réguas do site: {origem} ({mudadas or 'nenhuma diferente do padrão'})")
     print("\nLegibilidade")
     print(f"  {ok(asl <= r['palavras_por_frase_max'])}  palavras por frase (média): {asl:.1f}  (régua: <= {r['palavras_por_frase_max']})")
     print(f"  {ok(curtas >= r['frases_curtas_min_pct'])}  frases curtas, até {r['frase_curta_ate']} palavras: {curtas:.0f}%  (régua: >= {r['frases_curtas_min_pct']}%)")
