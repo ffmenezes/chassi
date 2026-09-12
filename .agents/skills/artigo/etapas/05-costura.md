@@ -33,7 +33,7 @@ etapa 6 corrige o `post.md`, não eles.
 ```markdown
 ---
 titulo: "Quanto gasta um ar-condicionado ligado a noite toda em 2026"
-descricao: "<150 a 160 caracteres, a do esqueleto>"
+descricao: "<140 a 160 caracteres, a do esqueleto>"
 slug: quanto-gasta-ar-condicionado-noite
 publicado: 2026-09-12
 atualizado: 2026-09-12

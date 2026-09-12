@@ -33,7 +33,7 @@ Regras gerais:
 ```markdown
 ---
 titulo: "<menos de 60 caracteres>"
-descricao: "<150 a 160 caracteres>"
+descricao: "<140 a 160 caracteres>"
 slug: <igual ao nome da pasta e à linha do CLUSTER.md>
 publicado: AAAA-MM-DD
 atualizado: AAAA-MM-DD

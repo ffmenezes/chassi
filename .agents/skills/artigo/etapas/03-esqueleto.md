@@ -46,7 +46,7 @@ Candidatos (3 a 5), com contagem de caracteres:
 1. Quanto gasta um ar-condicionado ligado a noite toda em 2026 (58)
 2. ...
 **escolhido:** 1
-**description (150 a 160):** <frase que cita um número ou método que existe
+**description (140 a 160):** <frase que cita um número ou método que existe
 no corpo; contagem: 156>
 **selo:** Guia de consumo
 
@@ -78,7 +78,7 @@ dado verificável, data e origem, e sobrevive extraída da página.
 ### C2 — ...
 
 ## FAQ (bloco 9)
-Três a seis perguntas literais do dossiê, cada uma com a resposta em 50 a
+Três a oito perguntas literais do dossiê, cada uma com a resposta em 50 a
 100 palavras ou o C que já responde (aí a resposta são duas frases
 apontando para lá).
 
@@ -211,7 +211,7 @@ Gabarito desta entrada (acrescente ao diário; não substitua entradas):
 - [ ] Nenhum número no esqueleto sem D; nenhum D `[SNIPPET]`.
 - [ ] Toda conclusão tem dado verificável ou lacuna explícita e ressalva.
 - [ ] Título escolhido tem menos de 60 caracteres e a query nos primeiros
-      40; description tem 150 a 160.
+      40; description tem 140 a 160.
 - [ ] Lista de H2 não coincide com a de outro esqueleto do site.
 - [ ] Todo bloco listado existe em `blocos` do `web/src/sites/<slug>.ts`.
       Não existe: acrescente lá (o arquivo é do participante, e a régua

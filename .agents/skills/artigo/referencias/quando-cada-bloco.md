@@ -71,7 +71,7 @@ e o leitor para de ler para olhar.
 
 | sinal no esqueleto | bloco | condição | quando não |
 |---|---|---|---|
-| Três a seis perguntas literais do leitor (dossiê, "também perguntam") que o corpo não responde na ordem em que ele as faz | `faq` (9) | resposta em 50 a 100 palavras; a que repete capítulo aponta para ele | pergunta inventada para caber palavra-chave; FAQ com uma pergunta |
+| Três a oito perguntas literais do leitor (dossiê, "também perguntam") que o corpo não responde na ordem em que ele as faz | `faq` (9) | resposta em 50 a 100 palavras; a que repete capítulo aponta para ele | pergunta inventada para caber palavra-chave; FAQ com uma pergunta |
 | Diagnóstico por faixa ("qual BTU para o seu quarto") ou prova com gabarito e fonte | `quiz` (30) | faixas sem buraco e sem sobreposição; gabarito com o porquê e a fonte com ano; um por peça | perguntas de opinião; resultado que exige e-mail |
 | Voto do leitor sobre algo que o texto não decide | `enquete` (11) | ainda `previsto` (sem endpoint): entra inerte e visível | qualquer coisa que o texto já responde |
 
