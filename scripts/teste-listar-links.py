@@ -9,7 +9,7 @@ import tempfile
 
 sys.dont_write_bytecode = True
 
-caminho = Path(__file__).with_name("listar-links")
+caminho = Path(__file__).parent / "_lib" / "listar-links.py"
 loader = importlib.machinery.SourceFileLoader("listar_links", str(caminho))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 links = importlib.util.module_from_spec(spec)

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# O Python do sistema, seja qual for o nome dele.
+#
+# O nome muda de sistema para sistema: Linux e macOS têm `python3`; o
+# instalador do python.org no Windows entrega `python` e `py`, e o Windows
+# ainda deixa no PATH um `python3.exe` da Microsoft Store que existe mas só
+# manda abrir a loja. Por isso cada candidato é EXECUTADO, e não só
+# procurado: vale o primeiro que roda e é 3.7 ou mais novo (o
+# `sys.stdout.reconfigure` dos scripts pede 3.7).
+#
+# Uso: scripts/_lib/python <argumentos que iriam para o python>
+set -euo pipefail
+
+# UTF-8 em open(), stdin e stdout mesmo com a locale cp1252 do console do
+# Windows. Os scripts também forçam o stdout; isto cobre o que eles esquecerem.
+export PYTHONUTF8=1
+
+for candidato in python3 python "py -3"; do
+  # sem aspas de propósito: "py -3" é comando e argumento
+  if $candidato -c 'import sys; sys.exit(sys.version_info < (3, 7))' >/dev/null 2>&1; then
+    exec $candidato "$@"
+  fi
+done
+
+echo "ERRO: nenhum Python 3.7 ou mais novo (tentei python3, python e py -3)." >&2
+echo "  Instale pelo https://www.python.org/downloads/ e abra um terminal novo." >&2
+exit 127

@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""Lista todo link de um post.md numa tabela para o dono decidir.
+
+Uso:
+    scripts/listar-links sites/<slug>/posts/<peça>/post.md > sites/<slug>/posts/<peça>/links.md
+
+Cada link (externo, interno, pendente) sai com o capítulo em que está, o
+texto da âncora, a URL, um tipo deduzido e a coluna "decisão do dono" vazia.
+A etapa 7 da skill `artigo` gera este arquivo; a peça só vai a `publicado`
+depois que toda linha tem decisão. O tipo é palpite por domínio e contexto,
+para orientar a leitura; quem classifica de verdade é o dono.
+"""
+import re, sys
+from urllib.parse import urlparse
+
+LOJA = ("mercadolivre", "amazon", "magazineluiza", "magalu", "americanas", "shopee", "casasbahia", "kabum",
+        "aliexpress", "loja", "shop", "store", "produto", "/p/", "/dp/")
+OFICIAL = ("gov.br", "planalto", "aneel", "inmetro", "receita", "senado", "camara", "jus.br", "anvisa", "bcb.gov",
+           "ibge", "abnt", "contran", "denatran", "senatran", "prefeitura")
+FABRICANTE = ("consul", "brastemp", "springer", "midea", "lg.com", "samsung", "electrolux", "philco", "sawgrass", "epson")
+
+def tipo(url, ancora, contexto):
+    u = url.lower(); c = (ancora + " " + contexto).lower()
+    if url.startswith("#"): return "âncora nesta peça"
+    if url.startswith("/"): return "interno"
+    if "LINK PENDENTE" in contexto: return "interno pendente"
+    if any(k in u for k in OFICIAL): return "fonte oficial"
+    if any(k in u for k in FABRICANTE): return "fabricante"
+    if any(k in u for k in LOJA) or re.search(r"r\$|preço|preco|à vista|pix|parcel", c): return "loja ou preço (candidato a afiliado)"
+    return "terceiro"
+
+def chave_referencia(rotulo):
+    return " ".join(rotulo.casefold().split())
+
+
+def extrair_links(linha, referencias=None):
+    """Links do contrato editorial, incluindo URL literal e pendência.
+
+    Não renderiza markdown. Mascara os trechos já encontrados para não
+    duplicar a URL de um link markdown ao procurar endereços literais.
+    """
+    # Código inline é exemplo de sintaxe, não destino editorial.
+    linha = re.sub(r"(?<!`)(`+)(?!`)(.*?)\1(?!`)", lambda m: " " * len(m.group()), linha)
+    encontrados = []
+    ocupados = []
+    destino = r"(<?(?:[^\s()<>]|\([^()]*\))+>?)"
+    titulo = r'''(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?'''
+    imagem = r"!\[([^\]]*)\]\(" + destino + titulo + r"\)"
+    # A imagem dentro da âncora contribui com seu alt, não com seu src.
+    linha = re.sub(imagem, lambda m: m.group(1) if (
+        m.start() > 0 and linha[m.start() - 1] == "[" and linha[m.end():].startswith("]("))
+        else " " * len(m.group()), linha)
+    padrao = r"(?<!!)\[([^\[\]]+)\]\(" + destino + titulo + r"\)"
+    for m in re.finditer(padrao, linha):
+        encontrados.append((m.start(), m.group(1), m.group(2).strip("<>"), False))
+        ocupados.append(m.span())
+    for m in re.finditer(r"(?:\[([^\]]+)\])?\[LINK PENDENTE:\s*([^\]]+)\]", linha):
+        slug = m.group(2).strip()
+        encontrados.append((m.start(), m.group(1) or slug, f"/{slug}/ (pendente)", True))
+        ocupados.append(m.span())
+    for m in re.finditer(r"(?<!!)\[([^\[\]]+)\](?:\[([^\[\]]*)\])?", linha):
+        if any(a <= m.start() < b for a, b in ocupados):
+            continue
+        url = (referencias or {}).get(chave_referencia(m.group(2) or m.group(1)))
+        if url:
+            encontrados.append((m.start(), m.group(1), url, False))
+            ocupados.append(m.span())
+    for m in re.finditer(r"<(https?://[^\s<>]+)>", linha):
+        if any(a <= m.start() < b for a, b in ocupados):
+            continue
+        encontrados.append((m.start(), m.group(1), m.group(1), False))
+        ocupados.append(m.span())
+    for m in re.finditer(r"https?://[^\s<>\"']+", linha):
+        if any(a <= m.start() < b for a, b in ocupados):
+            continue
+        url = m.group().rstrip(".,;:!?")
+        while url.endswith(")") and url.count(")") > url.count("("):
+            url = url[:-1]
+        encontrados.append((m.start(), url, url, False))
+    return [(a, u, p) for _, a, u, p in sorted(encontrados)]
+
+def celula(texto):
+    return texto.replace("|", "&#124;").replace("\n", " ")
+
+def main():
+    # A saída deste script é redirecionada para links.md. No Windows a
+    # locale é cp1252 e o fim de linha é CRLF, e sem isto o arquivo gravado
+    # não é UTF-8 nem LF.
+    sys.stdout.reconfigure(encoding="utf-8", newline="\n")
+    if len(sys.argv) < 2:
+        print(__doc__); sys.exit(2)
+    texto = open(sys.argv[1], encoding="utf-8").read()
+    corpo = "---".join(texto.split("---")[2:]) if texto.startswith("---") else texto
+    linhas = []
+    capitulo = "abertura"
+    n = 0
+    cerca = None
+    prosa = []
+    for ln in corpo.splitlines():
+        m = re.match(r"^\s*(`{3,}|~{3,})", ln)
+        if m:
+            if cerca is None:
+                cerca = m.group(1)
+            elif (m.group(1)[0] == cerca[0] and len(m.group(1)) >= len(cerca)
+                  and not ln[m.end():].strip()):
+                cerca = None
+            continue
+        if cerca:
+            continue
+        prosa.append(ln)
+    referencias = {}
+    definicao = r'^ {0,3}\[([^\]]+)\]:\s*(?:<([^<>]+)>|(\S+))(?:\s+.*)?$'
+    for ln in prosa:
+        m = re.match(definicao, ln)
+        if m:
+            referencias.setdefault(chave_referencia(m.group(1)), m.group(2) or m.group(3))
+    for ln in prosa:
+        if re.match(definicao, ln):
+            continue
+        m = re.match(r"^## (.+)$", ln)
+        if m:
+            capitulo = m.group(1).strip()
+        for a, u, pendente in extrair_links(ln, referencias):
+            n += 1
+            linhas.append((n, capitulo, a, u, "interno pendente" if pendente else tipo(u, a, ln)))
+    print("# Links — decisão do dono\n")
+    print("Gerado por `scripts/listar-links` na entrega. Preencha a última coluna de")
+    print("toda linha antes de marcar a peça como `publicado`: **manter**, **trocar")
+    print("por afiliado** (e a declaração de `base/DECLARACOES.md` entra na peça),")
+    print("**trocar a fonte** (diga qual), **remover** (diga o que fica no lugar).")
+    print("Link de loja ou de produto é onde o programa de afiliado de")
+    print("`base/MONETIZACAO.md` costuma caber; link de fonte oficial não se troca.\n")
+    print("| # | capítulo | âncora | URL | tipo (palpite) | decisão do dono |")
+    print("|---|---|---|---|---|---|")
+    for n, cap, a, u, t in linhas:
+        print(f"| {n} | {celula(cap)} | {celula(a)} | {celula(u)} | {t} | |")
+    if not linhas:
+        print("| | (nenhum link no corpo) | | | | |")
+    print(f"\nTotal: {len(linhas)} links. Inclui URLs literais, fontes no rodapé e pendências;")
+    print("a etapa 6 também cobra que a fonte mais forte esteja linkada onde é usada.")
+
+if __name__ == "__main__":
+    main()

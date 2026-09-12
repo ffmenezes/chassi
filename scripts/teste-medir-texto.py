@@ -1,15 +1,18 @@
 """Casos em que o relatório não pode aprovar metadados incorretos."""
 from pathlib import Path
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 
-SCRIPT = Path(__file__).with_name("medir-texto")
+SCRIPT = Path(__file__).parent / "_lib" / "medir-texto.py"
+LANCADOR = Path(__file__).with_name("medir-texto")
 
 
 class MedicaoDeTexto(unittest.TestCase):
-    def medir(self, titulo, query, extra=""):
+    def medir(self, titulo, query, extra="", comando=None, env=None):
         with tempfile.TemporaryDirectory() as pasta:
             post = Path(pasta) / "post.md"
             post.write_text(
@@ -18,7 +21,30 @@ class MedicaoDeTexto(unittest.TestCase):
                 'problema: O consumo de energia aumentou.\n:::\n'
                 '## A conta\nVeja o consumo de energia no mês. A conta é sua.\n' + extra,
                 encoding="utf-8")
-            return subprocess.check_output([sys.executable, str(SCRIPT), str(post), query], text=True, encoding="utf-8")
+            comando = comando or [sys.executable, str(SCRIPT)]
+            return subprocess.check_output(comando + [str(post), query], text=True, encoding="utf-8", env=env)
+
+    @unittest.skipUnless(shutil.which("bash"), "sem bash")
+    def test_lancador_acha_o_python_sozinho(self):
+        """`scripts/medir-texto` é o caminho que a documentação manda rodar, e
+        ele não pode depender de o sistema chamar o Python de `python3`."""
+        saida = self.medir("Consumo de energia", "consumo energia",
+                           comando=[shutil.which("bash"), str(LANCADOR)])
+        self.assertIn("Legibilidade", saida)
+
+    @unittest.skipUnless(os.name == "posix" and shutil.which("bash"), "precisa de symlink e bash")
+    def test_python3_que_nao_roda_nao_engana_o_lancador(self):
+        """O `python3.exe` da Microsoft Store existe no PATH e só manda abrir a
+        loja. O lançador tem que passar por ele e achar o `python` de verdade."""
+        with tempfile.TemporaryDirectory() as bin_falso:
+            falso = Path(bin_falso) / "python3"
+            falso.write_text("#!/bin/sh\necho 'Python não encontrado; abra a Microsoft Store' >&2\nexit 9009\n")
+            falso.chmod(0o755)
+            (Path(bin_falso) / "python").symlink_to(sys.executable)
+            env = dict(os.environ, PATH=os.pathsep.join([bin_falso, "/usr/bin", "/bin"]))
+            saida = self.medir("Consumo de energia", "consumo energia",
+                               comando=[shutil.which("bash"), str(LANCADOR)], env=env)
+        self.assertIn("Legibilidade", saida)
 
     def test_primeiro_termo_sozinho_nao_aprova_query_inteira(self):
         saida = self.medir("Consumo mensal da casa", "consumo energia")

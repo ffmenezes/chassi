@@ -1,0 +1,4 @@
+# Os scripts rodam em bash, inclusive no Git Bash do Windows. Lá o padrão do
+# Git (core.autocrlf=true) entrega o arquivo com CRLF, e o bash quebra na
+# primeira linha com `$'\r': command not found`. LF sempre, em todo sistema.
+scripts/** text eol=lf

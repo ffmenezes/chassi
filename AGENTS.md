@@ -45,6 +45,7 @@ scripts/atualizar                      puxada por arquivo, nunca merge
 scripts/higiene-texto                  tira caractere invisível de post.md e conta travessão
 scripts/medir-texto                    legibilidade (Flesch-PT, frases) e SEO on-page de post.md
 scripts/listar-links                   todo link de post.md numa tabela para o dono decidir
+scripts/_lib/                          o Python desses dois, e `python`: acha o interpretador em qualquer sistema
 web/src/sites/<slug>.ts                ← o site do participante (só este)
 web/src/sites/index.ts                 ← varre e valida. Nunca editado à mão.
 web/src/sites/exemplo.ts               ← o modelo. Único arquivo do upstream que se apaga
