@@ -3,7 +3,7 @@
 #
 # scripts/atualizar vai ser demonstrado ao vivo na aula 3. Este script prova,
 # num diretório temporário, que o ciclo completo funciona: clone de
-# participante -> instalação -> mudança no upstream -> puxada. Cobre os seis
+# participante -> instalação -> mudança no upstream -> puxada. Cobre os sete
 # casos que decidem se o mecanismo pode ser anunciado:
 #
 #   1. clone de participante (instalar + primeiro site + build)
@@ -12,7 +12,9 @@
 #   4. arquivo novo  (upstream cria estilo novo, dois arquivos)
 #   5. território do participante (site alheio e página institucional
 #      editada dos dois lados não podem ser oferecidos)
-#   6. limpeza       (a origem volta a ficar exatamente como estava)
+#   6. segunda atualização (o que já foi puxado e commitado não volta como
+#      CONFLITO, e a nova mudança do upstream nele vem em SEGUROS)
+#   7. limpeza       (a origem volta a ficar exatamente como estava)
 #
 # Não depende de rede nem do GitHub: clona `/home/filipe/projects/chassi`
 # pelo caminho local. Roda em cima do checkout real deste repositório —
@@ -296,20 +298,55 @@ echo "caso 5 OK: site de outro participante e página institucional editada dos 
 
 # ---------------------------------------------------------------------------
 echo
-echo "== caso 6: limpeza =="
+echo "== caso 6: segunda atualização =="
+# A puxada não faz merge, então a base comum nunca anda: arquivo puxado e
+# commitado continua "tocado aqui" para o git. Este caso prova que isso não
+# vira CONFLITO falso, nem para o que já está em dia nem para o que o
+# upstream muda de novo depois de puxado, e que o conflito real continua.
+cd "$CLONE"
+git add -A
+git commit --quiet -m "test: participante commita as puxadas dos casos 2 e 4"
+
+SAIDA_6=$(./scripts/atualizar) || falhar "6 (atualizar)" "scripts/atualizar falhou"
+for arq in web/src/components/blocos/Figura.astro web/src/styles/estilos/marmore.css web/src/styles/estilos/marmore.ts; do
+  if esta_em_alguma_secao "$SAIDA_6" "$arq"; then
+    falhar "6 (em dia ofertado: $arq)" "$arq já é igual ao upstream e apareceu numa das seções. Saída completa:
+$SAIDA_6"
+  fi
+done
+secao "CONFLITO" <<<"$SAIDA_6" | tem "web/src/components/blocos/Aviso.astro" \
+  || falhar "6 (conflito real sumiu)" "Aviso.astro, editado dos dois lados, saiu de CONFLITO. Saída completa:
+$SAIDA_6"
+
+cd "$CHASSI"
+sed -i '/marcador teste-ciclo: caso limpo/a * (marcador teste-ciclo: segunda mudança do upstream)' \
+  web/src/components/blocos/Figura.astro
+git add web/src/components/blocos/Figura.astro
+git commit --quiet -m "test: upstream muda de novo Figura.astro (segunda atualização)"
+
+cd "$CLONE"
+SAIDA_6B=$(./scripts/atualizar) || falhar "6 (atualizar, segunda mudança)" "scripts/atualizar falhou"
+secao "SEGUROS" <<<"$SAIDA_6B" | tem "web/src/components/blocos/Figura.astro" \
+  || falhar "6 (SEGUROS)" "Figura.astro, só puxado e nunca editado aqui, não apareceu em SEGUROS quando o upstream mudou de novo. Saída completa:
+$SAIDA_6B"
+echo "caso 6 OK: o que já foi puxado não volta como CONFLITO, a nova mudança do upstream nele vem em SEGUROS, e o conflito real continua"
+
+# ---------------------------------------------------------------------------
+echo
+echo "== caso 7: limpeza =="
 cd "$CHASSI"
 git reset --hard "$SHA_ORIGINAL" >/dev/null
 rm -rf "$TMP"
 TMP=""
 
 SHA_FINAL="$(git rev-parse HEAD)"
-[ "$SHA_FINAL" = "$SHA_ORIGINAL" ] || falhar "6 (SHA não voltou)" "SHA final ($SHA_FINAL) difere do original ($SHA_ORIGINAL)"
+[ "$SHA_FINAL" = "$SHA_ORIGINAL" ] || falhar "7 (SHA não voltou)" "SHA final ($SHA_FINAL) difere do original ($SHA_ORIGINAL)"
 # mesma exceção do início: o próprio scripts/teste-ciclo.sh fica untracked
 # até o commit final deste gate — não é sujeira deixada pelo teste.
 SUJEIRA_FINAL="$(git status --porcelain | grep -v ' scripts/teste-ciclo\.sh$' || true)"
-[ -z "$SUJEIRA_FINAL" ] || falhar "6 (status sujo)" "git status --porcelain não está vazio depois da limpeza:
+[ -z "$SUJEIRA_FINAL" ] || falhar "7 (status sujo)" "git status --porcelain não está vazio depois da limpeza:
 $SUJEIRA_FINAL"
-echo "caso 6 OK: origem de volta ao SHA $SHA_FINAL, git status limpo"
+echo "caso 7 OK: origem de volta ao SHA $SHA_FINAL, git status limpo"
 
 echo
 echo "CICLO OK"

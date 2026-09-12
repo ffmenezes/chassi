@@ -60,12 +60,31 @@ e_seu() {
 mudou_la=$(git diff --name-only "$BASE" upstream/main)
 tocou_aqui=$(git diff --name-only "$BASE" HEAD)
 
+# A puxada é por arquivo e não faz merge, então BASE nunca anda: arquivo que
+# você puxou e commitou continua aparecendo em `tocou_aqui` para sempre. Sem
+# as duas checagens abaixo, a partir da segunda atualização todo arquivo já
+# puxado vinha como CONFLITO, idêntico ao upstream — e lista de conflito que
+# mente ensina a ignorar a lista.
+#
+# Igual a alguma versão que o upstream já teve desde BASE: o arquivo só foi
+# puxado, nunca editado aqui. Compara a cópia de trabalho, então puxada ainda
+# não commitada também conta.
+so_puxado() {
+  local c
+  for c in $(git rev-list "$BASE"..upstream/main -- "$1"); do
+    git diff --quiet "$c" -- "$1" 2>/dev/null && return 0
+  done
+  return 1
+}
+
 novos=(); seguros=(); conflito=()
 for arq in $mudou_la; do
   e_seu "$arq" && continue
   if [ ! -e "$arq" ]; then
     novos+=("$arq")
-  elif echo "$tocou_aqui" | grep -qx -- "$arq"; then
+  elif git diff --quiet upstream/main -- "$arq" 2>/dev/null; then
+    continue   # já está igual ao upstream: nada a puxar
+  elif echo "$tocou_aqui" | grep -qx -- "$arq" && ! so_puxado "$arq"; then
     conflito+=("$arq")
   else
     seguros+=("$arq")
