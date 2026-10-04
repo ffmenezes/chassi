@@ -1,0 +1,50 @@
+# Publica o site `exemplo` em chassi-exemplo.pages.dev a cada push no main.
+#
+# Só roda no repositório de origem (`ffmenezes/chassi`): quem clona o chassi
+# herda este arquivo, e sem a condição abaixo todo push no clone falharia por
+# falta dos segredos — ou, pior, tentaria publicar no projeto de outra pessoa.
+#
+# Build de checkout limpo é o que garante o site certo: a página de artigo é
+# desenhada com o PRIMEIRO site de `web/src/sites/`, e aqui só existe o
+# `exemplo` — nenhum site de participante entra no git do upstream.
+#
+# Segredos, em Settings → Secrets and variables → Actions:
+#   CLOUDFLARE_API_TOKEN   token com a permissão "Cloudflare Pages: Edit"
+#   CLOUDFLARE_ACCOUNT_ID  a conta dona do projeto chassi-exemplo
+name: Publicar exemplo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: publicar-exemplo
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    if: github.repository == 'ffmenezes/chassi'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      # Teste e checagem antes de publicar: build que passa com trava quebrada
+      # não deveria chegar ao ar.
+      - run: npm test
+      - run: npm run check
+      - run: npm run build
+      - run: npx wrangler@4 pages deploy dist --project-name chassi-exemplo --branch main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
