@@ -49,6 +49,7 @@ import Calculadora from "../components/blocos/Calculadora.astro";
 import OfertaIsca from "../components/blocos/OfertaIsca.astro";
 import Newsletter from "../components/blocos/Newsletter.astro";
 import Compartilhar from "../components/blocos/Compartilhar.astro";
+import PerguntarIA from "../components/blocos/PerguntarIA.astro";
 import Passos from "../components/blocos/Passos.astro";
 import Verificacao from "../components/blocos/Verificacao.astro";
 import Slides from "../components/blocos/Slides.astro";
@@ -258,6 +259,7 @@ const palco = { estilo: estiloInicial, modo: modoInicial as "claro" };
             </div>
           </div>
         </Fragment>
+        <Fragment slot="b33"><PerguntarIA {...m.perguntarIA} /></Fragment>
         <Fragment slot="b27"><Passos itens={m.passos} /></Fragment>
         <Fragment slot="b28"><Verificacao itens={m.verificacao} /></Fragment>
         <Fragment slot="b29">

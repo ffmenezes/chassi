@@ -31,8 +31,14 @@ interface Props {
    * era antes de existir byline. Quem decide isso é `autor.ts`, não este arquivo.
    */
   autor?: DadosDoAutor | null;
+  /**
+   * Os temas do artigo, já resolvidos contra o vocabulário do site (ver
+   * `temas.ts`), cada um com o caminho da página dele. Ausente ou vazio, a
+   * linha não nasce — site sem vocabulário não tem taxonomia.
+   */
+  temas?: { nome: string; href: string }[];
 }
-const { selo, titulo, atualizado, minutos, autor } = Astro.props;
+const { selo, titulo, atualizado, minutos, autor, temas = [] } = Astro.props;
 ---
 
 <header class="cabecalho">
@@ -63,6 +69,19 @@ const { selo, titulo, atualizado, minutos, autor } = Astro.props;
       </button>
     </div>
   </div>
+
+  {/* Abaixo da faixa, e não dentro dela: a faixa é sobre ESTE artigo (quem,
+      quando, quanto tempo); os temas são saída para os outros. O rótulo
+      "Temas" é texto de verdade, não um `#` decorativo — leitor de tela
+      ouve a palavra antes da lista de links. */}
+  {temas.length > 0 && (
+    <nav class="temas" aria-label="Temas deste artigo">
+      <span class="temas-rotulo">Temas</span>
+      <ul>
+        {temas.map((t) => <li><a href={t.href}>{t.nome}</a></li>)}
+      </ul>
+    </nav>
+  )}
 </header>
 
 <style>
@@ -115,6 +134,23 @@ const { selo, titulo, atualizado, minutos, autor } = Astro.props;
   .copia[data-copiado] { color: var(--b-acento-tinta); }
 
   .copia svg { width: 14px; height: 14px; }
+
+  .temas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 12px;
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+  }
+  .temas-rotulo {
+    font-weight: 600;
+    letter-spacing: var(--b-track-rotulo);
+    text-transform: var(--b-caixa-rotulo);
+    color: var(--b-tinta-2);
+  }
+  .temas ul { display: flex; flex-wrap: wrap; gap: 6px 12px; list-style: none; margin: 0; padding: 0; }
+  .temas a { color: var(--b-acento-tinta); font-weight: 600; }
 </style>
 
 <script>

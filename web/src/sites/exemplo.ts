@@ -25,6 +25,9 @@ import type { Site, BlocoId } from "./tipos";
  *   26 Compartilhar — DEPOIS do card do autor, fechando a lista: é o último
  *                     ato do leitor que terminou o texto, não conteúdo do
  *                     corpo.
+ *   33 Perguntar à IA — DEPOIS do 26, pelo mesmo motivo: o leitor que
+ *                     terminou leva o artigo para fora — a uma pessoa, ou a
+ *                     um assistente para tirar as dúvidas que sobraram.
  *   29 Slides       — DENTRO, e no corpo. O deck é reforço do argumento, e
  *                     por isso ele exige que exista argumento em volta: só o
  *                     artigo-1 monta um, no meio da seção que ele percorre
@@ -33,7 +36,7 @@ import type { Site, BlocoId } from "./tipos";
  *                     lista não existe na página, e a recíproca também vale:
  *                     declarar sem ter roteiro de slot é declaração inerte.
  */
-const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 31, 6, 7, 8, 9, 10, 19, 20, 21, 22, 26, 29, "A1", "A2", "A3"];
+const TODOS_DE_ARTIGO: BlocoId[] = [1, 2, 3, 4, 5, 31, 6, 7, 8, 9, 10, 19, 20, 21, 22, 26, 33, 29, "A1", "A2", "A3"];
 
 /**
  * Navegação (N1–N5) é chrome de site, não conteúdo de artigo — por isso nunca
@@ -86,6 +89,22 @@ const site: Site = {
   // nasce sem favicon nenhum — o que ainda é melhor que herdar o tijolo do
   // chassi, mas é uma aba anônima.
   icone: "📡",
+
+  // O vocabulário FECHADO de temas: o artigo só se marca com o que está aqui,
+  // e tema fora da lista quebra a build dizendo qual artigo usou qual tema.
+  // TROQUE PELOS SEUS — mas, enquanto os artigos de exemplo existirem (eles
+  // usam velocidade, home-office, wi-fi e roteador, ver `mock/artigos.ts`),
+  // trocar estes slugs quebra a build no artigo de exemplo, e a mensagem diz
+  // qual. Apagando o campo, o site nasce sem temas e sem rota /temas/.
+  // `fibra` está aqui sem artigo nenhum, de propósito: tema sem artigo não
+  // ganha página, e é ele que prova isso no site de exemplo.
+  temas: [
+    { slug: "velocidade", nome: "Velocidade e pico", descricao: "Por que a internet fica lenta em certos horários, e como medir isso em casa antes de trocar de plano." },
+    { slug: "wi-fi", nome: "Wi-Fi", descricao: "Alcance, interferência e padrões do Wi-Fi doméstico, do roteador ao aparelho." },
+    { slug: "roteador", nome: "Roteador", descricao: "Escolher, posicionar e configurar o roteador de casa." },
+    { slug: "home-office", nome: "Home office", descricao: "A rede de quem trabalha de casa: chamada de vídeo, cabo, e o que checar antes da reunião." },
+    { slug: "fibra", nome: "Fibra óptica", descricao: "Como funciona a fibra até a casa, e o que muda em relação ao cabo e ao rádio." },
+  ],
 
   // "nenhum" é o padrão de toda porta: o site builda e publica sem conta
   // nenhuma configurada. Troque quando tiver o identificador em mãos.

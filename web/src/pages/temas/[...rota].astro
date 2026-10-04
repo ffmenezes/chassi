@@ -1,0 +1,115 @@
+---
+/**
+ * As páginas de tema: `/temas/` (o índice) e `/temas/<slug>/` (os artigos de
+ * um tema). É a "busca de relacionados" do site estático — gerada na build,
+ * uma URL por tema, que o crawler lê inteira e que o link do cabeçalho do
+ * artigo aponta.
+ *
+ * Uma rota de resto (`[...rota]`), e não `index.astro` + `[tema].astro`, por
+ * um motivo só: site sem vocabulário (`Site.temas` ausente) não pode ganhar
+ * nem o índice. Com `index.astro` o `/temas/` nasceria sempre, vazio; aqui o
+ * `getStaticPaths` devolve lista vazia e a rota inteira some.
+ *
+ * Tema declarado sem artigo não ganha página nem entra no índice: página que
+ * só tem o título é o retrato de página fina (ver `artigosPorTema`).
+ *
+ * Canônica apontando para a própria página, sem `noindex` — a mesma régua do
+ * N1. Não há paginação ainda: com o vocabulário fechado e o teto de três
+ * temas por artigo, um tema chegar a dezenas de artigos é problema de
+ * amanhã, e no dia em que chegar a página de tema passa a usar o N1
+ * (`Paginacao.astro`) em `/temas/<slug>/2/`.
+ *
+ * A JUNTA é a mesma de `[artigo].astro`: hoje a fonte é `mock/artigos.ts`.
+ */
+import Artigo from "../../layouts/Artigo.astro";
+import GradeArtigos from "../../components/blocos/GradeArtigos.astro";
+import type { Artigo as ItemDeGrade } from "../../components/blocos/GradeArtigos.astro";
+import { siteInstitucional } from "../../institucional/dados";
+import { ARTIGOS } from "../../mock/artigos";
+import type { DadosArtigo } from "../../mock/artigos";
+import { artigosPorTema, caminhoDoTema, CAMINHO_DOS_TEMAS } from "../../temas";
+import type { Tema } from "../../temas";
+import { dataBR } from "../../data";
+
+export function getStaticPaths() {
+  const grupos = artigosPorTema(siteInstitucional(), ARTIGOS);
+  if (grupos.length === 0) return [];
+  return [
+    { params: { rota: undefined }, props: { grupos, tema: null, artigos: [] } },
+    ...grupos.map((g) => ({
+      params: { rota: g.tema.slug },
+      props: { grupos, tema: g.tema, artigos: g.artigos },
+    })),
+  ];
+}
+
+interface Props {
+  grupos: { tema: Tema; artigos: DadosArtigo[] }[];
+  tema: Tema | null;
+  artigos: DadosArtigo[];
+}
+const { grupos, tema, artigos } = Astro.props;
+const site = siteInstitucional();
+
+const cards: ItemDeGrade[] = artigos.map((a) => ({
+  tituloFeed: a.titulo,
+  descricao: a.descricao,
+  atualizadoEm: dataBR(a.atualizado),
+  href: `/${a.slug}/`,
+}));
+
+const quantos = (n: number) => (n === 1 ? "1 artigo" : `${n} artigos`);
+---
+
+{tema ? (
+  <Artigo site={site} titulo={`${tema.nome} — ${site.nome}`} descricao={tema.descricao} tituloSocial={tema.nome}>
+    <div class="temas-pagina">
+      <p class="volta"><a href={CAMINHO_DOS_TEMAS}>Todos os temas</a></p>
+      <h1 class="b-h1">{tema.nome}</h1>
+      <p class="b-p">{tema.descricao}</p>
+      <GradeArtigos rotulo={quantos(artigos.length)} artigos={cards} />
+    </div>
+  </Artigo>
+) : (
+  <Artigo
+    site={site}
+    titulo={`Temas — ${site.nome}`}
+    descricao={`Os assuntos de ${site.nome}, cada um com os artigos que tratam dele.`}
+    tituloSocial="Temas"
+  >
+    <div class="temas-pagina">
+      <h1 class="b-h1">Temas</h1>
+      <ul class="indice">
+        {grupos.map((g) => (
+          <li>
+            <a class="nome" href={caminhoDoTema(g.tema.slug)}>{g.tema.nome}</a>
+            <span class="quantos">{quantos(g.artigos.length)}</span>
+            <p class="desc">{g.tema.descricao}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Artigo>
+)}
+
+<style>
+  .temas-pagina {
+    max-width: 836px;
+    margin-inline: auto;
+    padding: clamp(24px, 5vw, 56px) clamp(18px, 4vw, 28px) 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .volta { margin: 0; font-family: var(--b-fonte-meta); font-size: 12px; }
+  .volta a, .nome { color: var(--b-acento-tinta); font-weight: 600; }
+
+  .indice { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+  /* Bloco, não flex: com `flex-wrap`, o `max-width` da descrição encolhia o
+     `flex-basis: 100%` e a descrição curta subia para a linha do nome. */
+  .indice li { display: block; }
+  .quantos { margin-left: 10px; }
+  .nome { font-family: var(--b-fonte-titulo); font-size: 20px; }
+  .quantos { font-family: var(--b-fonte-meta); font-size: 12px; color: var(--b-tinta-2); }
+  .desc { margin: 4px 0 0; max-width: var(--b-medida); color: var(--b-corpo); line-height: 1.55; }
+</style>

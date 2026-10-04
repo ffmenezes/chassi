@@ -19,7 +19,7 @@
 export type BlocoId =
   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
-  | 26 | 27 | 28 | 29 | 30 | 31 | 32
+  | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33
   | "N1" | "N2" | "N3" | "N4" | "N5"
   | "A1" | "A2" | "A3";
 
@@ -159,6 +159,11 @@ export const CATALOGO: readonly Bloco[] = [
   // 26 é ATIVO: nenhum endpoint por trás, só navigator.share() e
   // navigator.clipboard, os dois já funcionando com a infra de hoje.
   { id: 26, estado: "ativo", categoria: "distribuicao", nome: "Compartilhar", regra: "navigator.share() no celular onde existir; senão, destinos explícitos com WhatsApp primeiro. Copiar link reusa copiarLink.ts. Zero script de terceiro: cada destino é URL montada, nunca SDK de rede social. Sem JS, todo destino continua um link que funciona." },
+  // 33 é ATIVO pela mesma régua do 26: nenhum endpoint, só URL montada. O que
+  // ele consome é o `?q=` de cada serviço de IA, que não é API pública — ver
+  // `src/perguntarIA.ts`, que diz também que nenhum deeplink foi testado contra
+  // o serviço real a partir deste repositório.
+  { id: 33, estado: "ativo", categoria: "distribuicao", nome: "Perguntar à IA", regra: "Destinos explícitos, cada um URL montada com o pedido na query: zero script de terceiro, nada da IA carrega antes do clique. O pedido é neutro e está no HTML antes do clique — pede resumo com as ressalvas do próprio artigo e manda a IA dizer quando não abriu a página. Não vende o artigo, e a nota diz que a conversa é do leitor e que a IA pode errar. Copiar o pedido serve a IA que não está na lista." },
   // 27 é ATIVO: HTML e CSS puros, sem um script sequer.
   { id: 27, estado: "ativo", categoria: "midia", nome: "Passos com detalhe", regra: "O detalhe mora sempre no HTML, nunca injetado por JS. Revela no hover e no foco em tela larga; sempre visível em tela estreita — celular não tem hover, crawler não roda JS. Cada passo é alcançável só de teclado." },
   // 28 é ATIVO: HTML e dados fornecidos pelo esqueleto, sem endpoint nenhum.
@@ -273,8 +278,7 @@ export const GRUPOS: readonly Grupo[] = [
   {
     rotulo: "Distribuir",
     categorias: ["distribuicao"],
-    // Também um grupo de um bloco só, pelo motivo simétrico ao da Ressalva:
-    nota: "Também um grupo de um bloco só: Compartilhar é a única peça do catálogo cuja função é levar o artigo para FORA da página, não fazer algo acontecer dentro dela. Zero SDK de terceiro — cada destino é URL montada.",
+    nota: "As peças cuja função é levar o artigo para FORA da página, não fazer algo acontecer dentro dela: Compartilhar leva o link a uma pessoa, Perguntar à IA leva um pedido a um assistente. Zero SDK de terceiro — cada destino é URL montada.",
   },
   {
     rotulo: "Navegação e chrome",

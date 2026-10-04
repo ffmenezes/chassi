@@ -62,6 +62,24 @@ export interface Responsavel {
   mostrarDocumentoNoRodape?: boolean;
 }
 
+/**
+ * Um tema do vocabulário do site — a "tag" do artigo, com o nome que o leitor
+ * vê e a frase que abre a página do tema. As regras moram em `src/temas.ts`.
+ */
+export interface Tema {
+  /** Vira a URL: `/temas/<slug>/`. Minúsculas, números e hífen. */
+  slug: string;
+  /** O que o leitor lê no artigo e no título da página do tema. */
+  nome: string;
+  /**
+   * Uma ou duas frases dizendo do que o tema trata. Obrigatória: é o
+   * `description` da página do tema e o parágrafo que a abre — sem ela, a
+   * página é uma lista de cards sem uma linha de texto próprio, que é o
+   * retrato de página fina para o buscador.
+   */
+  descricao: string;
+}
+
 export interface Site {
   slug: string;
   nome: string;
@@ -105,6 +123,18 @@ export interface Site {
    * do chassi vale so onde nao ha site: inventario e vitrine de estilo.
    */
   icone?: string;
+  /**
+   * O vocabulário FECHADO de temas do site. Artigo só se marca com tema
+   * declarado aqui, e tema fora da lista quebra a build — tag livre vira, em
+   * um ano, centenas de páginas com um artigo cada, que é conteúdo fino para
+   * o buscador e labirinto para o leitor.
+   *
+   * Ausente = a taxonomia não existe: nenhum tema sai no artigo e nenhuma
+   * rota `/temas/` é gerada, mesmo que o artigo traga temas. Tema declarado
+   * sem artigo nenhum não ganha página (não há o que listar nela), mas
+   * continua valendo para o artigo que vier.
+   */
+  temas?: Tema[];
   /**
    * Recado curto e passageiro no topo de toda página: aviso, evento,
    * promoção, mudança de regra. Ausente = a barra não existe no HTML —

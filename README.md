@@ -7,6 +7,10 @@ e-mail/verificação humana/analytics/dados/erros, slot de anúncio, e as sete
 páginas institucionais (inicial, quem somos, contato, privacidade, cookies,
 termos, direitos autorais).
 
+**Versão de teste publicada:** <https://chassi-exemplo.pages.dev> — o site
+`exemplo`, com o inventário de blocos e estilos em
+[/inventario](https://chassi-exemplo.pages.dev/inventario/).
+
 E o método de artigo: a skill `artigo` leva uma peça da ideia ao `post.md`
 revisado em oito etapas, com apuração rastreável e estado em disco; a skill
 `pitaco` põe a voz do autor na peça pronta; e três scripts medem higiene,
@@ -99,7 +103,7 @@ lá que você puxa melhorias dos stubs.
 cd web && npm run dev
 ```
 
-- **http://localhost:4321/inventario/** — os 32 blocos de artigo, etiquetados
+- **http://localhost:4321/inventario/** — os 33 blocos de artigo, etiquetados
   com número de catálogo, nome e a regra de cada um. Responde "quais blocos
   existem e qual a regra de cada um".
 - **http://localhost:4321/exemplo/\<estilo\>/** — o mesmo artigo, em lorem
@@ -107,7 +111,7 @@ cd web && npm run dev
   `rabisco`, `vidro`). Responde "como fica o mesmo texto em cada estilo, para
   eu escolher o meu".
 
-Sem essas duas rotas abertas, você tem 32 blocos e 7 estilos que ninguém te
+Sem essas duas rotas abertas, você tem 33 blocos e 7 estilos que ninguém te
 contou que existem. Escolhido o estilo, ele vai no campo `estilo` do seu
 `web/src/sites/<seu-slug>.ts`, e o **porquê** vai no seu
 `sites/<seu-slug>/base/DESIGN.md`.

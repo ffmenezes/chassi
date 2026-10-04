@@ -1,0 +1,38 @@
+---
+/**
+ * O convite ao feed RSS, no fim do artigo. Chrome de site, fora do catálogo:
+ * o feed é um só para o site inteiro, igual em toda página — não é algo que
+ * um artigo escolhe montar. Por isso não tem `id` em `catalogo.ts`, e mora
+ * aqui ao lado de `Rodape`, não em `blocos/`.
+ *
+ * Vem logo depois do Compartilhar e do Perguntar à IA porque responde à
+ * mesma hora do leitor — terminou de ler — com a pergunta seguinte: "como eu
+ * sei do próximo?". Sem e-mail, sem conta, sem script: é um link.
+ *
+ * A frase explica o que fazer com o link, porque abrir `/rss.xml` direto no
+ * navegador mostra XML cru, e quem não conhece RSS acharia que quebrou.
+ */
+import { CAMINHO_DO_FEED } from "../rss";
+
+/* Caminho relativo, e não `urlAbsoluta`: o link funciona igual no domínio
+   publicado e no `npm run dev`. A URL absoluta, que é a que leitor de feed
+   precisa, já sai na tag de descoberta do `<head>` (`Base.astro`). */
+const href = CAMINHO_DO_FEED;
+---
+
+<p class="feed">
+  Para saber do próximo artigo sem cadastro: <a href={href} type="application/rss+xml">feed RSS</a>.
+  Cole o endereço no seu leitor de feed.
+</p>
+
+<style>
+  .feed {
+    max-width: var(--b-medida);
+    margin: 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--b-tinta-2);
+  }
+  .feed a { color: var(--b-acento-tinta); font-weight: 600; }
+</style>

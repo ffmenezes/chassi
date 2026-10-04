@@ -23,6 +23,7 @@ import type { Comentario } from "../components/blocos/Comentarios.astro";
 import type { Props as CamposCalculadora } from "../components/blocos/Calculadora.astro";
 import type { Props as CamposOfertaIsca } from "../components/blocos/OfertaIsca.astro";
 import type { Props as CamposCompartilhar } from "../components/blocos/Compartilhar.astro";
+import type { Props as CamposPerguntarIA } from "../components/blocos/PerguntarIA.astro";
 import type { Passo } from "../components/blocos/Passos.astro";
 import type { ItemVerificacao } from "../components/blocos/Verificacao.astro";
 import type { Autor } from "../autor";
@@ -616,6 +617,13 @@ export const ofertaIsca: CamposOfertaIsca = {
 export const compartilhar: CamposCompartilhar = {
   url: "https://exemplo.com.br/por-que-sua-internet-cai-no-pico/",
   texto: "Por que sua internet cai só na hora do pico — e como medir isso em casa",
+};
+
+/** Bloco 33 — Perguntar à IA. A mesma página do 26: no artigo os dois saem
+ *  juntos, um levando o link a uma pessoa, o outro um pedido a um assistente. */
+export const perguntarIA: CamposPerguntarIA = {
+  url: compartilhar.url,
+  titulo: "Por que sua internet cai só na hora do pico — e como medir isso em casa",
 };
 
 /** Bloco 27 — Passos com detalhe. O resumo é o que sobra sem hover nem foco;

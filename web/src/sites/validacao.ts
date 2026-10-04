@@ -3,6 +3,7 @@
  * ambiente, para que rodem no vitest sem Astro nem Vite.
  */
 import type { Modo, Site } from "./tipos";
+import { validarTemas } from "../temas";
 
 /**
  * O teto, e ele existe para ser incômodo antes de o problema aparecer.
@@ -85,6 +86,11 @@ export function validar(sites: Site[], estilosConhecidos: string[]): void {
         );
       }
     }
+
+    /* ANTES do `continue` abaixo, de propósito: site sem `tokens` pulava tudo
+       que viesse depois dele — foi exatamente o defeito do `avisoBarra` no
+       commit 250601f. */
+    validarTemas(site);
 
     if (!site.tokens) continue;
     const usados = new Set<string>();

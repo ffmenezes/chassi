@@ -1,5 +1,13 @@
 /**
- * Os três artigos de exemplo da rota `/[artigo]/`.
+ * Os seis artigos de exemplo da rota `/[artigo]/`.
+ *
+ * Os três primeiros são as peças completas, cada uma com um repertório de
+ * blocos diferente. Os três últimos (artigo-4 a artigo-6) são curtos de
+ * propósito — títulos, parágrafo e fechamento — e existem para os TEMAS: com
+ * três artigos só, toda página de tema teria um ou dois cards e nada se
+ * provaria sobre agrupar. Com seis, `sites/exemplo.ts` tem tema com três
+ * artigos, tema com um, e um tema declarado sem artigo nenhum (`fibra`), que
+ * é o caso que NÃO pode ganhar página.
  *
  * O par de mocks já tem divisão de trabalho — ver o comentário no topo de
  * `mock/lorem.ts` — e este arquivo fica do lado do LOREM: título, descrição,
@@ -84,6 +92,12 @@ export interface DadosArtigo {
   /** Bloco 2. Só o primeiro e o terceiro artigo têm — o segundo mostra que o
    *  artigo continua de pé sem ela. */
   conclusoes?: { rotulo?: string; itens: Conclusao[] };
+  /**
+   * Slugs de tema, até três, todos do vocabulário que o site declara em
+   * `web/src/sites/<slug>.ts` (ver `src/temas.ts`). Os daqui casam com os
+   * temas de `sites/exemplo.ts`; site sem vocabulário ignora o campo.
+   */
+  temas?: string[];
   slots: Slot[];
 }
 
@@ -95,6 +109,7 @@ export const ARTIGOS: DadosArtigo[] = [
   // ---------------------------------------------------------------------
   {
     slug: "artigo-1",
+    temas: ["velocidade", "home-office"],
     titulo: "Por que a chamada de vídeo trava no horário de pico",
     descricao:
       "O plano contratado quase nunca é o problema. É a diferença entre consumo médio e pico simultâneo, e como enxergar essa diferença antes de contratar mais internet.",
@@ -294,6 +309,7 @@ export const ARTIGOS: DadosArtigo[] = [
   // ---------------------------------------------------------------------
   {
     slug: "artigo-2",
+    temas: ["velocidade"],
     titulo: "Como comparar dois planos de internet sem cair em pegadinha",
     descricao:
       "Velocidade anunciada e velocidade entregue raramente são o mesmo número. Um roteiro curto para comparar duas propostas na mesma base.",
@@ -454,6 +470,7 @@ export const ARTIGOS: DadosArtigo[] = [
   // ---------------------------------------------------------------------
   {
     slug: "artigo-3",
+    temas: ["home-office"],
     titulo: "Guia rápido para organizar o home office antes da reunião",
     descricao:
       "Uma checagem de cinco minutos, antes de qualquer chamada importante, para não descobrir o problema durante a reunião.",
@@ -588,6 +605,88 @@ teste-velocidade --exportar /caminho/ipsum.csv`,
           "Nenhum item deste roteiro é sofisticado — lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
           "O ganho está na ordem: rodar a checagem antes, e não descobrir o problema durante a reunião. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
         ],
+      },
+    ],
+  },
+
+  // ---------------------------------------------------------------------
+  // artigo-4 a artigo-6 — curtos, só para os temas (ver o topo do arquivo).
+  // ---------------------------------------------------------------------
+  {
+    slug: "artigo-4",
+    temas: ["roteador", "wi-fi"],
+    titulo: "Onde posicionar o roteador para o sinal chegar ao quarto",
+    descricao:
+      "Altura, parede e distância: o que muda o alcance do Wi-Fi dentro de casa antes de pensar em repetidor.",
+    atualizado: "2026-04-02",
+    minutos: 5,
+    selo: "Guia — internet doméstica",
+    abertura: {
+      cena: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      problema: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    },
+    slots: [
+      { tipo: "titulo", nivel: 2, id: "altura", texto: "Altura e centro da casa" },
+      { tipo: "paragrafo", texto: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
+      { tipo: "titulo", nivel: 2, id: "paredes", texto: "O que as paredes absorvem" },
+      { tipo: "paragrafo", texto: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
+      { tipo: "titulo", nivel: 2, id: "teste", texto: "Como testar cômodo a cômodo" },
+      { tipo: "paragrafo", texto: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." },
+      {
+        tipo: "fechamento",
+        paragrafos: ["Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."],
+      },
+    ],
+  },
+  {
+    slug: "artigo-5",
+    temas: ["wi-fi", "velocidade"],
+    titulo: "Wi-Fi 6 vale a troca para quem tem plano de 300 Mbps?",
+    descricao:
+      "Quando o roteador novo muda alguma coisa e quando o gargalo continua sendo o plano contratado.",
+    atualizado: "2026-03-15",
+    minutos: 4,
+    selo: "Análise — internet doméstica",
+    abertura: {
+      cena: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      problema: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    },
+    slots: [
+      { tipo: "titulo", nivel: 2, id: "gargalo", texto: "Onde está o gargalo" },
+      { tipo: "paragrafo", texto: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
+      { tipo: "titulo", nivel: 2, id: "aparelhos", texto: "Quantos aparelhos falam Wi-Fi 6" },
+      { tipo: "paragrafo", texto: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
+      { tipo: "titulo", nivel: 2, id: "decisao", texto: "Quando a troca compensa" },
+      { tipo: "paragrafo", texto: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." },
+      {
+        tipo: "fechamento",
+        paragrafos: ["Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."],
+      },
+    ],
+  },
+  {
+    slug: "artigo-6",
+    temas: ["home-office", "wi-fi"],
+    titulo: "Cabo ou Wi-Fi na mesa de trabalho",
+    descricao:
+      "O cabo de rede ainda resolve o que nenhum roteador resolve, e custa menos que parece.",
+    atualizado: "2026-02-20",
+    minutos: 4,
+    selo: "Guia — home office",
+    abertura: {
+      cena: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      problema: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    },
+    slots: [
+      { tipo: "titulo", nivel: 2, id: "latencia", texto: "Latência, não velocidade" },
+      { tipo: "paragrafo", texto: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
+      { tipo: "titulo", nivel: 2, id: "passar-cabo", texto: "Passar o cabo sem obra" },
+      { tipo: "paragrafo", texto: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
+      { tipo: "titulo", nivel: 2, id: "quando-nao", texto: "Quando o Wi-Fi basta" },
+      { tipo: "paragrafo", texto: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." },
+      {
+        tipo: "fechamento",
+        paragrafos: ["Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."],
       },
     ],
   },

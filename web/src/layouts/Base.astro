@@ -11,6 +11,8 @@ import Consentimento from "../components/Consentimento.astro";
 import type { Site } from "../sites/tipos";
 import { LANG_HTML } from "../idioma";
 import { tagsSociais } from "../social/tags";
+import { CAMINHO_DO_FEED } from "../rss";
+import { urlAbsoluta } from "../url";
 
 interface Props {
   titulo: string;
@@ -101,6 +103,13 @@ const iconeEmoji = (e: string) =>
       <link rel="icon" href={iconeEmoji(site.icone)} />
     )}
     {!site && <link rel="icon" href={iconeEmoji("🧱")} />}
+    {/* A descoberta automática do feed: é por esta tag que leitor de RSS e
+        extensão de navegador acham `/rss.xml` a partir de qualquer página,
+        sem o leitor precisar saber o endereço. Mesmo gate do chrome: o
+        inventário não é site e não tem feed. */}
+    {site && (
+      <link rel="alternate" type="application/rss+xml" title={site.nome} href={urlAbsoluta(site, CAMINHO_DO_FEED)} />
+    )}
     {site && <Analytics site={site} />}
   </head>
   <body>

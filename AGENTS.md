@@ -1,6 +1,6 @@
 # chassi
 
-Esqueleto de blog de nicho: Astro estático, 32 blocos, 7 estilos, páginas
+Esqueleto de blog de nicho: Astro estático, 33 blocos, 7 estilos, páginas
 institucionais, e o método de artigo em skills (`artigo`, `pitaco`). Escrito
 em português — doutrina, comentários, nomes de arquivo
 e de variável. Mantenha assim.
@@ -116,6 +116,14 @@ componente conhece cor, fonte ou medida literal.
   `shorts/`). Arquivo: sem `src`, `src` de YouTube ou Vimeo (página não é
   arquivo), `src` sem extensão de vídeo, `largura` sem `altura` ou vice-versa,
   medida que não é número positivo. As travas estão em `web/src/video.ts`.
+- **Perguntar à IA (bloco 33)** — título vazio, URL que não é absoluta com
+  `https`, pedido codificado acima de 2000 caracteres (URL longa é cortada
+  em silêncio pelo caminho). As travas estão em `web/src/perguntarIA.ts`.
+- **Temas** — vocabulário fechado em `temas` do `web/src/sites/<slug>.ts`:
+  lista vazia, slug que não serve de URL, slug ou nome repetido, tema sem
+  nome ou sem descrição. No artigo: tema fora do vocabulário, tema repetido,
+  mais de 3 temas. Site sem `temas` não tem taxonomia nem rota `/temas/`, e
+  tema sem artigo não ganha página. As travas estão em `web/src/temas.ts`.
 
 ## A regra das portas
 

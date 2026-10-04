@@ -2,7 +2,7 @@
 /**
  * A página de um artigo publicado.
  *
- * A JUNTA do chassi vive no `getStaticPaths` abaixo: hoje ele lê os três
+ * A JUNTA do chassi vive no `getStaticPaths` abaixo: hoje ele lê os seis
  * artigos de exemplo de `mock/artigos.ts`, e é só isso que muda quando a
  * renderização a partir de markdown chegar (a próxima aula do workshop) — a
  * fonte troca para a coleção de markdown, os `params` continuam sendo
@@ -21,7 +21,7 @@
  * diferente sem este arquivo crescer um `if` por artigo.
  *
  * Os blocos usados aqui são exatamente os que `sites/exemplo.ts` declara em
- * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, 26, 29, A1, A2, A3) mais a navegação que o
+ * `TODOS_DE_ARTIGO` (1 a 10, 19 a 22, 26, 29, 33, A1, A2, A3) mais a navegação que o
  * site escolheu em `NAVEGACAO_DE_ARTIGO` (N2 e N5, com o porquê de cada um
  * dos cinco comentado lá) — bloco fora da lista do site não é montado nesta
  * página, pela mesma regra que vale para qualquer site do chassi. Por isso
@@ -54,6 +54,9 @@ import Faq from "../components/blocos/Faq.astro";
 import Fechamento from "../components/blocos/Fechamento.astro";
 import AutorBloco from "../components/blocos/Autor.astro";
 import Compartilhar from "../components/blocos/Compartilhar.astro";
+import PerguntarIA from "../components/blocos/PerguntarIA.astro";
+import AssinarFeed from "../components/AssinarFeed.astro";
+import { caminhoDoTema, temasDoArtigo } from "../temas";
 import BarraProgresso from "../components/blocos/BarraProgresso.astro";
 import GradeArtigos from "../components/blocos/GradeArtigos.astro";
 import type { Artigo as ItemDeGrade } from "../components/blocos/GradeArtigos.astro";
@@ -68,10 +71,26 @@ export function getStaticPaths() {
 const { artigo } = Astro.props as { artigo: DadosArtigo };
 const site = siteInstitucional();
 
+/* Os temas deste artigo, resolvidos contra o vocabulário do site. Tema fora
+   do vocabulário quebra a build aqui, com o nome do artigo e do tema (ver
+   `temas.ts`); site sem vocabulário devolve lista vazia e a linha não nasce. */
+const temas = temasDoArtigo(site, artigo);
+const slugsDosTemas = new Set(temas.map((t) => t.slug));
+
 /* N2 — as irmãs deste artigo, no mesmo formato que a home (`index.astro`)
    já usa para a grade. "Continue por aqui" só faz sentido com quem NÃO é o
-   artigo que o leitor já está lendo. */
-const irmas: ItemDeGrade[] = ARTIGOS.filter((a) => a.slug !== artigo.slug).map((a) => ({
+   artigo que o leitor já está lendo. A ordem é por temas em comum — quem
+   divide mais temas com este artigo vem antes, e o empate fica na ordem de
+   `ARTIGOS` (`sort` é estável) —, e são três no máximo: com seis artigos de
+   exemplo, cinco cards eram a home repetida no pé de cada artigo, não
+   "continue por aqui". Site sem vocabulário cai na ordem de `ARTIGOS`. */
+const emComum = (a: DadosArtigo) =>
+  temasDoArtigo(site, a).filter((t) => slugsDosTemas.has(t.slug)).length;
+const irmas: ItemDeGrade[] = ARTIGOS.filter((a) => a.slug !== artigo.slug)
+  .map((a) => ({ a, n: emComum(a) }))
+  .sort((x, y) => y.n - x.n)
+  .slice(0, 3)
+  .map(({ a }) => ({
   tituloFeed: a.titulo,
   descricao: a.descricao,
   atualizadoEm: dataBR(a.atualizado),
@@ -129,6 +148,7 @@ const urlDoArtigo = `https://${site.dominio}/${artigo.slug}/`;
         atualizado={artigo.atualizado}
         minutos={artigo.minutos}
         autor={autor}
+        temas={temas.map((t) => ({ nome: t.nome, href: caminhoDoTema(t.slug) }))}
       />
 
       <Abertura {...artigo.abertura} />
@@ -189,6 +209,15 @@ const urlDoArtigo = `https://${site.dominio}/${artigo.slug}/`;
               ler, não conteúdo do corpo — por isso vem fora do map de slots,
               igual ao Autor logo acima. */}
           <Compartilhar url={urlDoArtigo} texto={artigo.titulo} />
+
+          {/* 33, colado no 26: a mesma hora do leitor, levando o artigo para
+              fora — a uma pessoa, ou a um assistente. Só monta se o site o
+              declarou, como todo bloco. */}
+          {site.blocos.includes(33) && <PerguntarIA url={urlDoArtigo} titulo={artigo.titulo} />}
+
+          {/* O feed não é bloco: é chrome de site, um só para o site inteiro
+              (ver o topo de `AssinarFeed.astro`). */}
+          <AssinarFeed />
         </div>
       </div>
     </article>

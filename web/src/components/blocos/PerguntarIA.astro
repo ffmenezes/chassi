@@ -1,0 +1,138 @@
+---
+/** Bloco 33 — Perguntar à IA.
+ *
+ * A regra por extenso, e os porquês do pedido, moram em `../../perguntarIA.ts`
+ * — lá ela tem teste. Aqui só se desenha.
+ *
+ * Primo do 26 (Compartilhar), e de propósito NÃO o mesmo arquivo: o 26 não
+ * tem trava nenhuma, este quebra a build com título vazio, URL relativa ou
+ * pedido acima do teto — o desempate da skill `criar-componente` ("travas
+ * diferentes, dois componentes"). O que os dois dividem é a forma de cada
+ * destino: um `<a href>` comum, URL montada, zero SDK, nada do serviço
+ * carregado antes do clique. A pílula repete o desenho do `.dest` do 26 para
+ * os dois lerem como da mesma família quando montados um perto do outro.
+ *
+ * O pedido mora num `<details>` nativo: fechado por padrão, para o bloco não
+ * pesar mais que o 26 no fim do artigo, e no HTML de qualquer jeito — o leitor
+ * abre e lê antes de clicar, e o crawler lê sem abrir. É a regra 3 do
+ * `perguntarIA.ts`: ninguém manda texto em nome do leitor às escondidas.
+ *
+ * "Copiar o pedido" reusa `ligarCopia()` (de `../../copiarLink`) com
+ * `data-copia-alvo`, o mesmo caminho do bloco de código: o texto é lido do
+ * DOM na hora do clique, nunca duplicado num atributo. É a saída para a IA
+ * que não está na lista, e para o dia em que um deeplink parar de funcionar.
+ *
+ * Sem JavaScript: os quatro destinos são links e funcionam, o `<details>`
+ * abre e fecha sozinho, e o pedido continua selecionável à mão. Só o botão de
+ * copiar fica sem efeito — o mesmo preço que o botão do bloco 20 já paga.
+ */
+import { destinosDoPedido, montarPedido } from "../../perguntarIA";
+
+export interface Props {
+  /** URL absoluta e canônica do artigo. */
+  url: string;
+  /** O título do artigo, cru, sem a marca do site. */
+  titulo: string;
+}
+const { url, titulo } = Astro.props;
+
+const pedido = montarPedido(url, titulo);
+const destinos = destinosDoPedido(pedido);
+---
+
+<div class="perguntar" data-copia-bloco>
+  <p class="b-rotulo">Perguntar a uma IA sobre este artigo</p>
+
+  <ul class="destinos">
+    {destinos.map((d) => (
+      <li>
+        <a class="dest" href={d.href} target="_blank" rel="noopener noreferrer">{d.nome}</a>
+      </li>
+    ))}
+  </ul>
+
+  <p class="nota">
+    Abre em outra aba, na sua conta do serviço escolhido. Este site não vê a conversa, e a
+    resposta da IA pode errar: o artigo continua sendo a fonte.
+  </p>
+
+  <details class="pedido">
+    <summary>O que vai no pedido</summary>
+    <p class="texto" data-pedido>{pedido}</p>
+    <button
+      type="button"
+      class="dest copia"
+      data-copia
+      data-copia-alvo="[data-pedido]"
+      data-copia-antes="Copiar o pedido"
+      data-copia-depois="Copiado"
+      data-copia-anuncio="Pedido copiado."
+    >
+      <span data-copia-rotulo>Copiar o pedido</span>
+    </button>
+  </details>
+</div>
+
+<style>
+  .perguntar { max-width: var(--b-medida); }
+
+  .destinos, .destinos li { list-style: none; margin: 0; padding: 0; }
+  .destinos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+
+  /* O mesmo desenho do `.dest` do bloco 26 — ver o porquê no topo. */
+  .dest {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--b-radius);
+    border: var(--b-borda);
+    background: var(--b-superficie);
+    color: var(--b-tinta);
+    font-family: var(--b-fonte-meta);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .dest:hover,
+  .dest[data-copiado] { border-color: var(--b-acento-tinta); color: var(--b-acento-tinta); }
+
+  .nota {
+    margin: 10px 0 0;
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--b-tinta-2);
+  }
+
+  .pedido { margin-top: 10px; }
+  .pedido summary {
+    cursor: pointer;
+    font-family: var(--b-fonte-meta);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--b-tinta-2);
+  }
+  .pedido summary:hover { color: var(--b-acento-tinta); }
+  .texto {
+    margin: 10px 0;
+    padding: 12px 14px;
+    border-radius: var(--b-radius);
+    border: var(--b-borda);
+    background: var(--b-superficie);
+    color: var(--b-corpo);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+</style>
+
+<script>
+  import { ligarCopia } from "../../copiarLink";
+  ligarCopia();
+</script>
