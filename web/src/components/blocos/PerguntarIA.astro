@@ -129,6 +129,9 @@ const destinos = destinosDoPedido(pedido);
     color: var(--b-corpo);
     font-size: 14px;
     line-height: 1.55;
+    /* O pedido é em linhas — os passos numerados. `pre-line` as mostra como
+       vão para a IA; o `textContent` que o botão copia já as tem. */
+    white-space: pre-line;
   }
 </style>
 

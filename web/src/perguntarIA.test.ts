@@ -11,6 +11,12 @@ describe("montarPedido", () => {
     expect(p).toMatch(/não conseguir abrir a página/);
   });
 
+  it("segue a estrutura do Akita: busca na web, depois quatro passos numerados", () => {
+    const p = montarPedido(URL_OK, "Título");
+    expect(p).toMatch(/^Por favor, abra esta URL com busca na web/);
+    expect(p).toMatch(/\n1\) Resuma os 5 pontos[^\n]*\n2\) [^\n]*\n3\) [^\n]*\n4\) Sugira/);
+  });
+
   it("não vende o artigo", () => {
     // A frase do pedido que a gente recusou de propósito: a IA de vendedora.
     expect(montarPedido(URL_OK, "Título")).not.toMatch(/perdendo|curios/i);

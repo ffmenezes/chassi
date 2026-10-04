@@ -25,6 +25,7 @@ import Base from "../../layouts/Base.astro";
 import { ESTILOS, SITES, cssDoSite } from "../../sites";
 import type { Estilo } from "../../sites";
 import "../../styles/chrome.css";
+import { urlAbsoluta } from "../../url";
 
 import Abertura from "../../components/blocos/Abertura.astro";
 import CaixaConclusoes from "../../components/blocos/CaixaConclusoes.astro";
@@ -51,6 +52,7 @@ import Overlay from "../../components/blocos/Overlay.astro";
 import BarraProgresso from "../../components/blocos/BarraProgresso.astro";
 import Comentarios from "../../components/blocos/Comentarios.astro";
 import Autor from "../../components/blocos/Autor.astro";
+import PerguntarIA from "../../components/blocos/PerguntarIA.astro";
 import DiagramaDemo from "../../components/blocos/_DiagramaDemo.astro";
 import Etiqueta from "../../components/Etiqueta.astro";
 import CabecalhoArtigo from "../../components/CabecalhoArtigo.astro";
@@ -72,6 +74,12 @@ const usam = Object.values(SITES).filter((s) => s.estilo === estilo);
 const desvios = usam.map(cssDoSite).filter(Boolean).join("");
 
 const titulo = m.titulo;
+/* O bloco 33 manda a IA abrir ESTA página, então a URL tem de ser a publicada.
+   O domínio vem do site de exemplo; no clone, onde ele já foi apagado, vem do
+   primeiro site que usa este tema. Sem nenhum dos dois, não há domínio de
+   verdade para dar, e o bloco não sai: URL inventada vira "não consegui abrir". */
+const siteDoPedido = SITES.exemplo ?? usam[0];
+const urlDoPedido = siteDoPedido && urlAbsoluta(siteDoPedido, Astro.url.pathname);
 /* headings e sumário saem da mesma lista: ver o comentário em mock/lorem.ts */
 const sec = Object.fromEntries(m.secoes.map((x) => [x.id, x]));
 ---
@@ -168,6 +176,12 @@ const sec = Object.fromEntries(m.secoes.map((x) => [x.id, x]));
         <Etiqueta bloco={2} nome="Caixa de conclusões" codigo="CaixaConclusoes.astro">
           <CaixaConclusoes itens={m.conclusoes} />
         </Etiqueta>
+
+        {urlDoPedido && (
+          <Etiqueta bloco={33} nome="Perguntar à IA" codigo="PerguntarIA.astro">
+            <PerguntarIA url={urlDoPedido} titulo={titulo} />
+          </Etiqueta>
+        )}
 
         {/* A MESMA nav sai nos dois lugares. Inline é o mínimo, e é o que o
             celular recebe; o trilho fixo é o extra do desktop. Nunca só o trilho. */}

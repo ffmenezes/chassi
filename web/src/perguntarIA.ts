@@ -11,10 +11,14 @@
  * aqui um PEDIDO, e o pedido é texto nosso falando em nome do leitor. Daí as
  * três regras que o 26 não precisa ter:
  *
- *   1. O pedido é NEUTRO. Ele pede resumo e as ressalvas que o próprio artigo
- *      faz. Não pede à IA que diga "o que o leitor perde por não ler", nem
- *      nada que faça a resposta trabalhar de vendedor do artigo — isso é a
- *      urgência comercial que o catálogo inteiro recusa (ver o bloco 21).
+ *   1. O pedido é NEUTRO. A estrutura é a do Akita (akitaonrails.com): abrir
+ *      com busca na web, ler o artigo real, e então passos numerados —
+ *      resumo em 5 pontos, lembrar que dá para seguir perguntando, sugerir a
+ *      primeira pergunta. O passo 2 dele é o único trocado: lá a IA diz "o
+ *      que o leitor perde por não ler", para deixá-lo curioso; aqui ela diz
+ *      as ressalvas que o próprio artigo faz. Resposta trabalhando de
+ *      vendedor do artigo é a urgência comercial que o catálogo inteiro
+ *      recusa (ver o bloco 21).
  *   2. O pedido manda a IA DIZER quando não conseguiu abrir a página. Serviço
  *      sem navegação, ou página bloqueada, é a hora em que o modelo resume o
  *      título e inventa o resto; a frase existe para trocar a invenção por um
@@ -72,12 +76,17 @@ export function montarPedido(url: string, titulo: string): string {
         "caminho relativo não leva a lugar nenhum.",
     );
   }
-  return (
-    `Leia o artigo "${titulo.trim()}", em ${url}, e me ajude a entendê-lo. ` +
-    "Resuma os pontos principais e diga quais ressalvas e limites o próprio artigo apresenta. " +
-    "Depois responda às minhas perguntas usando o artigo como fonte. " +
-    "Se não conseguir abrir a página, diga isso em vez de supor o conteúdo."
-  );
+  return [
+    `Por favor, abra esta URL com busca na web e leia o artigo completo, "${titulo.trim()}": ${url}`,
+    "",
+    "Depois de ler o conteúdo real do artigo, faça o seguinte:",
+    "1) Resuma os 5 pontos mais importantes e a conclusão.",
+    "2) Diga quais ressalvas e limites o próprio artigo apresenta.",
+    "3) Lembre que eu posso continuar fazendo perguntas sobre o artigo aqui neste chat.",
+    "4) Sugira uma boa pergunta de follow-up para eu começar.",
+    "",
+    "Se não conseguir abrir a página, diga isso em vez de supor o conteúdo.",
+  ].join("\n");
 }
 
 /** Os destinos com a URL pronta. Quebra a build se o pedido passar do teto. */
