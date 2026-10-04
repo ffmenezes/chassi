@@ -44,6 +44,10 @@ jobs:
       - run: npm test
       - run: npm run check
       - run: npm run build
+      # O exemplo é demonstração com conteúdo lorem e números inventados: não
+      # deve ser indexado. Mora aqui, e não em `web/public/`, porque todo clone
+      # herda `public/` — e o site de verdade do participante quer ser achado.
+      - run: printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
       - run: npx wrangler@4 pages deploy dist --project-name chassi-exemplo --branch main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
