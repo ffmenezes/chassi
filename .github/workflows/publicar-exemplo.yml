@@ -10,7 +10,9 @@
 #
 # Segredos, em Settings → Secrets and variables → Actions:
 #   CLOUDFLARE_API_TOKEN   token com a permissão "Cloudflare Pages: Edit"
-#   CLOUDFLARE_ACCOUNT_ID  a conta dona do projeto chassi-exemplo
+#   CLOUDFLARE_ACCOUNT_ID  OPCIONAL: só quando o token enxerga mais de uma
+#                          conta. Com uma só, o wrangler descobre sozinho — é
+#                          o caso hoje, e o segredo nem está cadastrado.
 name: Publicar exemplo
 
 on:
