@@ -75,7 +75,11 @@ const NAVEGACAO_DE_ARTIGO: BlocoId[] = ["N2", "N5"];
 const site: Site = {
   slug: "exemplo",
   nome: "Blog de Exemplo",
-  dominio: "exemplo.com.br",
+  // Onde o site de exemplo é publicado de fato (ver o README e
+  // `.github/workflows/publicar-exemplo.yml`). Dele saem canonical, og:url,
+  // o feed e a URL que o bloco 33 manda para a IA — domínio que ninguém
+  // publica faz a IA responder "não consegui abrir a página". TROQUE PELO SEU.
+  dominio: "chassi-exemplo.pages.dev",
   estilo: "linho",
   modoPadrao: "claro",
   blocos: [...TODOS_DE_ARTIGO, ...NAVEGACAO_DE_ARTIGO],
